@@ -11,6 +11,7 @@ export const translations = {
     navigation: {
       breakdown: "Jakauma",
       dashboard: "Yhteenveto",
+      info: "Info",
       record: "Levy",
       records: "Levyt",
     },
@@ -50,6 +51,11 @@ export const translations = {
       label: "Levymerkit",
       release_year: "Julkaisuvuodet",
       style: "Tyylit",
+    },
+    info: {
+      copyright: "Copyright @ Kalle Haavisto 2026 ->",
+      externalLinksTitle: "Toteutus ja kontaktointi",
+      openExternalLink: "Avaa linkki kohteeseen {label}",
     },
     recordCard: {
       accessibilityLabel: "{title} - {artist}",

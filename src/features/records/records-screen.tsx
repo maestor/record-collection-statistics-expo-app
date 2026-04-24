@@ -5,7 +5,6 @@ import { useFiltersQuery, useRecordsQuery } from "@/api/queries";
 import type { RecordListParams } from "@/api/types";
 import { getErrorMessage } from "@/api/client";
 import { Button } from "@/components/button";
-import { CollectionStatusCard } from "@/components/collection-status-card";
 import { Section } from "@/components/section";
 import { StatusMessage } from "@/components/status-message";
 import { useTranslation, translate } from "@/localization/i18n";
@@ -103,8 +102,6 @@ export function RecordsScreen() {
       style={{ backgroundColor: colors.background }}
       contentContainerStyle={{ gap: spacing.xl, padding: spacing.lg }}
     >
-      <CollectionStatusCard />
-
       <Section title={t("records.searchTitle")}>
         <View style={{ gap: spacing.md }}>
           <TextInput

@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Record Collection",
+    "slug": "record-collection-statistics-expo-app",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "recordcollection",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "android": {
+      "package": "dev.maestor.recordcollection",
+      "usesCleartextTraffic": true
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
+

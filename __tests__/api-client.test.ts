@@ -83,4 +83,24 @@ describe("api client", () => {
       "Nope",
     );
   });
+
+  it("handles abort errors when DOMException is unavailable", async () => {
+    const originalDomException = globalThis.DOMException;
+    Object.defineProperty(globalThis, "DOMException", {
+      configurable: true,
+      value: undefined,
+    });
+    globalThis.fetch = jest.fn(async () => {
+      throw { name: "AbortError" };
+    });
+
+    await expect(getHealth({ apiKey: "", baseUrl: "http://example.test" })).rejects.toThrow(
+      "Request timed out",
+    );
+
+    Object.defineProperty(globalThis, "DOMException", {
+      configurable: true,
+      value: originalDomException,
+    });
+  });
 });

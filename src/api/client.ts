@@ -59,6 +59,15 @@ export function getErrorMessage(error: unknown): string {
   return "Unexpected error";
 }
 
+function hasErrorName(error: unknown, name: string): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "name" in error &&
+    (error as { name?: unknown }).name === name
+  );
+}
+
 function getHeaders(config: ApiConfig): Headers {
   const headers = new Headers({ Accept: "application/json" });
   const apiKey = config.apiKey.trim();
@@ -121,7 +130,7 @@ async function requestJson<T>(
       throw error;
     }
 
-    if (error instanceof DOMException && error.name === "AbortError") {
+    if (hasErrorName(error, "AbortError")) {
       throw new ApiError("Request timed out", 0);
     }
 
@@ -166,4 +175,3 @@ export function getBreakdown(
 ): Promise<BreakdownResponse> {
   return requestJson<BreakdownResponse>(config, `/stats/breakdowns/${dimension}`);
 }
-

@@ -7,6 +7,7 @@ Tests use `jest-expo` and `@testing-library/react-native`.
 - Mock `fetch` directly for API behavior.
 - Avoid snapshot tests unless a small stable snapshot adds clear value.
 - Prefer accessible queries such as `getByRole`, `getByLabelText`, and visible text.
+- Prefer shared translation and formatting helpers in tests instead of hardcoded UI copy so locale text changes do not break assertions.
 - Keep generated OpenAPI types out of coverage.
 
 ## Required Scenarios

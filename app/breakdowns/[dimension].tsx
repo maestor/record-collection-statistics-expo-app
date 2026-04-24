@@ -3,6 +3,7 @@ import { useLocalSearchParams } from "expo-router";
 
 import { BreakdownScreen, isBreakdownDimension } from "@/features/dashboard/breakdown-screen";
 import { StatusMessage } from "@/components/status-message";
+import { translate } from "@/localization/i18n";
 import { spacing } from "@/theme/spacing";
 
 export default function BreakdownRoute() {
@@ -11,8 +12,8 @@ export default function BreakdownRoute() {
   if (!isBreakdownDimension(dimension)) {
     return (
       <StatusMessage
-        message="The requested breakdown dimension is not supported."
-        title="Unsupported breakdown"
+        message={translate("breakdowns.unsupportedMessage")}
+        title={translate("breakdowns.unsupportedTitle")}
         tone="error"
       />
     );
@@ -24,4 +25,3 @@ export default function BreakdownRoute() {
 export const unstable_settings = {
   contentContainerStyle: { padding: spacing.lg },
 };
-

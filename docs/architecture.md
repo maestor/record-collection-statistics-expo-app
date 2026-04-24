@@ -27,6 +27,9 @@ The runtime client is hand-written in `src/api/client.ts` to keep dependencies s
 
 React Query hooks in `src/api/queries.ts` handle caching, pagination, retries, and loading states.
 
+## Localization
+The app uses a small typed localization layer in `src/localization/`. Finnish is the active locale today, but all user-facing copy flows through translation keys so more locales can be added without rewriting screens or tests.
+
 ## Runtime Configuration
 API URL and required read API key come from Expo/EAS environment variables. `app.config.js` maps `API_URL` and `API_KEY` into Expo config so the client can read them at runtime. The app also accepts `EXPO_PUBLIC_API_URL` and `EXPO_PUBLIC_API_KEY` for local public Expo env workflows.
 

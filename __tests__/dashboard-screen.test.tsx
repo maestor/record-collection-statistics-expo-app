@@ -2,7 +2,8 @@ import * as React from "react";
 import { fireEvent, screen } from "@testing-library/react-native";
 
 import { DashboardScreen } from "@/features/dashboard/dashboard-screen";
-import { jsonResponse, renderWithProviders } from "../test/test-utils";
+import { formatCount } from "@/utils/format";
+import { jsonResponse, renderWithProviders, t } from "../test/test-utils";
 
 const dashboardPayload = {
   data: {
@@ -37,32 +38,19 @@ const dashboardPayload = {
 
 describe("DashboardScreen", () => {
   beforeEach(() => {
-    globalThis.fetch = jest.fn(async (input: RequestInfo | URL) => {
-      const url = String(input);
-
-      if (url.endsWith("/health")) {
-        return jsonResponse({
-          database: {
-            lastSuccessfulSyncAt: "2026-04-23T17:34:05.883Z",
-            releaseCount: 2345,
-            totalItems: 2346,
-          },
-          ok: true,
-        });
-      }
-
-      return jsonResponse(dashboardPayload);
-    });
+    globalThis.fetch = jest.fn(async () => jsonResponse(dashboardPayload));
   });
 
-  it("renders dashboard data and refreshes it", async () => {
+  it("renders dashboard data and allows switching collection highlights", async () => {
     renderWithProviders(<DashboardScreen />);
 
-    expect(await screen.findByText("Collection cache is healthy")).toBeTruthy();
-    expect(screen.getByText("2,346")).toBeTruthy();
+    expect(await screen.findByText(t("dashboard.highlightsTitle"))).toBeTruthy();
+    expect(screen.getByText(formatCount(dashboardPayload.data.summary.totals.collectionItems))).toBeTruthy();
     expect(screen.getByText("Klamydia")).toBeTruthy();
+    fireEvent.press(screen.getByRole("button", { name: t("dimensions.country") }));
+    expect(await screen.findByText("Finland")).toBeTruthy();
 
-    fireEvent.press(screen.getByRole("button", { name: "Browse records" }));
+    fireEvent.press(screen.getByRole("button", { name: t("dashboard.browseRecords") }));
   });
 
   it("renders an API error with retry", async () => {
@@ -70,8 +58,8 @@ describe("DashboardScreen", () => {
     renderWithProviders(<DashboardScreen />);
 
     expect(await screen.findByText("API down")).toBeTruthy();
-    expect(screen.getByText("Dashboard unavailable")).toBeTruthy();
-    fireEvent.press(screen.getByRole("button", { name: "Try again" }));
+    expect(screen.getByText(t("dashboard.errorTitle"))).toBeTruthy();
+    fireEvent.press(screen.getByRole("button", { name: t("common.tryAgain") }));
     expect(globalThis.fetch).toHaveBeenCalled();
   });
 });

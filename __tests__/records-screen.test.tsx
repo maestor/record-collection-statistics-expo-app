@@ -2,7 +2,7 @@ import * as React from "react";
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 
 import { RecordsScreen } from "@/features/records/records-screen";
-import { jsonResponse, renderWithProviders } from "../test/test-utils";
+import { jsonResponse, renderWithProviders, t } from "../test/test-utils";
 
 const firstRecord = {
   artistsSort: "Muse",
@@ -74,6 +74,17 @@ describe("RecordsScreen", () => {
     globalThis.fetch = jest.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
 
+      if (url.endsWith("/health")) {
+        return jsonResponse({
+          database: {
+            lastSuccessfulSyncAt: "2026-04-23T17:34:05.883Z",
+            releaseCount: 2,
+            totalItems: 2,
+          },
+          ok: true,
+        });
+      }
+
       if (url.includes("/filters")) {
         return jsonResponse(filtersPayload);
       }
@@ -87,14 +98,15 @@ describe("RecordsScreen", () => {
     renderWithProviders(<RecordsScreen />);
 
     expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
-    fireEvent.changeText(screen.getByLabelText("Search records"), "Muse");
-    fireEvent.press(screen.getByRole("button", { name: "Search" }));
-    fireEvent.press(screen.getByRole("button", { name: "Filters (1)" }));
+    expect(screen.getByText(t("dashboard.syncStatusTitle"))).toBeTruthy();
+    fireEvent.changeText(screen.getByLabelText(t("records.searchLabel")), "Muse");
+    fireEvent.press(screen.getByRole("button", { name: t("records.searchButton") }));
+    fireEvent.press(screen.getByRole("button", { name: `${t("records.filtersButton")} (1)` }));
 
     expect(await screen.findByText("Vinyl")).toBeTruthy();
     fireEvent.press(screen.getByRole("button", { name: "Vinyl" }));
-    fireEvent.press(screen.getByRole("button", { name: "Artist" }));
-    fireEvent.press(screen.getByRole("button", { name: "Ascending" }));
+    fireEvent.press(screen.getByRole("button", { name: t("records.sortArtist") }));
+    fireEvent.press(screen.getByRole("button", { name: t("records.orderAscending") }));
 
     await waitFor(() => {
       const urls = (globalThis.fetch as jest.Mock).mock.calls.map((call) => String(call[0]));
@@ -104,19 +116,31 @@ describe("RecordsScreen", () => {
       expect(urls.some((url) => url.includes("order=asc"))).toBe(true);
     });
 
-    fireEvent.press(screen.getByRole("button", { name: "Load more" }));
+    fireEvent.press(screen.getByRole("button", { name: t("records.loadMore") }));
     expect(await screen.findByText("Aikuiselämää")).toBeTruthy();
   });
 
   it("shows an empty state", async () => {
     globalThis.fetch = jest.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
+
+      if (url.endsWith("/health")) {
+        return jsonResponse({
+          database: {
+            lastSuccessfulSyncAt: "2026-04-23T17:34:05.883Z",
+            releaseCount: 0,
+            totalItems: 0,
+          },
+          ok: true,
+        });
+      }
+
       return url.includes("/filters")
         ? jsonResponse(filtersPayload)
         : jsonResponse({ ...recordsPayload(1), data: [], meta: { page: 1, pageSize: 25, total: 0, totalPages: 0 } });
     });
 
     renderWithProviders(<RecordsScreen />);
-    expect(await screen.findByText("No records matched your current search and filters.")).toBeTruthy();
+    expect(await screen.findByText(t("records.emptyMessage"))).toBeTruthy();
   });
 });

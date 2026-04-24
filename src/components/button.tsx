@@ -24,17 +24,17 @@ const variantStyles = {
   danger: {
     backgroundColor: colors.dangerSoft,
     borderColor: colors.danger,
-    color: colors.danger,
+    color: colors.text,
   },
   primary: {
     backgroundColor: colors.primary,
     borderColor: colors.primary,
-    color: colors.surface,
+    color: colors.primaryDark,
   },
   secondary: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceMuted,
     borderColor: colors.border,
-    color: colors.primaryDark,
+    color: colors.text,
   },
 } as const;
 

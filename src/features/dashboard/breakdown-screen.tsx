@@ -5,6 +5,7 @@ import { useBreakdownQuery } from "@/api/queries";
 import type { BreakdownDimension } from "@/api/types";
 import { BreakdownList } from "@/components/breakdown-list";
 import { StatusMessage } from "@/components/status-message";
+import { translate, useTranslation } from "@/localization/i18n";
 import { colors } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { getErrorMessage } from "@/api/client";
@@ -21,7 +22,7 @@ const supportedDimensions = new Set<BreakdownDimension>([
 ]);
 
 function titleForDimension(dimension: BreakdownDimension): string {
-  return dimension.replace("_", " ");
+  return translate(`dimensions.${dimension}` as const);
 }
 
 export function isBreakdownDimension(value: string): value is BreakdownDimension {
@@ -29,6 +30,7 @@ export function isBreakdownDimension(value: string): value is BreakdownDimension
 }
 
 export function BreakdownScreen({ dimension }: { dimension: BreakdownDimension }) {
+  const { t } = useTranslation();
   const query = useBreakdownQuery(dimension);
 
   return (
@@ -39,17 +41,17 @@ export function BreakdownScreen({ dimension }: { dimension: BreakdownDimension }
     >
       {query.isLoading ? (
         <StatusMessage
-          message="Loading collection breakdown values."
-          title="Loading breakdown"
+          message={t("breakdowns.loadingMessage")}
+          title={t("breakdowns.loadingTitle")}
           tone="loading"
         />
       ) : null}
       {query.isError ? (
         <StatusMessage
-          actionLabel="Try again"
+          actionLabel={t("common.tryAgain")}
           message={getErrorMessage(query.error)}
           onAction={() => void query.refetch()}
-          title="Breakdown unavailable"
+          title={t("navigation.breakdown")}
           tone="error"
         />
       ) : null}
@@ -59,4 +61,3 @@ export function BreakdownScreen({ dimension }: { dimension: BreakdownDimension }
     </ScrollView>
   );
 }
-

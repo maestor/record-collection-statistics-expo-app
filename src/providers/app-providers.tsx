@@ -1,6 +1,8 @@
 import * as React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+import { LocalizationProvider } from "@/localization/i18n";
+
 export function createQueryClient() {
   return new QueryClient({
     defaultOptions: {
@@ -15,5 +17,9 @@ export function createQueryClient() {
 const queryClient = createQueryClient();
 
 export function AppProviders({ children }: React.PropsWithChildren) {
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return (
+    <LocalizationProvider>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </LocalizationProvider>
+  );
 }

@@ -2,6 +2,7 @@ import * as React from "react";
 import { Text, View } from "react-native";
 import { Link } from "expo-router";
 
+import { translate } from "@/localization/i18n";
 import { Section } from "./section";
 import type { BreakdownDimension, BreakdownItem } from "@/api/types";
 import { colors, radius } from "@/theme/colors";
@@ -12,17 +13,17 @@ type BreakdownListProps = {
   dimension?: BreakdownDimension;
   items: readonly BreakdownItem[];
   title: string;
+  withSection?: boolean;
 };
 
-export function BreakdownList({ dimension, items, title }: BreakdownListProps) {
+export function BreakdownList({ dimension, items, title, withSection = true }: BreakdownListProps) {
   const max = Math.max(...items.map((item) => item.releaseCount), 1);
-
-  return (
-    <Section title={title}>
+  const content = (
+    <>
       <View style={{ gap: spacing.sm }}>
         {items.length === 0 ? (
           <Text selectable style={{ color: colors.textMuted }}>
-            No values yet.
+            {translate("common.noValuesYet")}
           </Text>
         ) : (
           items.map((item) => <BreakdownRow item={item} key={item.value} max={max} />)
@@ -32,11 +33,35 @@ export function BreakdownList({ dimension, items, title }: BreakdownListProps) {
         <Link
           accessibilityRole="link"
           href={{ pathname: "/breakdowns/[dimension]", params: { dimension } }}
-          style={{ color: colors.primaryDark, fontSize: 16, fontWeight: "700" }}
+          style={{ color: colors.primary, fontSize: 16, fontWeight: "700" }}
         >
-          View full {title.toLowerCase()}
+          {`${translate("breakdowns.viewFullPrefix")} ${title.toLowerCase()}`}
         </Link>
       ) : null}
+    </>
+  );
+
+  if (!withSection) {
+    return (
+      <View style={{ gap: spacing.md }}>
+        <Text
+          selectable
+          style={{
+            color: colors.text,
+            fontSize: 18,
+            fontWeight: "800",
+          }}
+        >
+          {title}
+        </Text>
+        {content}
+      </View>
+    );
+  }
+
+  return (
+    <Section title={title}>
+      {content}
     </Section>
   );
 }

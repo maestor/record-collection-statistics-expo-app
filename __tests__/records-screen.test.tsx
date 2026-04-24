@@ -7,10 +7,15 @@ import { jsonResponse, renderWithProviders, t } from "../test/test-utils";
 const firstRecord = {
   artistsSort: "Muse",
   country: "Worldwide",
-  firstDateAdded: "2026-04-18T08:10:33.000Z",
+  dateAdded: "2026-04-18T08:10:33.000Z",
+  formats: [
+    {
+      descriptions: ["EP"],
+      freeText: "Limited edition",
+      name: "Vinyl",
+    },
+  ],
   instanceCount: 1,
-  latestDateAdded: "2026-04-18T08:10:33.000Z",
-  lowestPrice: 18.69,
   releaseId: 37098591,
   releaseYear: 2026,
   thumb: "https://example.test/thumb.jpg",
@@ -99,6 +104,7 @@ describe("RecordsScreen", () => {
 
     expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
     expect(screen.getByText(t("dashboard.syncStatusTitle"))).toBeTruthy();
+    expect(screen.getByText("Vinyl, EP, Limited edition")).toBeTruthy();
     fireEvent.changeText(screen.getByLabelText(t("records.searchLabel")), "Muse");
     fireEvent.press(screen.getByRole("button", { name: t("records.searchButton") }));
     fireEvent.press(screen.getByRole("button", { name: `${t("records.filtersButton")} (1)` }));

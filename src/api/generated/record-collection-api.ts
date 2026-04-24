@@ -175,13 +175,15 @@ export interface components {
             artistsSort: string | null;
             releaseYear: number | null;
             country: string | null;
-            lowestPrice: number | null;
             thumb: string | null;
             instanceCount: number;
             /** Format: date-time */
-            firstDateAdded: string | null;
-            /** Format: date-time */
-            latestDateAdded: string | null;
+            dateAdded: string | null;
+            formats: {
+                name: string;
+                descriptions: string[];
+                freeText: string | null;
+            }[];
         };
         RecordDetail: components["schemas"]["RecordListItem"] & {
             coverImage: string | null;
@@ -213,8 +215,8 @@ export interface components {
             }[];
             formats: {
                 name: string;
-                qty: string | null;
                 descriptions: string[];
+                freeText: string | null;
             }[];
             identifiers: {
                 type: string;

@@ -36,18 +36,21 @@ export function StatusMessage({
         padding: spacing.lg,
       }}
     >
-      {tone === "loading" ? <ActivityIndicator color={colors.primaryDark} /> : null}
+      {tone === "loading" ? <ActivityIndicator color={colors.primary} /> : null}
       <Text
         selectable
         style={{
-          color: isError ? colors.danger : colors.text,
+          color: isError ? colors.text : colors.text,
           fontSize: 18,
           fontWeight: "700",
         }}
       >
         {title}
       </Text>
-      <Text selectable style={{ color: colors.textMuted, fontSize: 15, lineHeight: 22 }}>
+      <Text
+        selectable
+        style={{ color: isError ? colors.text : colors.textMuted, fontSize: 15, lineHeight: 22 }}
+      >
         {message}
       </Text>
       {actionLabel && onAction ? (

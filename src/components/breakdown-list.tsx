@@ -33,7 +33,7 @@ export function BreakdownList({ dimension, items, title }: BreakdownListProps) {
         <Link
           accessibilityRole="link"
           href={{ pathname: "/breakdowns/[dimension]", params: { dimension } }}
-          style={{ color: colors.primaryDark, fontSize: 16, fontWeight: "700" }}
+          style={{ color: colors.primary, fontSize: 16, fontWeight: "700" }}
         >
           {`${translate("breakdowns.viewFullPrefix")} ${title.toLowerCase()}`}
         </Link>

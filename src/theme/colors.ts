@@ -1,19 +1,19 @@
 export const colors = {
-  background: "#f6f9fc",
-  surface: "#ffffff",
-  surfaceMuted: "#e8f2fb",
-  border: "#b9c9d9",
-  text: "#0b1d33",
-  textMuted: "#455a70",
-  primary: "#178dde",
-  primaryDark: "#075a98",
-  primarySoft: "#d9efff",
-  accent: "#5d4a78",
-  danger: "#b42318",
-  dangerSoft: "#fef3f2",
-  success: "#126b3a",
-  successSoft: "#e6f4ec",
-  focus: "#082f5f",
+  background: "#075a98",
+  surface: "#0d6aad",
+  surfaceMuted: "#084d80",
+  border: "#71b8e6",
+  text: "#f7fbff",
+  textMuted: "#d7e9f8",
+  primary: "#9fe1ff",
+  primaryDark: "#053a61",
+  primarySoft: "#d9f3ff",
+  accent: "#ffd166",
+  danger: "#ff9486",
+  dangerSoft: "#6c2232",
+  success: "#69e0a2",
+  successSoft: "#174836",
+  focus: "#ffffff",
 } as const;
 
 export const radius = {
@@ -21,4 +21,3 @@ export const radius = {
   md: 8,
   lg: 12,
 } as const;
-

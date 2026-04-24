@@ -7,10 +7,10 @@ import { getErrorMessage } from "@/api/client";
 import { FieldRow } from "@/components/field-row";
 import { Section } from "@/components/section";
 import { StatusMessage } from "@/components/status-message";
-import { useTranslation, translate } from "@/localization/i18n";
+import { useTranslation } from "@/localization/i18n";
 import { colors, radius } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
-import { formatCount, formatDate, formatYear, joinValues } from "@/utils/format";
+import { formatDate, joinValues } from "@/utils/format";
 
 type RecordDetailScreenProps = {
   releaseId: number;
@@ -89,13 +89,9 @@ export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
 
       <Section title={t("recordDetail.release")}>
         <View style={{ gap: spacing.lg }}>
-          <FieldRow label={t("recordDetail.releaseYear")} value={formatYear(record.releaseYear)} />
-          <FieldRow label={t("recordDetail.releaseReleased")} value={record.released ?? t("common.unknown")} />
+          <FieldRow label={t("recordDetail.releaseReleased")} value={formatDate(record.released)} />
           <FieldRow label={t("recordDetail.releaseCountry")} value={record.country ?? t("common.unknown")} />
-          <FieldRow
-            label={t("recordDetail.releaseFormats")}
-            value={record.formats.map(formatReleaseFormat).join(", ")}
-          />
+          <FieldRow label={t("recordDetail.releaseFormats")} value={record.formats.map(formatReleaseFormat).join("\n")} />
           <FieldRow label={t("recordDetail.releaseGenres")} value={joinValues(record.genres)} />
           <FieldRow label={t("recordDetail.releaseStyles")} value={joinValues(record.styles)} />
         </View>
@@ -103,32 +99,17 @@ export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
 
       <Section title={t("recordDetail.collection")}>
         <View style={{ gap: spacing.lg }}>
-          <FieldRow label={t("recordDetail.collectionInstances")} value={formatCount(record.instanceCount)} />
-          <FieldRow label={t("recordDetail.collectionFirstAdded")} value={formatDate(record.firstDateAdded)} />
-          <FieldRow label={t("recordDetail.collectionLatestAdded")} value={formatDate(record.latestDateAdded)} />
-          <FieldRow
-            label={t("recordDetail.collectionRating")}
-            value={formatCollectionRatings(record.collectionItems)}
-          />
-        </View>
-      </Section>
-
-      <Section title={t("recordDetail.community")}>
-        <View style={{ gap: spacing.lg }}>
-          <FieldRow label={t("recordDetail.communityHave")} value={formatCount(record.community.have)} />
-          <FieldRow label={t("recordDetail.communityWant")} value={formatCount(record.community.want)} />
-          <FieldRow label={t("recordDetail.communityRating")} value={formatCommunityRating(record.community)} />
-          <FieldRow label={t("recordDetail.communityForSale")} value={formatCount(record.numForSale)} />
+          <FieldRow label={t("recordDetail.collectionAddedOn")} value={formatDate(record.dateAdded)} />
         </View>
       </Section>
 
       <Section title={t("recordDetail.labels")}>
         <View style={{ gap: spacing.md }}>
-          {record.labels.map((label) => (
+          {groupLabels(record.labels, t("recordDetail.noCatalogNumber")).map(([name, values], index) => (
             <FieldRow
-              key={`${label.position}-${label.name}-${label.catno ?? ""}`}
-              label={label.name}
-              value={label.catno ?? t("recordDetail.noCatalogNumber")}
+              key={`${name}-${index}`}
+              label={name}
+              value={values.join("\n")}
             />
           ))}
         </View>
@@ -159,11 +140,11 @@ export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
               {t("recordDetail.identifiersEmpty")}
             </Text>
           ) : (
-            record.identifiers.map((identifier) => (
+            groupIdentifiers(record.identifiers).map(([type, values], index) => (
               <FieldRow
-                key={`${identifier.type}-${identifier.value}`}
-                label={identifier.type}
-                value={identifier.description ? `${identifier.value} · ${identifier.description}` : identifier.value}
+                key={`${type}-${index}`}
+                label={type}
+                value={values.join("\n")}
               />
             ))
           )}
@@ -173,31 +154,56 @@ export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
   );
 }
 
-function formatReleaseFormat(format: { descriptions: string[]; name: string; qty: string | null }) {
-  const details = [format.qty, ...format.descriptions].filter(Boolean).join(" ");
-  return details ? `${details} ${format.name}` : format.name;
+function formatReleaseFormat(format: { descriptions: string[]; freeText: string | null; name: string }) {
+  return [format.name, ...format.descriptions, format.freeText].filter(Boolean).join(", ");
 }
 
-function formatCollectionRatings(items: { rating: number }[]) {
-  const ratedItems = items.filter((item) => item.rating > 0);
-
-  if (ratedItems.length === 0) {
-    return translate("common.notRated");
-  }
-
-  return ratedItems.map((item) => `${item.rating}/5`).join(", ");
+function formatIdentifierValue(identifier: { description: string | null; value: string }) {
+  return identifier.description ? `${identifier.value} · ${identifier.description}` : identifier.value;
 }
 
-function formatCommunityRating(community: {
-  ratingAverage: number | null;
-  ratingCount: number | null;
-}) {
-  if (community.ratingAverage === null) {
-    return translate("common.unknown");
+function groupIdentifiers(
+  identifiers: {
+    description: string | null;
+    type: string;
+    value: string;
+  }[],
+) {
+  const grouped = new Map<string, string[]>();
+
+  for (const identifier of identifiers) {
+    const values = grouped.get(identifier.type);
+    const formattedValue = formatIdentifierValue(identifier);
+
+    if (values) {
+      values.push(formattedValue);
+    } else {
+      grouped.set(identifier.type, [formattedValue]);
+    }
   }
 
-  return translate("recordDetail.communityRatingValue", {
-    average: community.ratingAverage.toFixed(2),
-    count: formatCount(community.ratingCount),
-  });
+  return Array.from(grouped.entries());
+}
+
+function groupLabels(
+  labels: {
+    catno: string | null;
+    name: string;
+  }[],
+  emptyValue: string,
+) {
+  const grouped = new Map<string, string[]>();
+
+  for (const label of labels) {
+    const values = grouped.get(label.name);
+    const formattedValue = label.catno ?? emptyValue;
+
+    if (values) {
+      values.push(formattedValue);
+    } else {
+      grouped.set(label.name, [formattedValue]);
+    }
+  }
+
+  return Array.from(grouped.entries());
 }

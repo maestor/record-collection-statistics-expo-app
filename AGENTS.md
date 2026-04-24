@@ -27,4 +27,6 @@
 - Work on a branch instead of `main`.
 - Commit coherent batches after the relevant checks pass.
 - Prefix commit messages with the change type, for example `Feature:`, `Chore:`, `Fix:`, or `Docs:`.
+- Before creating a commit, make sure the batch is coherent and any available checks for that batch have been run.
+- After completing, verifying, and committing a task, include copy-pasteable pull request notes in the chat.
 

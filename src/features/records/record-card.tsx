@@ -54,7 +54,7 @@ export function RecordCard({ record }: RecordCardProps) {
             width: 78,
           }}
         />
-        <View style={{ flex: 1, gap: 2, justifyContent: "center", minWidth: 0 }}>
+        <View style={{ flex: 1, gap: 2, justifyContent: "flex-start", minWidth: 0 }}>
           <Text
             numberOfLines={2}
             selectable
@@ -65,16 +65,30 @@ export function RecordCard({ record }: RecordCardProps) {
           <Text numberOfLines={1} selectable style={{ color: colors.textMuted, fontSize: 14 }}>
             {record.artistsSort ?? translate("common.unknownArtist")}
           </Text>
+          {record.formats.map((format, index) => (
+            <Text
+              key={`${format.name}-${format.freeText ?? ""}-${index}`}
+              numberOfLines={3}
+              selectable
+              style={{ color: colors.textMuted, fontSize: 13, lineHeight: 16 }}
+            >
+              {formatReleaseFormat(format)}
+            </Text>
+          ))}
           <Text numberOfLines={1} selectable style={{ color: colors.textMuted, fontSize: 13 }}>
             {formatYear(record.releaseYear)} · {record.country ?? translate("common.unknownCountry")}
           </Text>
           <Text numberOfLines={1} selectable style={{ color: colors.textMuted, fontSize: 13 }}>
             {translate("recordCard.addedOn", {
-              date: formatDate(record.latestDateAdded),
+              date: formatDate(record.dateAdded),
             })}
           </Text>
         </View>
       </View>
     </Pressable>
   );
+}
+
+function formatReleaseFormat(format: RecordListItem["formats"][number]) {
+  return [format.name, ...format.descriptions, format.freeText].filter(Boolean).join(", ");
 }

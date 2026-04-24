@@ -2,7 +2,6 @@ import * as React from "react";
 import { fireEvent, screen } from "@testing-library/react-native";
 
 import { RecordDetailScreen } from "@/features/records/record-detail-screen";
-import { formatCount } from "@/utils/format";
 import { jsonResponse, renderWithProviders, t } from "../test/test-utils";
 
 const recordDetail = {
@@ -26,22 +25,27 @@ const recordDetail = {
   country: "Worldwide",
   coverImage: "https://example.test/cover.jpg",
   dataQuality: "Needs Vote",
+  dateAdded: "2026-04-18T08:10:33.000Z",
   fetchedAt: "2026-04-23T17:26:53.282Z",
-  firstDateAdded: "2026-04-18T08:10:33.000Z",
   formats: [
     {
       descriptions: ["12\"", "EP"],
+      freeText: "Limited edition",
       name: "Vinyl",
-      qty: "1",
     },
   ],
   genres: ["Rock"],
-  identifiers: [{ description: "Text", type: "Barcode", value: "5026854087467" }],
+  identifiers: [
+    { description: "Text", type: "Barcode", value: "5026854087467" },
+    { description: null, type: "Barcode", value: "5026854087468" },
+    { description: null, type: "Label Code", value: "LC01234" },
+  ],
   instanceCount: 1,
-  labels: [{ catno: "5026854087467", labelId: 134882, name: "Warner Records", position: 0 }],
-  latestDateAdded: "2026-04-18T08:10:33.000Z",
-  lowestPrice: 18.69,
-  numForSale: 108,
+  labels: [
+    { catno: "5026854087467", labelId: 134882, name: "Warner Records", position: 0 },
+    { catno: "9362499549", labelId: 134882, name: "Warner Records", position: 1 },
+    { catno: null, labelId: 999, name: "Mushroom Pillow", position: 2 },
+  ],
   releaseId: 37098591,
   releaseYear: 2026,
   released: "2026-04-18",
@@ -67,15 +71,18 @@ describe("RecordDetailScreen", () => {
 
     expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
     expect(screen.getByText("Muse")).toBeTruthy();
-    expect(screen.getByText("1 12\" EP Vinyl")).toBeTruthy();
-    expect(
-      screen.getByText(
-        t("recordDetail.communityRatingValue", {
-          average: recordDetail.community.ratingAverage.toFixed(2),
-          count: formatCount(recordDetail.community.ratingCount),
-        }),
-      ),
-    ).toBeTruthy();
+    expect(screen.getByText("Vinyl, 12\", EP, Limited edition")).toBeTruthy();
+    expect(screen.getAllByText("18.4.2026")).toHaveLength(2);
+    expect(screen.getByText(t("recordDetail.collectionAddedOn"))).toBeTruthy();
+    expect(screen.queryByText("Vuosi")).toBeNull();
+    expect(screen.queryByText("Kappaleita")).toBeNull();
+    expect(screen.queryByText("Yhteisö")).toBeNull();
+    expect(screen.getAllByText("Barcode")).toHaveLength(1);
+    expect(screen.getByText("5026854087467 · Text\n5026854087468")).toBeTruthy();
+    expect(screen.getByText("LC01234")).toBeTruthy();
+    expect(screen.getAllByText("Warner Records")).toHaveLength(1);
+    expect(screen.getByText("5026854087467\n9362499549")).toBeTruthy();
+    expect(screen.getByText(t("recordDetail.noCatalogNumber"))).toBeTruthy();
     expect(screen.getByText("Sober")).toBeTruthy();
   });
 

@@ -79,17 +79,6 @@ describe("RecordsScreen", () => {
     globalThis.fetch = jest.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
 
-      if (url.endsWith("/health")) {
-        return jsonResponse({
-          database: {
-            lastSuccessfulSyncAt: "2026-04-23T17:34:05.883Z",
-            releaseCount: 2,
-            totalItems: 2,
-          },
-          ok: true,
-        });
-      }
-
       if (url.includes("/filters")) {
         return jsonResponse(filtersPayload);
       }
@@ -103,7 +92,6 @@ describe("RecordsScreen", () => {
     renderWithProviders(<RecordsScreen />);
 
     expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
-    expect(screen.getByText(t("dashboard.syncStatusTitle"))).toBeTruthy();
     expect(screen.getByText("Vinyl, EP, Limited edition")).toBeTruthy();
     fireEvent.changeText(screen.getByLabelText(t("records.searchLabel")), "Muse");
     fireEvent.press(screen.getByRole("button", { name: t("records.searchButton") }));
@@ -129,17 +117,6 @@ describe("RecordsScreen", () => {
   it("shows an empty state", async () => {
     globalThis.fetch = jest.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
-
-      if (url.endsWith("/health")) {
-        return jsonResponse({
-          database: {
-            lastSuccessfulSyncAt: "2026-04-23T17:34:05.883Z",
-            releaseCount: 0,
-            totalItems: 0,
-          },
-          ok: true,
-        });
-      }
 
       return url.includes("/filters")
         ? jsonResponse(filtersPayload)

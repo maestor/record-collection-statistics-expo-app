@@ -41,6 +41,15 @@ export default function TabsLayout() {
           title: translate("navigation.records"),
         }}
       />
+      <Tabs.Screen
+        name="info"
+        options={{
+          tabBarIcon: ({ color, size, focused }) => (
+            <MaterialCommunityIcons color={color} name={focused ? "information" : "information-outline"} size={size} />
+          ),
+          title: translate("navigation.info"),
+        }}
+      />
     </Tabs>
   );
 }

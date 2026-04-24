@@ -12,7 +12,7 @@ import { StatusMessage } from "@/components/status-message";
 import { useTranslation } from "@/localization/i18n";
 import { colors, radius } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
-import { formatCount, formatDate, formatYear } from "@/utils/format";
+import { formatCount, formatDate } from "@/utils/format";
 import { getErrorMessage } from "@/api/client";
 
 export function DashboardScreen() {
@@ -91,12 +91,6 @@ export function DashboardScreen() {
             {t("dashboard.overviewAddedRange", {
               first: formatDate(summary.addedRange.first),
               last: formatDate(summary.addedRange.last),
-            })}
-          </Text>
-          <Text selectable style={{ color: colors.textMuted, fontSize: 15 }}>
-            {t("dashboard.overviewReleaseYearRange", {
-              max: formatYear(summary.releaseYearRange.max),
-              min: formatYear(summary.releaseYearRange.min),
             })}
           </Text>
         </View>

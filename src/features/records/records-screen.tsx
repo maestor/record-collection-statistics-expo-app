@@ -18,7 +18,7 @@ type SortValue = NonNullable<RecordListParams["sort"]>;
 type OrderValue = NonNullable<RecordListParams["order"]>;
 type FilterKey = "artist" | "country" | "format" | "genre";
 
-const sortOptions: SortValue[] = ["date_added", "release_year", "artist", "title", "lowest_price"];
+const sortOptions: SortValue[] = ["date_added", "release_year", "artist", "title"];
 const orderOptions: OrderValue[] = ["desc", "asc"];
 
 function labelForSort(sort: SortValue): string {
@@ -27,12 +27,12 @@ function labelForSort(sort: SortValue): string {
       return translate("records.sortDateAdded");
     case "release_year":
       return translate("records.sortReleaseYear");
-    case "lowest_price":
-      return translate("records.sortLowestPrice");
     case "artist":
       return translate("records.sortArtist");
     case "title":
       return translate("records.sortTitle");
+    default:
+      return translate("records.sortDateAdded");
   }
 }
 
@@ -172,7 +172,7 @@ export function RecordsScreen() {
       ) : null}
 
       {firstPage ? (
-        <Section title={`${formatCount(firstPage.meta.total)} records`}>
+        <Section title={t("records.resultsTitle", { count: formatCount(firstPage.meta.total) })}>
           <View style={{ gap: spacing.md }}>
             {records.length === 0 ? (
               <StatusMessage

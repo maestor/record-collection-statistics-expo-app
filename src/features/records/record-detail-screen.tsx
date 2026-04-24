@@ -10,7 +10,7 @@ import { StatusMessage } from "@/components/status-message";
 import { useTranslation, translate } from "@/localization/i18n";
 import { colors, radius } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
-import { formatCount, formatCurrency, formatDate, formatYear, joinValues } from "@/utils/format";
+import { formatCount, formatDate, formatYear, joinValues } from "@/utils/format";
 
 type RecordDetailScreenProps = {
   releaseId: number;
@@ -98,7 +98,6 @@ export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
           />
           <FieldRow label={t("recordDetail.releaseGenres")} value={joinValues(record.genres)} />
           <FieldRow label={t("recordDetail.releaseStyles")} value={joinValues(record.styles)} />
-          <FieldRow label={t("recordDetail.releaseLowestPrice")} value={formatCurrency(record.lowestPrice)} />
         </View>
       </Section>
 

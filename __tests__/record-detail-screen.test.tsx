@@ -2,7 +2,7 @@ import * as React from "react";
 import { fireEvent, screen } from "@testing-library/react-native";
 
 import { RecordDetailScreen } from "@/features/records/record-detail-screen";
-import { jsonResponse, renderWithProviders, resetSecureStore } from "../test/test-utils";
+import { jsonResponse, renderWithProviders } from "../test/test-utils";
 
 const recordDetail = {
   artists: [{ artistId: 1003, name: "Muse", position: 0, role: "" }],
@@ -58,7 +58,6 @@ const recordDetail = {
 
 describe("RecordDetailScreen", () => {
   beforeEach(() => {
-    resetSecureStore();
     globalThis.fetch = jest.fn(async () => jsonResponse({ data: recordDetail }));
   });
 

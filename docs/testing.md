@@ -10,10 +10,9 @@ Tests use `jest-expo` and `@testing-library/react-native`.
 - Keep generated OpenAPI types out of coverage.
 
 ## Required Scenarios
-- Settings save, reset, and connection test.
-- API key header behavior without printing or rendering secrets.
+- API configuration from Expo environment values.
+- API key header behavior without putting the key in URLs, query keys, screenshots, or rendered UI.
 - Dashboard loading, success, error, and refresh.
 - Records search, sort, filters, pagination, empty result, and API error.
 - Record detail success, 404/error, and invalid release id.
 - Accessibility labels and roles for navigation targets, controls, and alerts.
-

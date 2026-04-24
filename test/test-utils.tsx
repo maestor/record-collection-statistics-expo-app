@@ -2,8 +2,6 @@ import * as React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react-native";
 
-import { AppSettingsProvider } from "@/providers/settings-provider";
-
 export function renderWithProviders(ui: React.ReactElement) {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -15,9 +13,7 @@ export function renderWithProviders(ui: React.ReactElement) {
   });
 
   return render(
-    <QueryClientProvider client={queryClient}>
-      <AppSettingsProvider>{ui}</AppSettingsProvider>
-    </QueryClientProvider>,
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
   );
 }
 
@@ -27,9 +23,4 @@ export function jsonResponse(body: unknown, status = 200): Response {
     ok: status >= 200 && status < 300,
     status,
   } as unknown as Response;
-}
-
-export function resetSecureStore() {
-  const secureStore = jest.requireMock("expo-secure-store") as { __resetStore?: () => void };
-  secureStore.__resetStore?.();
 }

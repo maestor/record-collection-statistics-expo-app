@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Record Collection",
-    "slug": "record-collection-statistics-expo-app",
+    "slug": "maestors-record-collection",
     "version": "0.1.0",
     "orientation": "portrait",
     "scheme": "recordcollection",
@@ -12,8 +12,7 @@
       "usesCleartextTraffic": true
     },
     "plugins": [
-      "expo-router",
-      "expo-secure-store"
+      "expo-router"
     ],
     "experiments": {
       "typedRoutes": true

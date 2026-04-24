@@ -2,7 +2,7 @@ import * as React from "react";
 import { fireEvent, screen } from "@testing-library/react-native";
 
 import { DashboardScreen } from "@/features/dashboard/dashboard-screen";
-import { jsonResponse, renderWithProviders, resetSecureStore } from "../test/test-utils";
+import { jsonResponse, renderWithProviders } from "../test/test-utils";
 
 const dashboardPayload = {
   data: {
@@ -37,7 +37,6 @@ const dashboardPayload = {
 
 describe("DashboardScreen", () => {
   beforeEach(() => {
-    resetSecureStore();
     globalThis.fetch = jest.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
 

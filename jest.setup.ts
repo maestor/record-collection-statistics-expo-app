@@ -10,19 +10,19 @@ afterEach(() => {
   cleanup();
 });
 
-jest.mock("expo-secure-store", () => {
-  const store = new Map<string, string>();
+jest.mock("expo-constants", () => {
+  const constants = {
+    expoConfig: {
+      extra: {},
+    },
+    manifest: {
+      extra: {},
+    },
+  };
 
   return {
-    isAvailableAsync: jest.fn(async () => true),
-    getItemAsync: jest.fn(async (key: string) => store.get(key) ?? null),
-    setItemAsync: jest.fn(async (key: string, value: string) => {
-      store.set(key, value);
-    }),
-    deleteItemAsync: jest.fn(async (key: string) => {
-      store.delete(key);
-    }),
-    __resetStore: () => store.clear(),
+    __esModule: true,
+    default: constants,
   };
 });
 

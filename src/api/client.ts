@@ -9,18 +9,35 @@ import type {
   RecordListParams,
   RecordsResponse,
 } from "./types";
+import Constants from "expo-constants";
 
 export const COMPUTER_API_BASE_URL = "http://127.0.0.1:3003";
 export const ANDROID_EMULATOR_API_BASE_URL = "http://10.0.2.2:3003";
 
+type AppExtra = {
+  recordCollectionApiKey?: unknown;
+  recordCollectionApiUrl?: unknown;
+};
+
+function getExtraValue(key: keyof AppExtra): string {
+  const extra = (Constants.expoConfig?.extra ?? Constants.manifest?.extra ?? {}) as AppExtra;
+  const value = extra[key];
+
+  return typeof value === "string" ? value.trim() : "";
+}
+
 function getDefaultApiBaseUrl(expoOs = process.env.EXPO_OS): string {
   return (
+    process.env.EXPO_PUBLIC_API_URL?.trim() ||
+    getExtraValue("recordCollectionApiUrl") ||
     process.env.EXPO_PUBLIC_DEFAULT_API_BASE_URL?.trim() ||
     (expoOs === "android" ? ANDROID_EMULATOR_API_BASE_URL : COMPUTER_API_BASE_URL)
   );
 }
 
 export const DEFAULT_API_BASE_URL = getDefaultApiBaseUrl();
+export const DEFAULT_API_KEY =
+  process.env.EXPO_PUBLIC_API_KEY?.trim() || getExtraValue("recordCollectionApiKey");
 
 export type ApiConfig = {
   apiKey: string;
@@ -70,6 +87,13 @@ export function getDeviceReachableBaseUrl(
   }
 
   return normalizedBaseUrl;
+}
+
+export function getApiConfig(): ApiConfig {
+  return {
+    apiKey: DEFAULT_API_KEY,
+    baseUrl: DEFAULT_API_BASE_URL,
+  };
 }
 
 export function isApiError(error: unknown): error is ApiError {

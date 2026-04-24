@@ -38,30 +38,17 @@ const dashboardPayload = {
 
 describe("DashboardScreen", () => {
   beforeEach(() => {
-    globalThis.fetch = jest.fn(async (input: RequestInfo | URL) => {
-      const url = String(input);
-
-      if (url.endsWith("/health")) {
-        return jsonResponse({
-          database: {
-            lastSuccessfulSyncAt: "2026-04-23T17:34:05.883Z",
-            releaseCount: 2345,
-            totalItems: 2346,
-          },
-          ok: true,
-        });
-      }
-
-      return jsonResponse(dashboardPayload);
-    });
+    globalThis.fetch = jest.fn(async () => jsonResponse(dashboardPayload));
   });
 
-  it("renders dashboard data and refreshes it", async () => {
+  it("renders dashboard data and allows switching collection highlights", async () => {
     renderWithProviders(<DashboardScreen />);
 
-    expect(await screen.findByText(t("dashboard.healthStatusHealthy"))).toBeTruthy();
+    expect(await screen.findByText(t("dashboard.highlightsTitle"))).toBeTruthy();
     expect(screen.getByText(formatCount(dashboardPayload.data.summary.totals.collectionItems))).toBeTruthy();
     expect(screen.getByText("Klamydia")).toBeTruthy();
+    fireEvent.press(screen.getByRole("button", { name: t("dimensions.country") }));
+    expect(await screen.findByText("Finland")).toBeTruthy();
 
     fireEvent.press(screen.getByRole("button", { name: t("dashboard.browseRecords") }));
   });

@@ -37,6 +37,9 @@ export const translations = {
       overviewReleaseYearRange: "Julkaisuvuodet {min} - {max}",
       overviewTitle: "Yleiskuva",
       pickerLabel: "Valitse näkyvä kohokohdalista",
+      syncStatusLoading: "Tarkistetaan synkronoinnin tilaa.",
+      syncStatusTitle: "Synkronoinnin tila",
+      syncUnavailableMessage: "Viimeisimmän synkronoinnin tietoja ei saatu haettua.",
       syncLastSuccessful: "Viimeisin onnistunut synkronointi {date}.",
     },
     dimensions: {

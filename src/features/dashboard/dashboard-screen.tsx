@@ -1,8 +1,9 @@
 import * as React from "react";
-import { RefreshControl, ScrollView, Text, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { Link } from "expo-router";
 
-import { useDashboardStatsQuery, useHealthQuery } from "@/api/queries";
+import type { BreakdownDimension, BreakdownItem } from "@/api/types";
+import { useDashboardStatsQuery } from "@/api/queries";
 import { BreakdownList } from "@/components/breakdown-list";
 import { Button } from "@/components/button";
 import { MetricCard } from "@/components/metric-card";
@@ -16,17 +17,16 @@ import { getErrorMessage } from "@/api/client";
 
 export function DashboardScreen() {
   const { t } = useTranslation();
-  const healthQuery = useHealthQuery();
   const dashboardQuery = useDashboardStatsQuery(8);
-  const isRefreshing = healthQuery.isFetching || dashboardQuery.isFetching;
+  const [selectedHighlight, setSelectedHighlight] = React.useState<BreakdownDimension>("artist");
+  const isRefreshing = dashboardQuery.isFetching;
   const dashboard = dashboardQuery.data?.data;
 
   const refresh = React.useCallback(() => {
-    void healthQuery.refetch();
     void dashboardQuery.refetch();
-  }, [dashboardQuery, healthQuery]);
+  }, [dashboardQuery]);
 
-  if (healthQuery.isLoading || dashboardQuery.isLoading) {
+  if (dashboardQuery.isLoading) {
     return (
       <ScrollView contentContainerStyle={{ padding: spacing.lg }}>
         <StatusMessage
@@ -38,12 +38,12 @@ export function DashboardScreen() {
     );
   }
 
-  if (healthQuery.isError || dashboardQuery.isError || !dashboard) {
+  if (dashboardQuery.isError || !dashboard) {
     return (
       <ScrollView contentContainerStyle={{ padding: spacing.lg }}>
         <StatusMessage
           actionLabel={t("common.tryAgain")}
-          message={getErrorMessage(healthQuery.error ?? dashboardQuery.error)}
+          message={getErrorMessage(dashboardQuery.error)}
           onAction={refresh}
           title={t("dashboard.errorTitle")}
           tone="error"
@@ -53,6 +53,21 @@ export function DashboardScreen() {
   }
 
   const { summary } = dashboard;
+  const highlightOptions: {
+    dimension: BreakdownDimension;
+    items: readonly BreakdownItem[];
+    title: string;
+  }[] = [
+    { dimension: "artist", items: dashboard.topArtists, title: t("dimensions.artist") },
+    { dimension: "label", items: dashboard.labels, title: t("dimensions.label") },
+    { dimension: "format", items: dashboard.formats, title: t("dimensions.format") },
+    { dimension: "genre", items: dashboard.genres, title: t("dimensions.genre") },
+    { dimension: "style", items: dashboard.styles, title: t("dimensions.style") },
+    { dimension: "country", items: dashboard.countries, title: t("dimensions.country") },
+    { dimension: "added_year", items: dashboard.addedYears, title: t("dimensions.added_year") },
+  ];
+  const activeHighlight =
+    highlightOptions.find((option) => option.dimension === selectedHighlight) ?? highlightOptions[0]!;
 
   return (
     <ScrollView
@@ -61,27 +76,6 @@ export function DashboardScreen() {
       style={{ backgroundColor: colors.background }}
       contentContainerStyle={{ gap: spacing.xl, padding: spacing.lg }}
     >
-      <View
-        style={{
-          backgroundColor: colors.primaryDark,
-          borderCurve: "continuous",
-          borderRadius: radius.md,
-          gap: spacing.sm,
-          padding: spacing.lg,
-        }}
-      >
-        <Text selectable style={{ color: colors.surface, fontSize: 18, fontWeight: "800" }}>
-          {healthQuery.data?.ok
-            ? t("dashboard.healthStatusHealthy")
-            : t("dashboard.healthStatusUnavailable")}
-        </Text>
-        <Text selectable style={{ color: colors.primarySoft, fontSize: 15, lineHeight: 22 }}>
-          {t("dashboard.syncLastSuccessful", {
-            date: formatDate(healthQuery.data?.database.lastSuccessfulSyncAt),
-          })}
-        </Text>
-      </View>
-
       <Section title={t("dashboard.overviewTitle")}>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.md }}>
           <MetricCard
@@ -111,13 +105,52 @@ export function DashboardScreen() {
         </Link>
       </Section>
 
-      <BreakdownList dimension="artist" items={dashboard.topArtists} title={t("dimensions.artist")} />
-      <BreakdownList dimension="label" items={dashboard.labels} title={t("dimensions.label")} />
-      <BreakdownList dimension="format" items={dashboard.formats} title={t("dimensions.format")} />
-      <BreakdownList dimension="genre" items={dashboard.genres} title={t("dimensions.genre")} />
-      <BreakdownList dimension="style" items={dashboard.styles} title={t("dimensions.style")} />
-      <BreakdownList dimension="country" items={dashboard.countries} title={t("dimensions.country")} />
-      <BreakdownList dimension="added_year" items={dashboard.addedYears} title={t("dimensions.added_year")} />
+      <Section title={t("dashboard.highlightsTitle")}>
+        <View
+          accessibilityLabel={t("dashboard.pickerLabel")}
+          style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}
+        >
+          {highlightOptions.map((option) => {
+            const isSelected = option.dimension === activeHighlight.dimension;
+
+            return (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ selected: isSelected }}
+                key={option.dimension}
+                onPress={() => setSelectedHighlight(option.dimension)}
+                style={{
+                  backgroundColor: isSelected ? colors.primary : colors.surfaceMuted,
+                  borderColor: isSelected ? colors.primary : colors.border,
+                  borderCurve: "continuous",
+                  borderRadius: radius.md,
+                  borderWidth: 1,
+                  minHeight: 40,
+                  paddingHorizontal: spacing.md,
+                  paddingVertical: spacing.sm,
+                }}
+              >
+                <Text
+                  selectable
+                  style={{
+                    color: isSelected ? colors.primaryDark : colors.text,
+                    fontSize: 14,
+                    fontWeight: "700",
+                  }}
+                >
+                  {option.title}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        <BreakdownList
+          dimension={activeHighlight.dimension}
+          items={activeHighlight.items}
+          title={activeHighlight.title}
+          withSection={false}
+        />
+      </Section>
     </ScrollView>
   );
 }

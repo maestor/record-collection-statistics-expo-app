@@ -13,13 +13,13 @@ type BreakdownListProps = {
   dimension?: BreakdownDimension;
   items: readonly BreakdownItem[];
   title: string;
+  withSection?: boolean;
 };
 
-export function BreakdownList({ dimension, items, title }: BreakdownListProps) {
+export function BreakdownList({ dimension, items, title, withSection = true }: BreakdownListProps) {
   const max = Math.max(...items.map((item) => item.releaseCount), 1);
-
-  return (
-    <Section title={title}>
+  const content = (
+    <>
       <View style={{ gap: spacing.sm }}>
         {items.length === 0 ? (
           <Text selectable style={{ color: colors.textMuted }}>
@@ -38,6 +38,30 @@ export function BreakdownList({ dimension, items, title }: BreakdownListProps) {
           {`${translate("breakdowns.viewFullPrefix")} ${title.toLowerCase()}`}
         </Link>
       ) : null}
+    </>
+  );
+
+  if (!withSection) {
+    return (
+      <View style={{ gap: spacing.md }}>
+        <Text
+          selectable
+          style={{
+            color: colors.text,
+            fontSize: 18,
+            fontWeight: "800",
+          }}
+        >
+          {title}
+        </Text>
+        {content}
+      </View>
+    );
+  }
+
+  return (
+    <Section title={title}>
+      {content}
     </Section>
   );
 }

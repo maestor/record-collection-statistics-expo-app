@@ -1,4 +1,9 @@
-import { getHealth, listRecords } from "@/api/client";
+import {
+  ANDROID_EMULATOR_API_BASE_URL,
+  getDeviceReachableBaseUrl,
+  getHealth,
+  listRecords,
+} from "@/api/client";
 import { jsonResponse } from "../test/test-utils";
 
 describe("api client", () => {
@@ -81,6 +86,42 @@ describe("api client", () => {
 
     await expect(getHealth({ apiKey: "", baseUrl: "http://example.test" })).rejects.toThrow(
       "Nope",
+    );
+  });
+
+  it("handles abort errors when DOMException is unavailable", async () => {
+    const originalDomException = globalThis.DOMException;
+    Object.defineProperty(globalThis, "DOMException", {
+      configurable: true,
+      value: undefined,
+    });
+    globalThis.fetch = jest.fn(async () => {
+      throw { name: "AbortError" };
+    });
+
+    await expect(getHealth({ apiKey: "", baseUrl: "http://example.test" })).rejects.toThrow(
+      "Request timed out",
+    );
+
+    Object.defineProperty(globalThis, "DOMException", {
+      configurable: true,
+      value: originalDomException,
+    });
+  });
+
+  it("explains loopback network failures for Android", async () => {
+    globalThis.fetch = jest.fn(async () => {
+      throw new TypeError("Network request failed");
+    });
+
+    await expect(
+      getHealth({ apiKey: "", baseUrl: "http://127.0.0.1:3003" }),
+    ).rejects.toThrow(`Use ${ANDROID_EMULATOR_API_BASE_URL} for the emulator`);
+  });
+
+  it("can migrate the Android loopback default to the emulator URL", () => {
+    expect(getDeviceReachableBaseUrl("http://127.0.0.1:3003", "android")).toBe(
+      ANDROID_EMULATOR_API_BASE_URL,
     );
   });
 });

@@ -9,9 +9,35 @@ import type {
   RecordListParams,
   RecordsResponse,
 } from "./types";
+import Constants from "expo-constants";
 
-export const DEFAULT_API_BASE_URL =
-  process.env.EXPO_PUBLIC_DEFAULT_API_BASE_URL?.trim() || "http://127.0.0.1:3003";
+export const COMPUTER_API_BASE_URL = "http://127.0.0.1:3003";
+export const ANDROID_EMULATOR_API_BASE_URL = "http://10.0.2.2:3003";
+
+type AppExtra = {
+  recordCollectionApiKey?: unknown;
+  recordCollectionApiUrl?: unknown;
+};
+
+function getExtraValue(key: keyof AppExtra): string {
+  const extra = (Constants.expoConfig?.extra ?? Constants.manifest?.extra ?? {}) as AppExtra;
+  const value = extra[key];
+
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function getDefaultApiBaseUrl(expoOs = process.env.EXPO_OS): string {
+  return (
+    process.env.EXPO_PUBLIC_API_URL?.trim() ||
+    getExtraValue("recordCollectionApiUrl") ||
+    process.env.EXPO_PUBLIC_DEFAULT_API_BASE_URL?.trim() ||
+    (expoOs === "android" ? ANDROID_EMULATOR_API_BASE_URL : COMPUTER_API_BASE_URL)
+  );
+}
+
+export const DEFAULT_API_BASE_URL = getDefaultApiBaseUrl();
+export const DEFAULT_API_KEY =
+  process.env.EXPO_PUBLIC_API_KEY?.trim() || getExtraValue("recordCollectionApiKey");
 
 export type ApiConfig = {
   apiKey: string;
@@ -43,6 +69,33 @@ export function normalizeBaseUrl(baseUrl: string): string {
   return trimmed.replace(/\/+$/, "");
 }
 
+export function getDeviceReachableBaseUrl(
+  baseUrl: string | null | undefined,
+  expoOs = process.env.EXPO_OS,
+): string {
+  if (!baseUrl) {
+    return DEFAULT_API_BASE_URL;
+  }
+
+  const normalizedBaseUrl = normalizeBaseUrl(baseUrl);
+
+  if (
+    expoOs === "android" &&
+    (normalizedBaseUrl === COMPUTER_API_BASE_URL || normalizedBaseUrl === "http://localhost:3003")
+  ) {
+    return getDefaultApiBaseUrl(expoOs);
+  }
+
+  return normalizedBaseUrl;
+}
+
+export function getApiConfig(): ApiConfig {
+  return {
+    apiKey: DEFAULT_API_KEY,
+    baseUrl: DEFAULT_API_BASE_URL,
+  };
+}
+
 export function isApiError(error: unknown): error is ApiError {
   return error instanceof ApiError;
 }
@@ -57,6 +110,15 @@ export function getErrorMessage(error: unknown): string {
   }
 
   return "Unexpected error";
+}
+
+function hasErrorName(error: unknown, name: string): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "name" in error &&
+    (error as { name?: unknown }).name === name
+  );
 }
 
 function getHeaders(config: ApiConfig): Headers {
@@ -80,6 +142,16 @@ function buildUrl(config: ApiConfig, path: string, params?: RequestOptions["para
   }
 
   return url.toString();
+}
+
+function getNetworkErrorMessage(config: ApiConfig): string {
+  const baseUrl = normalizeBaseUrl(config.baseUrl);
+
+  if (baseUrl === COMPUTER_API_BASE_URL || baseUrl === "http://localhost:3003") {
+    return `Network request failed for ${baseUrl}. On Android, localhost points to the device. Use ${ANDROID_EMULATOR_API_BASE_URL} for the emulator, or http://<computer-lan-ip>:3003 for a physical phone.`;
+  }
+
+  return `Network request failed for ${baseUrl}. Check that the API is reachable from this device. For a physical phone, use your computer LAN IP and make sure the API listens beyond localhost.`;
 }
 
 async function readError(response: Response): Promise<string> {
@@ -121,11 +193,11 @@ async function requestJson<T>(
       throw error;
     }
 
-    if (error instanceof DOMException && error.name === "AbortError") {
+    if (hasErrorName(error, "AbortError")) {
       throw new ApiError("Request timed out", 0);
     }
 
-    throw new ApiError("Network request failed", 0);
+    throw new ApiError(getNetworkErrorMessage(config), 0);
   } finally {
     clearTimeout(timeout);
   }
@@ -166,4 +238,3 @@ export function getBreakdown(
 ): Promise<BreakdownResponse> {
   return requestJson<BreakdownResponse>(config, `/stats/breakdowns/${dimension}`);
 }
-

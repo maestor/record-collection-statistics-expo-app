@@ -5,54 +5,54 @@ import {
   getDashboardStats,
   getFilters,
   getHealth,
+  getApiConfig,
   getRecordDetail,
   listRecords,
 } from "./client";
 import type { BreakdownDimension, RecordListParams, RecordsResponse } from "./types";
-import { useAppSettings } from "@/providers/settings-provider";
+
+const apiConfig = getApiConfig();
 
 function useApiQueryBase() {
-  const { isLoaded, revision, settings } = useAppSettings();
-
   return {
-    enabled: isLoaded,
-    queryScope: [settings.baseUrl, revision] as const,
-    settings,
+    enabled: true,
+    queryScope: [apiConfig.baseUrl] as const,
+    config: apiConfig,
   };
 }
 
 export function useHealthQuery() {
-  const { enabled, queryScope, settings } = useApiQueryBase();
+  const { config, enabled, queryScope } = useApiQueryBase();
 
   return useQuery({
     enabled,
-    queryFn: () => getHealth(settings),
+    queryFn: () => getHealth(config),
     queryKey: ["health", ...queryScope],
   });
 }
 
 export function useDashboardStatsQuery(limit = 8) {
-  const { enabled, queryScope, settings } = useApiQueryBase();
+  const { config, enabled, queryScope } = useApiQueryBase();
 
   return useQuery({
     enabled,
-    queryFn: () => getDashboardStats(settings, limit),
+    queryFn: () => getDashboardStats(config, limit),
     queryKey: ["dashboard", ...queryScope, limit],
   });
 }
 
 export function useFiltersQuery(limit = 50) {
-  const { enabled, queryScope, settings } = useApiQueryBase();
+  const { config, enabled, queryScope } = useApiQueryBase();
 
   return useQuery({
     enabled,
-    queryFn: () => getFilters(settings, limit),
+    queryFn: () => getFilters(config, limit),
     queryKey: ["filters", ...queryScope, limit],
   });
 }
 
 export function useRecordsQuery(params: Omit<RecordListParams, "page">) {
-  const { enabled, queryScope, settings } = useApiQueryBase();
+  const { config, enabled, queryScope } = useApiQueryBase();
 
   return useInfiniteQuery<RecordsResponse>({
     enabled,
@@ -62,7 +62,7 @@ export function useRecordsQuery(params: Omit<RecordListParams, "page">) {
     },
     initialPageParam: 1,
     queryFn: ({ pageParam }) =>
-      listRecords(settings, {
+      listRecords(config, {
         ...params,
         page: typeof pageParam === "number" ? pageParam : 1,
       }),
@@ -71,22 +71,21 @@ export function useRecordsQuery(params: Omit<RecordListParams, "page">) {
 }
 
 export function useRecordDetailQuery(releaseId: number) {
-  const { enabled, queryScope, settings } = useApiQueryBase();
+  const { config, enabled, queryScope } = useApiQueryBase();
 
   return useQuery({
     enabled: enabled && Number.isFinite(releaseId),
-    queryFn: () => getRecordDetail(settings, releaseId),
+    queryFn: () => getRecordDetail(config, releaseId),
     queryKey: ["record-detail", ...queryScope, releaseId],
   });
 }
 
 export function useBreakdownQuery(dimension: BreakdownDimension) {
-  const { enabled, queryScope, settings } = useApiQueryBase();
+  const { config, enabled, queryScope } = useApiQueryBase();
 
   return useQuery({
     enabled,
-    queryFn: () => getBreakdown(settings, dimension),
+    queryFn: () => getBreakdown(config, dimension),
     queryKey: ["breakdown", ...queryScope, dimension],
   });
 }
-

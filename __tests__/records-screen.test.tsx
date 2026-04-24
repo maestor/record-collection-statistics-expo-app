@@ -2,7 +2,7 @@ import * as React from "react";
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 
 import { RecordsScreen } from "@/features/records/records-screen";
-import { jsonResponse, renderWithProviders, resetSecureStore } from "../test/test-utils";
+import { jsonResponse, renderWithProviders } from "../test/test-utils";
 
 const firstRecord = {
   artistsSort: "Muse",
@@ -71,7 +71,6 @@ function recordsPayload(page: number) {
 
 describe("RecordsScreen", () => {
   beforeEach(() => {
-    resetSecureStore();
     globalThis.fetch = jest.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
 

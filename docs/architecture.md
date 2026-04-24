@@ -6,7 +6,6 @@ Expo Router owns navigation:
 - `/` dashboard
 - `/records` catalog
 - `/records/[releaseId]` detail
-- `/settings` API connection settings
 - `/breakdowns/[dimension]` full stats breakdowns
 
 Route files stay thin and delegate to feature components under `src/features`.
@@ -28,6 +27,7 @@ The runtime client is hand-written in `src/api/client.ts` to keep dependencies s
 
 React Query hooks in `src/api/queries.ts` handle caching, pagination, retries, and loading states.
 
-## Settings
-API URL and optional API key are stored through `expo-secure-store`. Query keys include the API URL and a settings revision, but never the API key value.
+## Runtime Configuration
+API URL and required read API key come from Expo/EAS environment variables. `app.config.js` maps `API_URL` and `API_KEY` into Expo config so the client can read them at runtime. The app also accepts `EXPO_PUBLIC_API_URL` and `EXPO_PUBLIC_API_KEY` for local public Expo env workflows.
 
+React Query keys include the API URL, but never the API key value.

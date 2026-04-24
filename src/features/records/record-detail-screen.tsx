@@ -19,7 +19,6 @@ type RecordDetailScreenProps = {
 export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
   const { t } = useTranslation();
   const query = useRecordDetailQuery(releaseId);
-  const record = query.data?.data;
 
   if (!Number.isFinite(releaseId)) {
     return (
@@ -45,7 +44,7 @@ export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
     );
   }
 
-  if (query.isError || !record) {
+  if (query.isError) {
     return (
       <ScrollView contentContainerStyle={{ padding: spacing.lg }}>
         <StatusMessage
@@ -58,6 +57,8 @@ export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
       </ScrollView>
     );
   }
+
+  const record = query.data!.data;
 
   return (
     <ScrollView

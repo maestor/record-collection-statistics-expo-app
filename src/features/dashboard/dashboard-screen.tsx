@@ -20,7 +20,6 @@ export function DashboardScreen() {
   const dashboardQuery = useDashboardStatsQuery(8);
   const [selectedHighlight, setSelectedHighlight] = React.useState<BreakdownDimension>("artist");
   const isRefreshing = dashboardQuery.isFetching;
-  const dashboard = dashboardQuery.data?.data;
 
   const refresh = React.useCallback(() => {
     void dashboardQuery.refetch();
@@ -38,7 +37,7 @@ export function DashboardScreen() {
     );
   }
 
-  if (dashboardQuery.isError || !dashboard) {
+  if (dashboardQuery.isError) {
     return (
       <ScrollView contentContainerStyle={{ padding: spacing.lg }}>
         <StatusMessage
@@ -52,6 +51,7 @@ export function DashboardScreen() {
     );
   }
 
+  const dashboard = dashboardQuery.data!.data;
   const { summary } = dashboard;
   const highlightOptions: {
     dimension: BreakdownDimension;

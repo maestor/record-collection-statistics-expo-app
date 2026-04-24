@@ -4,33 +4,14 @@ const numberFormatter = new Intl.NumberFormat("fi-FI", {
   maximumFractionDigits: 0,
 });
 
-const compactNumberFormatter = new Intl.NumberFormat("fi-FI", {
-  maximumFractionDigits: 1,
-  notation: "compact",
-});
-
-const currencyFormatter = new Intl.NumberFormat("fi-FI", {
-  currency: "EUR",
-  maximumFractionDigits: 2,
-  style: "currency",
-});
-
 const dateFormatter = new Intl.DateTimeFormat("fi-FI", {
   day: "numeric",
   month: "short",
   year: "numeric",
 });
 
-export function formatCount(value: number | null | undefined): string {
-  return typeof value === "number" ? numberFormatter.format(value) : translate("common.unknown");
-}
-
-export function formatCompactCount(value: number | null | undefined): string {
-  return typeof value === "number" ? compactNumberFormatter.format(value) : translate("common.unknown");
-}
-
-export function formatCurrency(value: number | null | undefined): string {
-  return typeof value === "number" ? currencyFormatter.format(value) : translate("common.unknown");
+export function formatCount(value: number): string {
+  return numberFormatter.format(value);
 }
 
 export function formatDate(value: string | null | undefined): string {

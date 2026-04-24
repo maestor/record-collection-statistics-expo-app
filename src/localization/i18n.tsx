@@ -17,15 +17,9 @@ export type TranslationKey = NestedTranslationKey<TranslationTree>;
 const defaultLocale: Locale = "fi";
 
 function getTranslationValue(locale: Locale, key: TranslationKey): string {
-  const value = key
+  return key
     .split(".")
-    .reduce<unknown>((current, segment) => (current as Record<string, unknown>)?.[segment], translations[locale]);
-
-  if (typeof value !== "string") {
-    return key;
-  }
-
-  return value;
+    .reduce<unknown>((current, segment) => (current as Record<string, unknown>)?.[segment], translations[locale]) as string;
 }
 
 function interpolate(template: string, values?: Record<string, TranslationValue>) {

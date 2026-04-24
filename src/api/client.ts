@@ -1,5 +1,4 @@
 import type {
-  ApiIndex,
   BreakdownDimension,
   BreakdownResponse,
   DashboardResponse,
@@ -96,15 +95,7 @@ export function getApiConfig(): ApiConfig {
   };
 }
 
-export function isApiError(error: unknown): error is ApiError {
-  return error instanceof ApiError;
-}
-
 export function getErrorMessage(error: unknown): string {
-  if (isApiError(error)) {
-    return error.message;
-  }
-
   if (error instanceof Error) {
     return error.message;
   }
@@ -189,7 +180,7 @@ async function requestJson<T>(
 
     return (await response.json()) as T;
   } catch (error) {
-    if (isApiError(error)) {
+    if (error instanceof ApiError) {
       throw error;
     }
 
@@ -203,19 +194,15 @@ async function requestJson<T>(
   }
 }
 
-export function getApiIndex(config: ApiConfig): Promise<ApiIndex> {
-  return requestJson<ApiIndex>(config, "/");
-}
-
 export function getHealth(config: ApiConfig): Promise<Health> {
   return requestJson<Health>(config, "/health");
 }
 
-export function getDashboardStats(config: ApiConfig, limit = 8): Promise<DashboardResponse> {
+export function getDashboardStats(config: ApiConfig, limit: number): Promise<DashboardResponse> {
   return requestJson<DashboardResponse>(config, "/stats/dashboard", { params: { limit } });
 }
 
-export function getFilters(config: ApiConfig, limit = 50): Promise<FilterCatalogResponse> {
+export function getFilters(config: ApiConfig, limit: number): Promise<FilterCatalogResponse> {
   return requestJson<FilterCatalogResponse>(config, "/filters", { params: { limit } });
 }
 

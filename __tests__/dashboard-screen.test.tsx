@@ -1,8 +1,7 @@
 import * as React from "react";
-import { fireEvent, screen } from "@testing-library/react-native";
+import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 
 import { DashboardScreen } from "@/features/dashboard/dashboard-screen";
-import { formatCount } from "@/utils/format";
 import { jsonResponse, renderWithProviders, t } from "../test/test-utils";
 
 const dashboardPayload = {
@@ -36,30 +35,91 @@ const dashboardPayload = {
   meta: { limit: 8 },
 };
 
+const highlightCases = [
+  { dimension: "artist", value: "Klamydia" },
+  { dimension: "label", value: "Herodes" },
+  { dimension: "format", value: "CD" },
+  { dimension: "genre", value: "Rock" },
+  { dimension: "style", value: "Pop Rock" },
+  { dimension: "country", value: "Finland" },
+  { dimension: "added_year", value: "2026" },
+] as const;
+
 describe("DashboardScreen", () => {
   beforeEach(() => {
+    jest.restoreAllMocks();
     globalThis.fetch = jest.fn(async () => jsonResponse(dashboardPayload));
   });
 
-  it("renders dashboard data and allows switching collection highlights", async () => {
+  it("renders a loading state before dashboard data arrives", async () => {
+    let resolveDashboardResponse: ((response: Response) => void) | undefined;
+
+    globalThis.fetch = jest.fn(
+      () =>
+        new Promise<Response>((resolve) => {
+          resolveDashboardResponse = resolve;
+        }),
+    );
+
+    renderWithProviders(<DashboardScreen />);
+
+    expect(screen.getByText(t("dashboard.loadingTitle"))).toBeTruthy();
+    expect(screen.getByText(t("dashboard.loadingMessage"))).toBeTruthy();
+    expect(screen.queryByText(t("dashboard.highlightsTitle"))).toBeNull();
+
+    resolveDashboardResponse?.(jsonResponse(dashboardPayload));
+
+    expect(await screen.findByText(t("dashboard.highlightsTitle"))).toBeTruthy();
+  });
+
+  it("renders dashboard data and supports every highlight action", async () => {
     renderWithProviders(<DashboardScreen />);
 
     expect(await screen.findByText(t("dashboard.highlightsTitle"))).toBeTruthy();
-    expect(screen.getByText(formatCount(dashboardPayload.data.summary.totals.collectionItems))).toBeTruthy();
-    expect(screen.getByText("Klamydia")).toBeTruthy();
-    fireEvent.press(screen.getByRole("button", { name: t("dimensions.country") }));
-    expect(await screen.findByText("Finland")).toBeTruthy();
+    expect(screen.getByText("2 346")).toBeTruthy();
+    expect(screen.getByText("2 345")).toBeTruthy();
+    expect(screen.getByText("405")).toBeTruthy();
+    expect(screen.getByText("456")).toBeTruthy();
+    expect(screen.getByText("Äänitteet lisätty välillä 15.8.2019 - 19.4.2026")).toBeTruthy();
 
-    fireEvent.press(screen.getByRole("button", { name: t("dashboard.browseRecords") }));
+    const browseButton = screen.getByRole("button", { name: t("dashboard.browseRecords") });
+    expect(browseButton.props.href).toBe("/records");
+
+    for (const { dimension, value } of highlightCases) {
+      const title = t(`dimensions.${dimension}`);
+      const button = screen.getByRole("button", { name: title });
+
+      fireEvent.press(button);
+
+      expect(await screen.findByText(value)).toBeTruthy();
+      expect(screen.getByRole("button", { name: title }).props.accessibilityState.selected).toBe(true);
+
+      const viewFullLink = screen.getByRole("link", {
+        name: `${t("breakdowns.viewFullPrefix")} ${title.toLowerCase()}`,
+      });
+
+      expect(viewFullLink.props.href).toEqual({
+        params: { dimension },
+        pathname: "/breakdowns/[dimension]",
+      });
+    }
+
+    expect((globalThis.fetch as jest.Mock).mock.calls[0]?.[0]).toContain("/stats/dashboard?limit=8");
   });
 
   it("renders an API error with retry", async () => {
     globalThis.fetch = jest.fn(async () => jsonResponse({ error: "API down" }, 503));
+
     renderWithProviders(<DashboardScreen />);
 
-    expect(await screen.findByText("API down")).toBeTruthy();
+    expect(await screen.findByRole("alert")).toBeTruthy();
+    expect(screen.getByText("API down")).toBeTruthy();
     expect(screen.getByText(t("dashboard.errorTitle"))).toBeTruthy();
+
     fireEvent.press(screen.getByRole("button", { name: t("common.tryAgain") }));
-    expect(globalThis.fetch).toHaveBeenCalled();
+
+    await waitFor(() => {
+      expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+    });
   });
 });

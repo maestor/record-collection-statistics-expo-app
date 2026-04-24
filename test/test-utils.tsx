@@ -1,8 +1,9 @@
 import * as React from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 import { render } from "@testing-library/react-native";
 
-import { LocalizationProvider, translate } from "@/localization/i18n";
+import { translate } from "@/localization/i18n";
+import { AppProviders } from "@/providers/app-providers";
 
 export function renderWithProviders(ui: React.ReactElement) {
   const queryClient = new QueryClient({
@@ -14,11 +15,7 @@ export function renderWithProviders(ui: React.ReactElement) {
     },
   });
 
-  return render(
-    <LocalizationProvider>
-      <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
-    </LocalizationProvider>,
-  );
+  return render(<AppProviders client={queryClient}>{ui}</AppProviders>);
 }
 
 export function jsonResponse(body: unknown, status = 200): Response {

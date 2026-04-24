@@ -31,7 +31,7 @@ export function useHealthQuery() {
   });
 }
 
-export function useDashboardStatsQuery(limit = 8) {
+export function useDashboardStatsQuery(limit: number) {
   const { config, enabled, queryScope } = useApiQueryBase();
 
   return useQuery({
@@ -41,7 +41,7 @@ export function useDashboardStatsQuery(limit = 8) {
   });
 }
 
-export function useFiltersQuery(limit = 50) {
+export function useFiltersQuery(limit: number) {
   const { config, enabled, queryScope } = useApiQueryBase();
 
   return useQuery({
@@ -64,7 +64,7 @@ export function useRecordsQuery(params: Omit<RecordListParams, "page">) {
     queryFn: ({ pageParam }) =>
       listRecords(config, {
         ...params,
-        page: typeof pageParam === "number" ? pageParam : 1,
+        page: pageParam as number,
       }),
     queryKey: ["records", ...queryScope, params],
   });

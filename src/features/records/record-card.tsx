@@ -4,6 +4,7 @@ import { Image } from "expo-image";
 import { Link } from "expo-router";
 
 import type { RecordListItem } from "@/api/types";
+import { translate } from "@/localization/i18n";
 import { colors, radius } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { formatCurrency, formatDate, formatYear } from "@/utils/format";
@@ -19,7 +20,10 @@ export function RecordCard({ record }: RecordCardProps) {
       asChild
     >
       <Pressable
-        accessibilityLabel={`${record.title} by ${record.artistsSort ?? "unknown artist"}`}
+        accessibilityLabel={translate("recordCard.accessibilityLabel", {
+          artist: record.artistsSort ?? translate("common.unknownArtist"),
+          title: record.title,
+        })}
         accessibilityRole="link"
         style={({ pressed }) => ({
           backgroundColor: colors.surface,
@@ -35,7 +39,7 @@ export function RecordCard({ record }: RecordCardProps) {
         })}
       >
         <Image
-          accessibilityLabel={`Cover thumbnail for ${record.title}`}
+          accessibilityLabel={translate("recordCard.coverImage", { title: record.title })}
           contentFit="cover"
           source={record.thumb ? { uri: record.thumb } : null}
           style={{
@@ -50,13 +54,17 @@ export function RecordCard({ record }: RecordCardProps) {
             {record.title}
           </Text>
           <Text selectable style={{ color: colors.textMuted, fontSize: 15 }}>
-            {record.artistsSort ?? "Unknown artist"}
+            {record.artistsSort ?? translate("common.unknownArtist")}
           </Text>
           <Text selectable style={{ color: colors.textMuted, fontSize: 14 }}>
-            {formatYear(record.releaseYear)} · {record.country ?? "Unknown country"}
+            {formatYear(record.releaseYear)} · {record.country ?? translate("common.unknownCountry")}
           </Text>
           <Text selectable style={{ color: colors.textMuted, fontSize: 14 }}>
-            Lowest {formatCurrency(record.lowestPrice)} · Added {formatDate(record.latestDateAdded)}
+            {`${translate("recordCard.lowestPrice", {
+              price: formatCurrency(record.lowestPrice),
+            })} · ${translate("recordCard.addedOn", {
+              date: formatDate(record.latestDateAdded),
+            })}`}
           </Text>
         </View>
       </Pressable>

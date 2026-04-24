@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Tabs } from "expo-router";
 
+import { translate } from "@/localization/i18n";
 import { colors } from "@/theme/colors";
 
 export default function TabsLayout() {
@@ -14,8 +15,8 @@ export default function TabsLayout() {
         tabBarStyle: { backgroundColor: colors.surface },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: "Dashboard" }} />
-      <Tabs.Screen name="records" options={{ title: "Records" }} />
+      <Tabs.Screen name="index" options={{ title: translate("navigation.dashboard") }} />
+      <Tabs.Screen name="records" options={{ title: translate("navigation.records") }} />
     </Tabs>
   );
 }

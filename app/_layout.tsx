@@ -5,6 +5,7 @@ import { Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
 
+import { translate } from "@/localization/i18n";
 import { AppProviders } from "@/providers/app-providers";
 import { colors } from "@/theme/colors";
 
@@ -21,11 +22,10 @@ export default function RootLayout() {
           }}
         >
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="records/[releaseId]" options={{ title: "Record" }} />
-          <Stack.Screen name="breakdowns/[dimension]" options={{ title: "Breakdown" }} />
+          <Stack.Screen name="records/[releaseId]" options={{ title: translate("navigation.record") }} />
+          <Stack.Screen name="breakdowns/[dimension]" options={{ title: translate("navigation.breakdown") }} />
         </Stack>
       </AppProviders>
     </GestureHandlerRootView>
   );
 }
-

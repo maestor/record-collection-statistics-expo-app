@@ -8,12 +8,14 @@ import { Button } from "@/components/button";
 import { MetricCard } from "@/components/metric-card";
 import { Section } from "@/components/section";
 import { StatusMessage } from "@/components/status-message";
+import { useTranslation } from "@/localization/i18n";
 import { colors, radius } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { formatCount, formatDate, formatYear } from "@/utils/format";
 import { getErrorMessage } from "@/api/client";
 
 export function DashboardScreen() {
+  const { t } = useTranslation();
   const healthQuery = useHealthQuery();
   const dashboardQuery = useDashboardStatsQuery(8);
   const isRefreshing = healthQuery.isFetching || dashboardQuery.isFetching;
@@ -28,8 +30,8 @@ export function DashboardScreen() {
     return (
       <ScrollView contentContainerStyle={{ padding: spacing.lg }}>
         <StatusMessage
-          message="Loading the local collection cache and dashboard statistics."
-          title="Loading collection"
+          message={t("dashboard.loadingMessage")}
+          title={t("dashboard.loadingTitle")}
           tone="loading"
         />
       </ScrollView>
@@ -40,10 +42,10 @@ export function DashboardScreen() {
     return (
       <ScrollView contentContainerStyle={{ padding: spacing.lg }}>
         <StatusMessage
-          actionLabel="Try again"
+          actionLabel={t("common.tryAgain")}
           message={getErrorMessage(healthQuery.error ?? dashboardQuery.error)}
           onAction={refresh}
-          title="Dashboard unavailable"
+          title={t("dashboard.errorTitle")}
           tone="error"
         />
       </ScrollView>
@@ -69,42 +71,53 @@ export function DashboardScreen() {
         }}
       >
         <Text selectable style={{ color: colors.surface, fontSize: 18, fontWeight: "800" }}>
-          Collection cache is {healthQuery.data?.ok ? "healthy" : "unavailable"}
+          {healthQuery.data?.ok
+            ? t("dashboard.healthStatusHealthy")
+            : t("dashboard.healthStatusUnavailable")}
         </Text>
         <Text selectable style={{ color: colors.primarySoft, fontSize: 15, lineHeight: 22 }}>
-          Last successful sync {formatDate(healthQuery.data?.database.lastSuccessfulSyncAt)}.
+          {t("dashboard.syncLastSuccessful", {
+            date: formatDate(healthQuery.data?.database.lastSuccessfulSyncAt),
+          })}
         </Text>
       </View>
 
-      <Section title="Overview">
+      <Section title={t("dashboard.overviewTitle")}>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.md }}>
-          <MetricCard label="Collection items" value={formatCount(summary.totals.collectionItems)} />
-          <MetricCard label="Releases" value={formatCount(summary.totals.releases)} />
-          <MetricCard label="Artists" value={formatCount(summary.totals.uniqueArtists)} />
-          <MetricCard label="Labels" value={formatCount(summary.totals.labels)} />
+          <MetricCard
+            label={t("dashboard.metricCollectionItems")}
+            value={formatCount(summary.totals.collectionItems)}
+          />
+          <MetricCard label={t("dashboard.metricReleases")} value={formatCount(summary.totals.releases)} />
+          <MetricCard label={t("dashboard.metricArtists")} value={formatCount(summary.totals.uniqueArtists)} />
+          <MetricCard label={t("dashboard.metricLabels")} value={formatCount(summary.totals.labels)} />
         </View>
         <View style={{ gap: spacing.xs }}>
           <Text selectable style={{ color: colors.textMuted, fontSize: 15 }}>
-            Added from {formatDate(summary.addedRange.first)} to {formatDate(summary.addedRange.last)}
+            {t("dashboard.overviewAddedRange", {
+              first: formatDate(summary.addedRange.first),
+              last: formatDate(summary.addedRange.last),
+            })}
           </Text>
           <Text selectable style={{ color: colors.textMuted, fontSize: 15 }}>
-            Release years {formatYear(summary.releaseYearRange.min)} to{" "}
-            {formatYear(summary.releaseYearRange.max)}
+            {t("dashboard.overviewReleaseYearRange", {
+              max: formatYear(summary.releaseYearRange.max),
+              min: formatYear(summary.releaseYearRange.min),
+            })}
           </Text>
         </View>
         <Link href="/records" asChild>
-          <Button accessibilityLabel="Browse records" label="Browse records" />
+          <Button accessibilityLabel={t("dashboard.browseRecords")} label={t("dashboard.browseRecords")} />
         </Link>
       </Section>
 
-      <BreakdownList dimension="artist" items={dashboard.topArtists} title="Top artists" />
-      <BreakdownList dimension="label" items={dashboard.labels} title="Labels" />
-      <BreakdownList dimension="format" items={dashboard.formats} title="Formats" />
-      <BreakdownList dimension="genre" items={dashboard.genres} title="Genres" />
-      <BreakdownList dimension="style" items={dashboard.styles} title="Styles" />
-      <BreakdownList dimension="country" items={dashboard.countries} title="Countries" />
-      <BreakdownList dimension="added_year" items={dashboard.addedYears} title="Added years" />
+      <BreakdownList dimension="artist" items={dashboard.topArtists} title={t("dimensions.artist")} />
+      <BreakdownList dimension="label" items={dashboard.labels} title={t("dimensions.label")} />
+      <BreakdownList dimension="format" items={dashboard.formats} title={t("dimensions.format")} />
+      <BreakdownList dimension="genre" items={dashboard.genres} title={t("dimensions.genre")} />
+      <BreakdownList dimension="style" items={dashboard.styles} title={t("dimensions.style")} />
+      <BreakdownList dimension="country" items={dashboard.countries} title={t("dimensions.country")} />
+      <BreakdownList dimension="added_year" items={dashboard.addedYears} title={t("dimensions.added_year")} />
     </ScrollView>
   );
 }
-

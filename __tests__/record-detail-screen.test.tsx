@@ -2,7 +2,8 @@ import * as React from "react";
 import { fireEvent, screen } from "@testing-library/react-native";
 
 import { RecordDetailScreen } from "@/features/records/record-detail-screen";
-import { jsonResponse, renderWithProviders } from "../test/test-utils";
+import { formatCount } from "@/utils/format";
+import { jsonResponse, renderWithProviders, t } from "../test/test-utils";
 
 const recordDetail = {
   artists: [{ artistId: 1003, name: "Muse", position: 0, role: "" }],
@@ -67,7 +68,14 @@ describe("RecordDetailScreen", () => {
     expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
     expect(screen.getByText("Muse")).toBeTruthy();
     expect(screen.getByText("1 12\" EP Vinyl")).toBeTruthy();
-    expect(screen.getByText("4.88 from 109 ratings")).toBeTruthy();
+    expect(
+      screen.getByText(
+        t("recordDetail.communityRatingValue", {
+          average: recordDetail.community.ratingAverage.toFixed(2),
+          count: formatCount(recordDetail.community.ratingCount),
+        }),
+      ),
+    ).toBeTruthy();
     expect(screen.getByText("Sober")).toBeTruthy();
   });
 
@@ -75,7 +83,7 @@ describe("RecordDetailScreen", () => {
     renderWithProviders(<RecordDetailScreen releaseId={Number.NaN} />);
 
     expect(await screen.findByRole("alert")).toBeTruthy();
-    expect(screen.getByText("The release id in this route is not valid.")).toBeTruthy();
+    expect(screen.getByText(t("recordDetail.invalidMessage"))).toBeTruthy();
   });
 
   it("renders API errors with retry", async () => {
@@ -83,7 +91,7 @@ describe("RecordDetailScreen", () => {
     renderWithProviders(<RecordDetailScreen releaseId={404} />);
 
     expect(await screen.findByText("Release not found")).toBeTruthy();
-    fireEvent.press(screen.getByRole("button", { name: "Try again" }));
+    fireEvent.press(screen.getByRole("button", { name: t("common.tryAgain") }));
     expect(globalThis.fetch).toHaveBeenCalled();
   });
 });

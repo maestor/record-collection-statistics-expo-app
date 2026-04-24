@@ -7,6 +7,7 @@ import { getErrorMessage } from "@/api/client";
 import { Button } from "@/components/button";
 import { Section } from "@/components/section";
 import { StatusMessage } from "@/components/status-message";
+import { useTranslation, translate } from "@/localization/i18n";
 import { colors, radius } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { formatCount } from "@/utils/format";
@@ -22,15 +23,15 @@ const orderOptions: OrderValue[] = ["desc", "asc"];
 function labelForSort(sort: SortValue): string {
   switch (sort) {
     case "date_added":
-      return "Date added";
+      return translate("records.sortDateAdded");
     case "release_year":
-      return "Release year";
+      return translate("records.sortReleaseYear");
     case "lowest_price":
-      return "Lowest price";
+      return translate("records.sortLowestPrice");
     case "artist":
-      return "Artist";
+      return translate("records.sortArtist");
     case "title":
-      return "Title";
+      return translate("records.sortTitle");
   }
 }
 
@@ -63,6 +64,7 @@ function buildParams(
 }
 
 export function RecordsScreen() {
+  const { t } = useTranslation();
   const [draftQuery, setDraftQuery] = React.useState("");
   const [query, setQuery] = React.useState("");
   const [filtersOpen, setFiltersOpen] = React.useState(false);
@@ -100,14 +102,14 @@ export function RecordsScreen() {
       style={{ backgroundColor: colors.background }}
       contentContainerStyle={{ gap: spacing.xl, padding: spacing.lg }}
     >
-      <Section title="Find records">
+      <Section title={t("records.searchTitle")}>
         <View style={{ gap: spacing.md }}>
           <TextInput
-            accessibilityLabel="Search records"
+            accessibilityLabel={t("records.searchLabel")}
             autoCapitalize="none"
             onChangeText={setDraftQuery}
             onSubmitEditing={() => setQuery(draftQuery)}
-            placeholder="Artist, title, label, genre..."
+            placeholder={t("records.searchPlaceholder")}
             placeholderTextColor={colors.textMuted}
             returnKeyType="search"
             style={{
@@ -123,9 +125,9 @@ export function RecordsScreen() {
             value={draftQuery}
           />
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
-            <Button label="Search" onPress={() => setQuery(draftQuery)} style={{ flexGrow: 1 }} />
+            <Button label={t("records.searchButton")} onPress={() => setQuery(draftQuery)} style={{ flexGrow: 1 }} />
             <Button
-              label={`Filters${activeFilterCount ? ` (${activeFilterCount})` : ""}`}
+              label={`${t("records.filtersButton")}${activeFilterCount ? ` (${activeFilterCount})` : ""}`}
               onPress={() => setFiltersOpen((value) => !value)}
               style={{ flexGrow: 1 }}
               variant="secondary"
@@ -150,18 +152,18 @@ export function RecordsScreen() {
 
       {recordsQuery.isLoading ? (
         <StatusMessage
-          message="Loading records from the collection cache."
-          title="Loading records"
+          message={t("records.loadingMessage")}
+          title={t("records.loadingTitle")}
           tone="loading"
         />
       ) : null}
 
       {recordsQuery.isError ? (
         <StatusMessage
-          actionLabel="Try again"
+          actionLabel={t("common.tryAgain")}
           message={getErrorMessage(recordsQuery.error)}
           onAction={() => void recordsQuery.refetch()}
-          title="Records unavailable"
+          title={t("records.errorTitle")}
           tone="error"
         />
       ) : null}
@@ -171,8 +173,8 @@ export function RecordsScreen() {
           <View style={{ gap: spacing.md }}>
             {records.length === 0 ? (
               <StatusMessage
-                message="No records matched your current search and filters."
-                title="No records found"
+                message={t("records.emptyMessage")}
+                title={t("records.emptyTitle")}
               />
             ) : (
               records.map((record) => <RecordCard key={record.releaseId} record={record} />)
@@ -181,7 +183,7 @@ export function RecordsScreen() {
           {recordsQuery.hasNextPage ? (
             <Button
               isLoading={recordsQuery.isFetchingNextPage}
-              label="Load more"
+              label={t("records.loadMore")}
               onPress={() => void recordsQuery.fetchNextPage()}
               variant="secondary"
             />
@@ -219,9 +221,11 @@ function FilterPanel({
   setSort,
   sort,
 }: FilterPanelProps) {
+  const { t } = useTranslation();
+
   return (
     <View
-      accessibilityLabel="Record filters"
+      accessibilityLabel={t("records.filterPanelLabel")}
       style={{
         backgroundColor: colors.surface,
         borderColor: colors.border,
@@ -233,51 +237,54 @@ function FilterPanel({
       }}
     >
       <ChipGroup
-        label="Sort by"
+        label={t("records.sortBy")}
         options={sortOptions.map((value) => ({ label: labelForSort(value), value }))}
         selected={sort}
         onSelect={(value) => setSort(value as SortValue)}
       />
       <ChipGroup
-        label="Order"
-        options={orderOptions.map((value) => ({ label: value === "desc" ? "Descending" : "Ascending", value }))}
+        label={t("records.order")}
+        options={orderOptions.map((value) => ({
+          label: value === "desc" ? t("records.orderDescending") : t("records.orderAscending"),
+          value,
+        }))}
         selected={order}
         onSelect={(value) => setOrder(value as OrderValue)}
       />
       {isLoading ? (
         <Text selectable style={{ color: colors.textMuted }}>
-          Loading filter values...
+          {t("records.loadingFilters")}
         </Text>
       ) : null}
       {filters ? (
         <>
           <ChipGroup
-            label="Formats"
+            label={t("records.filterFormats")}
             options={filters.formats.map((item) => ({ label: item.value, value: item.value }))}
             selected={selectedFilters.format ?? ""}
             onSelect={(value) => setFilter("format", value)}
           />
           <ChipGroup
-            label="Genres"
+            label={t("records.filterGenres")}
             options={filters.genres.map((item) => ({ label: item.value, value: item.value }))}
             selected={selectedFilters.genre ?? ""}
             onSelect={(value) => setFilter("genre", value)}
           />
           <ChipGroup
-            label="Countries"
+            label={t("records.filterCountries")}
             options={filters.countries.map((item) => ({ label: item.value, value: item.value }))}
             selected={selectedFilters.country ?? ""}
             onSelect={(value) => setFilter("country", value)}
           />
           <ChipGroup
-            label="Artists"
+            label={t("records.filterArtists")}
             options={filters.artists.map((item) => ({ label: item.value, value: item.value }))}
             selected={selectedFilters.artist ?? ""}
             onSelect={(value) => setFilter("artist", value)}
           />
         </>
       ) : null}
-      <Button label="Clear filters" onPress={clearFilters} variant="secondary" />
+      <Button label={t("records.clearFilters")} onPress={clearFilters} variant="secondary" />
     </View>
   );
 }

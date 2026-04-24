@@ -2,6 +2,7 @@ import * as React from "react";
 import { Text, View } from "react-native";
 import { Link } from "expo-router";
 
+import { translate } from "@/localization/i18n";
 import { Section } from "./section";
 import type { BreakdownDimension, BreakdownItem } from "@/api/types";
 import { colors, radius } from "@/theme/colors";
@@ -22,7 +23,7 @@ export function BreakdownList({ dimension, items, title }: BreakdownListProps) {
       <View style={{ gap: spacing.sm }}>
         {items.length === 0 ? (
           <Text selectable style={{ color: colors.textMuted }}>
-            No values yet.
+            {translate("common.noValuesYet")}
           </Text>
         ) : (
           items.map((item) => <BreakdownRow item={item} key={item.value} max={max} />)
@@ -34,7 +35,7 @@ export function BreakdownList({ dimension, items, title }: BreakdownListProps) {
           href={{ pathname: "/breakdowns/[dimension]", params: { dimension } }}
           style={{ color: colors.primaryDark, fontSize: 16, fontWeight: "700" }}
         >
-          View full {title.toLowerCase()}
+          {`${translate("breakdowns.viewFullPrefix")} ${title.toLowerCase()}`}
         </Link>
       ) : null}
     </Section>

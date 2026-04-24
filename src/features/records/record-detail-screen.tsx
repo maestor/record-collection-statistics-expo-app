@@ -7,6 +7,7 @@ import { getErrorMessage } from "@/api/client";
 import { FieldRow } from "@/components/field-row";
 import { Section } from "@/components/section";
 import { StatusMessage } from "@/components/status-message";
+import { useTranslation, translate } from "@/localization/i18n";
 import { colors, radius } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { formatCount, formatCurrency, formatDate, formatYear, joinValues } from "@/utils/format";
@@ -16,6 +17,7 @@ type RecordDetailScreenProps = {
 };
 
 export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
+  const { t } = useTranslation();
   const query = useRecordDetailQuery(releaseId);
   const record = query.data?.data;
 
@@ -23,8 +25,8 @@ export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
     return (
       <ScrollView contentContainerStyle={{ padding: spacing.lg }}>
         <StatusMessage
-          message="The release id in this route is not valid."
-          title="Invalid release"
+          message={t("recordDetail.invalidMessage")}
+          title={t("recordDetail.invalidTitle")}
           tone="error"
         />
       </ScrollView>
@@ -35,8 +37,8 @@ export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
     return (
       <ScrollView contentContainerStyle={{ padding: spacing.lg }}>
         <StatusMessage
-          message="Loading the selected release from the local cache."
-          title="Loading record"
+          message={t("recordDetail.loadingMessage")}
+          title={t("recordDetail.loadingTitle")}
           tone="loading"
         />
       </ScrollView>
@@ -47,10 +49,10 @@ export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
     return (
       <ScrollView contentContainerStyle={{ padding: spacing.lg }}>
         <StatusMessage
-          actionLabel="Try again"
+          actionLabel={t("common.tryAgain")}
           message={getErrorMessage(query.error)}
           onAction={() => void query.refetch()}
-          title="Record unavailable"
+          title={t("recordDetail.errorTitle")}
           tone="error"
         />
       </ScrollView>
@@ -65,7 +67,7 @@ export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
     >
       <View style={{ gap: spacing.lg }}>
         <Image
-          accessibilityLabel={`Cover image for ${record.title}`}
+          accessibilityLabel={t("recordDetail.coverImage", { title: record.title })}
           contentFit="cover"
           source={record.coverImage ? { uri: record.coverImage } : null}
           style={{
@@ -80,58 +82,64 @@ export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
             {record.title}
           </Text>
           <Text selectable style={{ color: colors.textMuted, fontSize: 18, lineHeight: 25 }}>
-            {record.artistsSort ?? "Unknown artist"}
+            {record.artistsSort ?? t("common.unknownArtist")}
           </Text>
         </View>
       </View>
 
-      <Section title="Release">
+      <Section title={t("recordDetail.release")}>
         <View style={{ gap: spacing.lg }}>
-          <FieldRow label="Year" value={formatYear(record.releaseYear)} />
-          <FieldRow label="Released" value={record.released ?? "Unknown"} />
-          <FieldRow label="Country" value={record.country ?? "Unknown"} />
-          <FieldRow label="Formats" value={record.formats.map(formatReleaseFormat).join(", ")} />
-          <FieldRow label="Genres" value={joinValues(record.genres)} />
-          <FieldRow label="Styles" value={joinValues(record.styles)} />
-          <FieldRow label="Lowest price" value={formatCurrency(record.lowestPrice)} />
+          <FieldRow label={t("recordDetail.releaseYear")} value={formatYear(record.releaseYear)} />
+          <FieldRow label={t("recordDetail.releaseReleased")} value={record.released ?? t("common.unknown")} />
+          <FieldRow label={t("recordDetail.releaseCountry")} value={record.country ?? t("common.unknown")} />
+          <FieldRow
+            label={t("recordDetail.releaseFormats")}
+            value={record.formats.map(formatReleaseFormat).join(", ")}
+          />
+          <FieldRow label={t("recordDetail.releaseGenres")} value={joinValues(record.genres)} />
+          <FieldRow label={t("recordDetail.releaseStyles")} value={joinValues(record.styles)} />
+          <FieldRow label={t("recordDetail.releaseLowestPrice")} value={formatCurrency(record.lowestPrice)} />
         </View>
       </Section>
 
-      <Section title="Collection">
+      <Section title={t("recordDetail.collection")}>
         <View style={{ gap: spacing.lg }}>
-          <FieldRow label="Instances" value={formatCount(record.instanceCount)} />
-          <FieldRow label="First added" value={formatDate(record.firstDateAdded)} />
-          <FieldRow label="Latest added" value={formatDate(record.latestDateAdded)} />
-          <FieldRow label="Collection rating" value={formatCollectionRatings(record.collectionItems)} />
+          <FieldRow label={t("recordDetail.collectionInstances")} value={formatCount(record.instanceCount)} />
+          <FieldRow label={t("recordDetail.collectionFirstAdded")} value={formatDate(record.firstDateAdded)} />
+          <FieldRow label={t("recordDetail.collectionLatestAdded")} value={formatDate(record.latestDateAdded)} />
+          <FieldRow
+            label={t("recordDetail.collectionRating")}
+            value={formatCollectionRatings(record.collectionItems)}
+          />
         </View>
       </Section>
 
-      <Section title="Community">
+      <Section title={t("recordDetail.community")}>
         <View style={{ gap: spacing.lg }}>
-          <FieldRow label="Have" value={formatCount(record.community.have)} />
-          <FieldRow label="Want" value={formatCount(record.community.want)} />
-          <FieldRow label="Rating" value={formatCommunityRating(record.community)} />
-          <FieldRow label="For sale" value={formatCount(record.numForSale)} />
+          <FieldRow label={t("recordDetail.communityHave")} value={formatCount(record.community.have)} />
+          <FieldRow label={t("recordDetail.communityWant")} value={formatCount(record.community.want)} />
+          <FieldRow label={t("recordDetail.communityRating")} value={formatCommunityRating(record.community)} />
+          <FieldRow label={t("recordDetail.communityForSale")} value={formatCount(record.numForSale)} />
         </View>
       </Section>
 
-      <Section title="Labels">
+      <Section title={t("recordDetail.labels")}>
         <View style={{ gap: spacing.md }}>
           {record.labels.map((label) => (
             <FieldRow
               key={`${label.position}-${label.name}-${label.catno ?? ""}`}
               label={label.name}
-              value={label.catno ?? "No catalog number"}
+              value={label.catno ?? t("recordDetail.noCatalogNumber")}
             />
           ))}
         </View>
       </Section>
 
-      <Section title="Track list">
+      <Section title={t("recordDetail.trackList")}>
         <View style={{ gap: spacing.md }}>
           {record.tracks.length === 0 ? (
             <Text selectable style={{ color: colors.textMuted }}>
-              No tracks available.
+              {t("recordDetail.tracksEmpty")}
             </Text>
           ) : (
             record.tracks.map((track, index) => (
@@ -145,11 +153,11 @@ export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
         </View>
       </Section>
 
-      <Section title="Identifiers">
+      <Section title={t("recordDetail.identifiers")}>
         <View style={{ gap: spacing.md }}>
           {record.identifiers.length === 0 ? (
             <Text selectable style={{ color: colors.textMuted }}>
-              No identifiers available.
+              {t("recordDetail.identifiersEmpty")}
             </Text>
           ) : (
             record.identifiers.map((identifier) => (
@@ -175,7 +183,7 @@ function formatCollectionRatings(items: { rating: number }[]) {
   const ratedItems = items.filter((item) => item.rating > 0);
 
   if (ratedItems.length === 0) {
-    return "Not rated";
+    return translate("common.notRated");
   }
 
   return ratedItems.map((item) => `${item.rating}/5`).join(", ");
@@ -186,8 +194,11 @@ function formatCommunityRating(community: {
   ratingCount: number | null;
 }) {
   if (community.ratingAverage === null) {
-    return "Unknown";
+    return translate("common.unknown");
   }
 
-  return `${community.ratingAverage.toFixed(2)} from ${formatCount(community.ratingCount)} ratings`;
+  return translate("recordDetail.communityRatingValue", {
+    average: community.ratingAverage.toFixed(2),
+    count: formatCount(community.ratingCount),
+  });
 }

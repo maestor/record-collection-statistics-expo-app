@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as SecureStore from "expo-secure-store";
 
-import { DEFAULT_API_BASE_URL, normalizeBaseUrl, type ApiConfig } from "@/api/client";
+import { DEFAULT_API_BASE_URL, getDeviceReachableBaseUrl, normalizeBaseUrl, type ApiConfig } from "@/api/client";
 
 const API_BASE_URL_KEY = "recordCollection.apiBaseUrl";
 const API_KEY_KEY = "recordCollection.apiKey";
@@ -75,7 +75,7 @@ export function AppSettingsProvider({ children }: React.PropsWithChildren) {
       if (isMounted) {
         setSettings({
           apiKey: apiKey ?? "",
-          baseUrl: normalizeBaseUrl(baseUrl ?? DEFAULT_API_BASE_URL),
+          baseUrl: getDeviceReachableBaseUrl(baseUrl),
         });
         setIsLoaded(true);
       }
@@ -128,4 +128,3 @@ export function useAppSettings(): AppSettingsContextValue {
 
   return value;
 }
-

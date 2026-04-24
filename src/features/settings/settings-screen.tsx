@@ -2,7 +2,13 @@ import * as React from "react";
 import { ScrollView, TextInput, View } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { getHealth, getErrorMessage } from "@/api/client";
+import {
+  ANDROID_EMULATOR_API_BASE_URL,
+  COMPUTER_API_BASE_URL,
+  DEFAULT_API_BASE_URL,
+  getErrorMessage,
+  getHealth,
+} from "@/api/client";
 import { Button } from "@/components/button";
 import { FieldRow } from "@/components/field-row";
 import { Section } from "@/components/section";
@@ -96,7 +102,7 @@ export function SettingsScreen() {
             autoCorrect={false}
             inputMode="url"
             onChangeText={setApiBaseUrl}
-            placeholder="http://127.0.0.1:3003"
+            placeholder={DEFAULT_API_BASE_URL}
             placeholderTextColor={colors.textMuted}
             style={inputStyle}
             value={apiBaseUrl}
@@ -118,6 +124,20 @@ export function SettingsScreen() {
               isLoading={isTesting}
               label="Test connection"
               onPress={testConnection}
+              style={{ flexGrow: 1 }}
+              variant="secondary"
+            />
+          </View>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
+            <Button
+              label="Use emulator URL"
+              onPress={() => setApiBaseUrl(ANDROID_EMULATOR_API_BASE_URL)}
+              style={{ flexGrow: 1 }}
+              variant="secondary"
+            />
+            <Button
+              label="Use computer URL"
+              onPress={() => setApiBaseUrl(COMPUTER_API_BASE_URL)}
               style={{ flexGrow: 1 }}
               variant="secondary"
             />

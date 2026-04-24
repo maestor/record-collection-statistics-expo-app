@@ -14,6 +14,12 @@ Open the project in Expo Go. Set the API base URL in Settings:
 
 For physical devices, the phone and API host computer must be on the same network. If the API requires non-local auth, configure the read API key in Settings.
 
+If every API call says `Network request failed`, check the app Settings first:
+
+- Android emulator should use `http://10.0.2.2:3003`.
+- Physical Android should use `http://<computer-lan-ip>:3003`.
+- Physical Android also needs the API server to listen beyond `127.0.0.1`; bind it to the LAN interface or `0.0.0.0` for local debugging.
+
 ## Development APK
 The app includes an EAS development profile for an installable Android APK:
 
@@ -34,4 +40,3 @@ npm run android:dev-client
 ```
 
 Production Play Store release is intentionally out of scope for now.
-

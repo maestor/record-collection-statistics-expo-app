@@ -45,7 +45,6 @@ export type ApiConfig = {
 
 type RequestOptions = {
   params?: Record<string, number | string | null | undefined>;
-  signal?: AbortSignal;
 };
 
 export class ApiError extends Error {
@@ -59,33 +58,7 @@ export class ApiError extends Error {
 }
 
 export function normalizeBaseUrl(baseUrl: string): string {
-  const trimmed = baseUrl.trim();
-
-  if (!trimmed) {
-    return DEFAULT_API_BASE_URL;
-  }
-
-  return trimmed.replace(/\/+$/, "");
-}
-
-export function getDeviceReachableBaseUrl(
-  baseUrl: string | null | undefined,
-  expoOs = process.env.EXPO_OS,
-): string {
-  if (!baseUrl) {
-    return DEFAULT_API_BASE_URL;
-  }
-
-  const normalizedBaseUrl = normalizeBaseUrl(baseUrl);
-
-  if (
-    expoOs === "android" &&
-    (normalizedBaseUrl === COMPUTER_API_BASE_URL || normalizedBaseUrl === "http://localhost:3003")
-  ) {
-    return getDefaultApiBaseUrl(expoOs);
-  }
-
-  return normalizedBaseUrl;
+  return baseUrl.trim().replace(/\/+$/, "");
 }
 
 export function getApiConfig(): ApiConfig {
@@ -95,12 +68,8 @@ export function getApiConfig(): ApiConfig {
   };
 }
 
-export function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "Unexpected error";
+export function getErrorMessage(error: Error): string {
+  return error.message;
 }
 
 function hasErrorName(error: unknown, name: string): boolean {
@@ -163,10 +132,6 @@ async function requestJson<T>(
 ): Promise<T> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10_000);
-
-  if (options.signal) {
-    options.signal.addEventListener("abort", () => controller.abort(), { once: true });
-  }
 
   try {
     const response = await fetch(buildUrl(config, path, options.params), {

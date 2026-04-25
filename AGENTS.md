@@ -13,6 +13,9 @@
 - Keep API keys out of logs, query keys, screenshots, and error messages.
 - Use Expo Go first. Add or use a development client only when native dependencies require it.
 - Preserve Android as the priority platform. iOS support should not block Android debug workflows.
+- Implement only code needed by the current user-facing behavior. Do not add helpers, branches, optional parameters, fallback handling, or defensive checks for hypothetical future use.
+- Type function inputs as narrowly as the current implementation requires. Use required strings, numbers, and concrete unions when callers always provide those values; widen to `null`, `undefined`, optional, or broader unions only when a real current call path needs it.
+- If a requested task seems to require unused code, speculative defensive logic, unreachable branches, or untestable behavior, stop and explain the issue before continuing. Do not change direction just to make coverage or implementation easier.
 
 ## Quality
 - Run `npm run verify` after meaningful app changes.
@@ -20,6 +23,8 @@
 - Run `npm run check:api-types` when the local API is available and API compatibility matters.
 - Test user-visible behavior with Testing Library. Prefer interactions and assertions over snapshots.
 - Cover loading, success, empty, error, and accessibility states for user-facing screens.
+- Definition of Done: every new line of behavior added during a task must be covered by user-behavior tests in the same task. If complete behavior coverage is not practical, stop and raise that as a separate decision before merging or moving on.
+- Do not add unit tests that exist only to raise coverage for unused helpers or unreachable branches. Remove the unused code or branch instead.
 - Keep README focused on overview and common commands. Put detailed development, testing, Android debug, accessibility, and architecture notes under `docs/`.
 - Treat `docs/plans/` as local planning scratch space. Do not commit plan files by default unless the user explicitly asks.
 
@@ -29,4 +34,3 @@
 - Prefix commit messages with the change type, for example `Feature:`, `Chore:`, `Fix:`, or `Docs:`.
 - Before creating a commit, make sure the batch is coherent and any available checks for that batch have been run.
 - After completing, verifying, and committing a task, include copy-pasteable pull request notes in the chat.
-

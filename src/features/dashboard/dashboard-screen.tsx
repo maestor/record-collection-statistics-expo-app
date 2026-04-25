@@ -66,8 +66,7 @@ export function DashboardScreen() {
     { dimension: "country", items: dashboard.countries, title: t("dimensions.country") },
     { dimension: "added_year", items: dashboard.addedYears, title: t("dimensions.added_year") },
   ];
-  const activeHighlight =
-    highlightOptions.find((option) => option.dimension === selectedHighlight) ?? highlightOptions[0]!;
+  const activeHighlight = highlightOptions.find((option) => option.dimension === selectedHighlight)!;
 
   return (
     <ScrollView

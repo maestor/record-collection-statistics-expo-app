@@ -54,7 +54,7 @@ export function StatusMessage({
         {message}
       </Text>
       {actionLabel && onAction ? (
-        <Button label={actionLabel} onPress={onAction} variant={isError ? "danger" : "secondary"} />
+        <Button label={actionLabel} onPress={onAction} variant="danger" />
       ) : null}
     </View>
   );

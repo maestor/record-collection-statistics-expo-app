@@ -50,6 +50,12 @@ For a physical Android device, the API must be reachable from the phone over the
 The read API key is embedded in the app bundle. Treat it as a client-visible gate key, not a private server secret.
 
 ## Verification
+Before verification, review the task diff for unused implementation:
+
+- Remove helpers, fallback branches, optional inputs, and defensive checks that no current user path reaches.
+- Keep parameter types as narrow as the current call sites allow.
+- Make sure every behavior added by the task has user-behavior test coverage. If that cannot be done, stop and decide the exception separately.
+
 ```bash
 npm run typecheck
 npm run lint

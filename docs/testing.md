@@ -9,6 +9,9 @@ Tests use `jest-expo` and `@testing-library/react-native`.
 - Prefer accessible queries such as `getByRole`, `getByLabelText`, and visible text.
 - Prefer shared translation and formatting helpers in tests instead of hardcoded UI copy so locale text changes do not break assertions.
 - Keep generated OpenAPI types out of coverage.
+- Every behavior added by a task must be tested in that task. A task is incomplete until its new loading, success, empty, error, interaction, and accessibility paths are covered where they apply.
+- Do not create helper-only or implementation-only tests to justify unused code. If a helper, branch, optional parameter, or fallback is not reached by current user behavior, remove it.
+- When full behavior testing is blocked or would require changing the product decision, pause and document the issue before continuing.
 
 ## Required Scenarios
 - API configuration from Expo environment values.

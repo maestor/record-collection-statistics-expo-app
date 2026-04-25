@@ -27,7 +27,7 @@ function interpolate(template: string, values?: Record<string, TranslationValue>
     return template;
   }
 
-  return template.replace(/\{(\w+)\}/g, (_, name: string) => String(values[name] ?? `{${name}}`));
+  return template.replace(/\{(\w+)\}/g, (_, name: string) => String(values[name]));
 }
 
 export function translate(key: TranslationKey, values?: Record<string, TranslationValue>) {

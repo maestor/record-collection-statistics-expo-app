@@ -23,14 +23,14 @@ export function formatDate(value: string | null | undefined): string {
   return Number.isNaN(date.getTime()) ? translate("common.unknown") : dateFormatter.format(date);
 }
 
-export function formatYear(value: number | string | null | undefined): string {
-  if (value === null || value === undefined || value === "" || value === 0 || value === "0") {
+export function formatYear(value: number | null): string {
+  if (value === null || value === 0) {
     return translate("common.unknown");
   }
 
   return String(value);
 }
 
-export function joinValues(values: readonly string[] | null | undefined): string {
-  return values && values.length > 0 ? values.join(", ") : translate("common.unknown");
+export function joinValues(values: readonly string[]): string {
+  return values.length > 0 ? values.join(", ") : translate("common.unknown");
 }

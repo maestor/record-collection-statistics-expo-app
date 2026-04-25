@@ -1,6 +1,5 @@
 import {
   ANDROID_EMULATOR_API_BASE_URL,
-  getDeviceReachableBaseUrl,
   getHealth,
   listRecords,
 } from "@/api/client";
@@ -117,11 +116,5 @@ describe("api client", () => {
     await expect(
       getHealth({ apiKey: "", baseUrl: "http://127.0.0.1:3003" }),
     ).rejects.toThrow(`Use ${ANDROID_EMULATOR_API_BASE_URL} for the emulator`);
-  });
-
-  it("can migrate the Android loopback default to the emulator URL", () => {
-    expect(getDeviceReachableBaseUrl("http://127.0.0.1:3003", "android")).toBe(
-      ANDROID_EMULATOR_API_BASE_URL,
-    );
   });
 });

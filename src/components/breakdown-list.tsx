@@ -7,7 +7,7 @@ import { Section } from "./section";
 import type { BreakdownDimension, BreakdownItem } from "@/api/types";
 import { colors, radius } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
-import { sectionTitleStyle, surfaceCardStyle } from "@/theme/styles";
+import { surfaceCardStyle } from "@/theme/styles";
 import { formatCount } from "@/utils/format";
 
 type BreakdownListProps = {
@@ -58,14 +58,7 @@ export const BreakdownList = ({
   );
 
   if (!withSection) {
-    return (
-      <View style={{ gap: spacing.md }}>
-        <Text selectable style={[sectionTitleStyle, { fontSize: 18 }]}>
-          {title}
-        </Text>
-        {content}
-      </View>
-    );
+    return <View style={{ gap: spacing.md }}>{content}</View>;
   }
 
   return <Section title={title}>{content}</Section>;

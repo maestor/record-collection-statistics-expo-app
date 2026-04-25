@@ -1,20 +1,28 @@
 import * as React from "react";
-import { ScrollView, View } from "react-native";
+import { ScrollView } from "react-native";
 
 import { useDashboardStatsQuery } from "@/api/queries";
-import type { BreakdownDimension, BreakdownItem } from "@/api/types";
 import { getErrorMessage } from "@/api/client";
 import { BreakdownList } from "@/components/breakdown-list";
-import { Chip } from "@/components/chip";
 import { StatusMessage } from "@/components/status-message";
 import { useTranslation } from "@/localization/i18n";
-import { screenStyles, wrapRowStyle } from "@/theme/styles";
+import { screenStyles } from "@/theme/styles";
+import {
+  buildStatisticOptions,
+  type StatisticDimension,
+  type StatisticsView,
+} from "./statistics-model";
+import { StatisticsDimensionSelector } from "./statistics-dimension-selector";
+import { StatisticsGraphPanel } from "./statistics-graph-panel";
+import { StatisticsViewSwitch } from "./statistics-view-switch";
 
 export const StatisticsScreen = () => {
   const { t } = useTranslation();
   const dashboardQuery = useDashboardStatsQuery(8);
   const [selectedStatistic, setSelectedStatistic] =
-    React.useState<BreakdownDimension>("artist");
+    React.useState<StatisticDimension>("artist");
+  const [selectedView, setSelectedView] =
+    React.useState<StatisticsView>("list");
 
   if (dashboardQuery.isLoading) {
     return (
@@ -43,47 +51,7 @@ export const StatisticsScreen = () => {
   }
 
   const dashboard = dashboardQuery.data!.data;
-  const statisticOptions: {
-    dimension: BreakdownDimension;
-    items: readonly BreakdownItem[];
-    title: string;
-  }[] = [
-    {
-      dimension: "artist",
-      items: dashboard.topArtists,
-      title: t("dimensions.artist"),
-    },
-    {
-      dimension: "label",
-      items: dashboard.labels,
-      title: t("dimensions.label"),
-    },
-    {
-      dimension: "format",
-      items: dashboard.formats,
-      title: t("dimensions.format"),
-    },
-    {
-      dimension: "genre",
-      items: dashboard.genres,
-      title: t("dimensions.genre"),
-    },
-    {
-      dimension: "style",
-      items: dashboard.styles,
-      title: t("dimensions.style"),
-    },
-    {
-      dimension: "country",
-      items: dashboard.countries,
-      title: t("dimensions.country"),
-    },
-    {
-      dimension: "added_year",
-      items: dashboard.addedYears,
-      title: t("dimensions.added_year"),
-    },
-  ];
+  const statisticOptions = buildStatisticOptions(dashboard);
   const activeStatistic = statisticOptions.find(
     (option) => option.dimension === selectedStatistic,
   )!;
@@ -94,29 +62,25 @@ export const StatisticsScreen = () => {
       style={screenStyles.scrollView}
       contentContainerStyle={screenStyles.content}
     >
-      <View
-        accessibilityLabel={t("statistics.pickerLabel")}
-        style={wrapRowStyle}
-      >
-        {statisticOptions.map((option) => {
-          const isSelected = option.dimension === activeStatistic.dimension;
-
-          return (
-            <Chip
-              key={option.dimension}
-              label={option.title}
-              onPress={() => setSelectedStatistic(option.dimension)}
-              selected={isSelected}
-            />
-          );
-        })}
-      </View>
-      <BreakdownList
-        dimension={activeStatistic.dimension}
-        items={activeStatistic.items}
-        title={activeStatistic.title}
-        withSection={false}
+      <StatisticsViewSwitch onChange={setSelectedView} value={selectedView} />
+      <StatisticsDimensionSelector
+        onChange={setSelectedStatistic}
+        options={statisticOptions}
+        value={activeStatistic.dimension}
       />
+      {selectedView === "list" ? (
+        <BreakdownList
+          dimension={activeStatistic.dimension}
+          items={activeStatistic.items}
+          title={activeStatistic.title}
+          withSection={false}
+        />
+      ) : (
+        <StatisticsGraphPanel
+          dimension={activeStatistic.dimension}
+          title={activeStatistic.title}
+        />
+      )}
     </ScrollView>
   );
 };

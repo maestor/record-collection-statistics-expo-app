@@ -274,7 +274,17 @@ describe("Expo Router routes", () => {
     dashboardView.unmount();
 
     const statisticsView = renderWithProviders(<StatisticsRoute />);
-    expect(await screen.findByRole("button", { name: t("dimensions.artist") })).toBeTruthy();
+    expect(
+      await screen.findByRole("button", {
+        name: t("statistics.currentDimensionLabel", {
+          title: t("dimensions.artist"),
+        }),
+      }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: t("statistics.viewList") }).props
+        .accessibilityState.selected,
+    ).toBe(true);
     statisticsView.unmount();
 
     const recordsView = renderWithProviders(<RecordsRoute />);

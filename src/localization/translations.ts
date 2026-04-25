@@ -109,7 +109,6 @@ export const translations = {
       orderAscending: "Nouseva",
       orderDescending: "Laskeva",
       resultsTitle: "{count} äänitettä",
-      searchButton: "Hae",
       searchLabel: "Hae levyjä",
       searchPlaceholder: "Artisti, nimi, levymerkki, genre...",
       searchTitle: "Etsi levyjä",

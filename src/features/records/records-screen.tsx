@@ -173,19 +173,12 @@ export const RecordsScreen = () => {
             ]}
             value={draftQuery}
           />
-          <View style={wrapRowStyle}>
-            <Button
-              label={t("records.searchButton")}
-              onPress={() => applySearch(draftQuery)}
-              style={{ flexGrow: 1 }}
-            />
-            <Button
-              label={`${t("records.filtersButton")}${activeFilterCount ? ` (${activeFilterCount})` : ""}`}
-              onPress={() => setFiltersOpen(true)}
-              style={{ flexGrow: 1 }}
-              variant="secondary"
-            />
-          </View>
+          <Button
+            label={`${t("records.filtersButton")}${activeFilterCount ? ` (${activeFilterCount})` : ""}`}
+            onPress={() => setFiltersOpen(true)}
+            style={{ width: "100%" }}
+            variant="secondary"
+          />
         </View>
       </Section>
 
@@ -307,7 +300,7 @@ const FilterSheet = ({
           backgroundColor={colors.surface}
           borderColor={colors.border}
           cornerRadius="lg"
-          style={{ gap: spacing.lg, maxHeight: "82%", padding: spacing.lg }}
+          style={{ height: "100%", padding: spacing.lg }}
         >
           <View
             style={{
@@ -326,32 +319,56 @@ const FilterSheet = ({
               variant="secondary"
             />
           </View>
-          <ScrollView
-            contentContainerStyle={{ gap: spacing.lg }}
-            showsVerticalScrollIndicator={false}
+          <View style={{ flex: 1, minHeight: 0 }}>
+            <ScrollView
+              contentContainerStyle={{
+                gap: spacing.lg,
+                paddingTop: spacing.lg,
+                paddingBottom: spacing.md,
+              }}
+              showsVerticalScrollIndicator={false}
+              style={{ flex: 1 }}
+            >
+              <FilterPanel
+                filters={filters}
+                isLoading={isLoading}
+                order={order}
+                selectedFilters={selectedFilters}
+                setFilter={setFilter}
+                setOrder={setOrder}
+                setSort={setSort}
+                sort={sort}
+              />
+            </ScrollView>
+          </View>
+          <View
+            style={{
+              borderTopColor: colors.border,
+              borderTopWidth: 1,
+              marginHorizontal: -spacing.lg,
+              marginBottom: -spacing.lg,
+              padding: spacing.lg,
+            }}
           >
-            <FilterPanel
-              clearFilters={clearFilters}
-              filters={filters}
-              isLoading={isLoading}
-              order={order}
-              selectedFilters={selectedFilters}
-              setFilter={setFilter}
-              setOrder={setOrder}
-              setSort={setSort}
-              sort={sort}
+            <Button
+              label={t("records.clearFilters")}
+              onPress={clearFilters}
+              style={{ width: "100%" }}
+              variant="secondary"
             />
-          </ScrollView>
+          </View>
         </Panel>
       </View>
     </Modal>
   );
 };
 
-type FilterPanelProps = Omit<FilterSheetProps, "closeFilters" | "isOpen">;
+type FilterPanelProps = Omit<
+  FilterSheetProps,
+  "clearFilters" | "closeFilters" | "isOpen"
+>;
 
 const FilterPanel = ({
-  clearFilters,
   filters,
   isLoading,
   order,
@@ -422,11 +439,6 @@ const FilterPanel = ({
           />
         </>
       )}
-      <Button
-        label={t("records.clearFilters")}
-        onPress={clearFilters}
-        variant="secondary"
-      />
     </View>
   );
 };

@@ -4,11 +4,13 @@ import { Stack, Tabs, useLocalSearchParams } from "expo-router";
 
 import RootLayout from "../app/_layout";
 import TabsLayout from "../app/(tabs)/_layout";
-import DashboardRoute from "../app/(tabs)/index";
+import DashboardStackLayout from "../app/(tabs)/(dashboard)/_layout";
+import DashboardRoute from "../app/(tabs)/(dashboard)/index";
+import BreakdownRoute from "../app/(tabs)/(dashboard)/breakdowns/[dimension]";
 import InfoRoute from "../app/(tabs)/info";
-import RecordsRoute from "../app/(tabs)/records";
-import BreakdownRoute from "../app/breakdowns/[dimension]";
-import RecordDetailRoute from "../app/records/[releaseId]";
+import RecordsStackLayout from "../app/(tabs)/records/_layout";
+import RecordsRoute from "../app/(tabs)/records/index";
+import RecordDetailRoute from "../app/(tabs)/records/[releaseId]";
 import { jsonResponse, renderWithProviders, t } from "../test/test-utils";
 
 const dashboardPayload = {
@@ -184,10 +186,37 @@ describe("Expo Router routes", () => {
       }),
       undefined,
     );
+  });
+
+  it("registers tab screens with localized labels and icon renderers", () => {
+    renderWithProviders(<TabsLayout />);
+
+    const tabScreens = (Tabs.Screen as jest.Mock).mock.calls.map(([props]) => props);
+    const dashboardTab = tabScreens.find((props) => props.name === "(dashboard)");
+    const recordsTab = tabScreens.find((props) => props.name === "records");
+    const infoTab = tabScreens.find((props) => props.name === "info");
+
+    expect(dashboardTab?.options.title).toBe(t("navigation.dashboard"));
+    expect(recordsTab?.options.title).toBe(t("navigation.records"));
+    expect(infoTab?.options.title).toBe(t("navigation.info"));
+    expect(dashboardTab?.options.headerShown).toBe(false);
+    expect(recordsTab?.options.headerShown).toBe(false);
+
+    expect(dashboardTab?.options.tabBarIcon({ color: "red", focused: true, size: 20 })).toBeTruthy();
+    expect(dashboardTab?.options.tabBarIcon({ color: "red", focused: false, size: 20 })).toBeTruthy();
+    expect(recordsTab?.options.tabBarIcon({ color: "red", focused: true, size: 20 })).toBeTruthy();
+    expect(recordsTab?.options.tabBarIcon({ color: "red", focused: false, size: 20 })).toBeTruthy();
+    expect(infoTab?.options.tabBarIcon({ color: "red", focused: true, size: 20 })).toBeTruthy();
+    expect(infoTab?.options.tabBarIcon({ color: "red", focused: false, size: 20 })).toBeTruthy();
+  });
+
+  it("registers the dashboard stack screens inside the dashboard tab", () => {
+    renderWithProviders(<DashboardStackLayout />);
+
     expect(Stack.Screen).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: "records/[releaseId]",
-        options: { title: t("navigation.record") },
+        name: "index",
+        options: { title: t("navigation.dashboard") },
       }),
       undefined,
     );
@@ -200,24 +229,23 @@ describe("Expo Router routes", () => {
     );
   });
 
-  it("registers tab screens with localized labels and icon renderers", () => {
-    renderWithProviders(<TabsLayout />);
+  it("registers the records stack screens inside the records tab", () => {
+    renderWithProviders(<RecordsStackLayout />);
 
-    const tabScreens = (Tabs.Screen as jest.Mock).mock.calls.map(([props]) => props);
-    const dashboardTab = tabScreens.find((props) => props.name === "index");
-    const recordsTab = tabScreens.find((props) => props.name === "records");
-    const infoTab = tabScreens.find((props) => props.name === "info");
-
-    expect(dashboardTab?.options.title).toBe(t("navigation.dashboard"));
-    expect(recordsTab?.options.title).toBe(t("navigation.records"));
-    expect(infoTab?.options.title).toBe(t("navigation.info"));
-
-    expect(dashboardTab?.options.tabBarIcon({ color: "red", focused: true, size: 20 })).toBeTruthy();
-    expect(dashboardTab?.options.tabBarIcon({ color: "red", focused: false, size: 20 })).toBeTruthy();
-    expect(recordsTab?.options.tabBarIcon({ color: "red", focused: true, size: 20 })).toBeTruthy();
-    expect(recordsTab?.options.tabBarIcon({ color: "red", focused: false, size: 20 })).toBeTruthy();
-    expect(infoTab?.options.tabBarIcon({ color: "red", focused: true, size: 20 })).toBeTruthy();
-    expect(infoTab?.options.tabBarIcon({ color: "red", focused: false, size: 20 })).toBeTruthy();
+    expect(Stack.Screen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "index",
+        options: { title: t("navigation.records") },
+      }),
+      undefined,
+    );
+    expect(Stack.Screen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "[releaseId]",
+        options: { title: t("navigation.record") },
+      }),
+      undefined,
+    );
   });
 
   it("renders the tab routes through their actual route components", async () => {

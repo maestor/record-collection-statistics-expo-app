@@ -9,8 +9,6 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerStyle: { backgroundColor: colors.surfaceMuted },
-        headerTintColor: colors.text,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: {
@@ -20,8 +18,9 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="(dashboard)"
         options={{
+          headerShown: false,
           tabBarIcon: ({ color, size, focused }) => (
             <MaterialCommunityIcons
               color={color}
@@ -35,6 +34,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="records"
         options={{
+          headerShown: false,
           tabBarIcon: ({ color, size, focused }) => (
             <MaterialCommunityIcons color={color} name={focused ? "album" : "album"} size={size} />
           ),
@@ -47,6 +47,8 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size, focused }) => (
             <MaterialCommunityIcons color={color} name={focused ? "information" : "information-outline"} size={size} />
           ),
+          headerStyle: { backgroundColor: colors.surfaceMuted },
+          headerTintColor: colors.text,
           title: translate("navigation.info"),
         }}
       />

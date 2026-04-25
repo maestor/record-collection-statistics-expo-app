@@ -9,4 +9,3 @@ export default function RecordDetailRoute() {
 
   return <RecordDetailScreen releaseId={parsedReleaseId} />;
 }
-

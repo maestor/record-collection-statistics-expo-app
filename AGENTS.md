@@ -23,6 +23,7 @@
 - Run `npm run check:api-types` when the local API is available and API compatibility matters.
 - Test user-visible behavior with Testing Library. Prefer interactions and assertions over snapshots.
 - Cover loading, success, empty, error, and accessibility states for user-facing screens.
+- Include Expo Router routes and layouts under `app/` in coverage. Test route params, unsupported route fallbacks, provider/layout wiring, and navigation registration at the route level; keep detailed screen behavior tests in `src/` feature tests.
 - Definition of Done: every new line of behavior added during a task must be covered by user-behavior tests in the same task. If complete behavior coverage is not practical, stop and raise that as a separate decision before merging or moving on.
 - Do not add unit tests that exist only to raise coverage for unused helpers or unreachable branches. Remove the unused code or branch instead.
 - Keep README focused on overview and common commands. Put detailed development, testing, Android debug, accessibility, and architecture notes under `docs/`.

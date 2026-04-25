@@ -52,6 +52,7 @@
       "<rootDir>/jest.setup.ts"
     ],
     "collectCoverageFrom": [
+      "app/**/*.{ts,tsx}",
       "src/**/*.{ts,tsx}",
       "!src/api/generated/**",
       "!src/api/types.ts"

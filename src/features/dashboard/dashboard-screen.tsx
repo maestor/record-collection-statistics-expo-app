@@ -1,24 +1,22 @@
 import * as React from "react";
-import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { Link } from "expo-router";
 
-import type { BreakdownDimension, BreakdownItem } from "@/api/types";
 import { useDashboardStatsQuery } from "@/api/queries";
-import { BreakdownList } from "@/components/breakdown-list";
+import { BreakdownRow } from "@/components/breakdown-list";
 import { Button } from "@/components/button";
 import { MetricCard } from "@/components/metric-card";
 import { Section } from "@/components/section";
 import { StatusMessage } from "@/components/status-message";
 import { useTranslation } from "@/localization/i18n";
-import { colors, radius } from "@/theme/colors";
+import { colors } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
-import { formatCount, formatDate } from "@/utils/format";
+import { formatCount, formatCurrency, formatDate } from "@/utils/format";
 import { getErrorMessage } from "@/api/client";
 
 export function DashboardScreen() {
   const { t } = useTranslation();
   const dashboardQuery = useDashboardStatsQuery(8);
-  const [selectedHighlight, setSelectedHighlight] = React.useState<BreakdownDimension>("artist");
   const isRefreshing = dashboardQuery.isFetching;
 
   const refresh = React.useCallback(() => {
@@ -53,96 +51,66 @@ export function DashboardScreen() {
 
   const dashboard = dashboardQuery.data!.data;
   const { summary } = dashboard;
-  const highlightOptions: {
-    dimension: BreakdownDimension;
-    items: readonly BreakdownItem[];
-    title: string;
-  }[] = [
-    { dimension: "artist", items: dashboard.topArtists, title: t("dimensions.artist") },
-    { dimension: "label", items: dashboard.labels, title: t("dimensions.label") },
-    { dimension: "format", items: dashboard.formats, title: t("dimensions.format") },
-    { dimension: "genre", items: dashboard.genres, title: t("dimensions.genre") },
-    { dimension: "style", items: dashboard.styles, title: t("dimensions.style") },
-    { dimension: "country", items: dashboard.countries, title: t("dimensions.country") },
-    { dimension: "added_year", items: dashboard.addedYears, title: t("dimensions.added_year") },
-  ];
-  const activeHighlight = highlightOptions.find((option) => option.dimension === selectedHighlight)!;
+  const topBreakdownRows = [
+    dashboard.topArtists[0]
+      ? {
+          count: dashboard.topArtists[0].releaseCount,
+          label: t("dashboard.topArtistSummary", { value: dashboard.topArtists[0].value }),
+        }
+      : null,
+    dashboard.formats[0]
+      ? {
+          count: dashboard.formats[0].releaseCount,
+          label: t("dashboard.topFormatSummary", { value: dashboard.formats[0].value }),
+        }
+      : null,
+  ].filter((row) => row !== null);
 
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
       refreshControl={<RefreshControl onRefresh={refresh} refreshing={isRefreshing} />}
       style={{ backgroundColor: colors.background }}
-      contentContainerStyle={{ gap: spacing.xl, padding: spacing.lg }}
+      contentContainerStyle={{ flexGrow: 1, gap: spacing.xl, padding: spacing.lg }}
     >
-      <Section title={t("dashboard.overviewTitle")}>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.md }}>
-          <MetricCard
-            label={t("dashboard.metricCollectionItems")}
-            value={formatCount(summary.totals.collectionItems)}
-          />
-          <MetricCard label={t("dashboard.metricReleases")} value={formatCount(summary.totals.releases)} />
-          <MetricCard label={t("dashboard.metricArtists")} value={formatCount(summary.totals.uniqueArtists)} />
-          <MetricCard label={t("dashboard.metricLabels")} value={formatCount(summary.totals.labels)} />
+      <Section style={{ flex: 1 }} title={t("dashboard.overviewTitle")}>
+        <View style={{ flex: 1, gap: spacing.md }}>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.md }}>
+            <MetricCard
+              label={t("dashboard.metricCollectionItems")}
+              value={formatCount(summary.totals.releases)}
+            />
+            <MetricCard
+              label={t("dashboard.metricMedianValue")}
+              value={formatCurrency(summary.collectionValue.median)}
+            />
+            <MetricCard label={t("dashboard.metricArtists")} value={formatCount(summary.totals.uniqueArtists)} />
+            <MetricCard label={t("dashboard.metricLabels")} value={formatCount(summary.totals.labels)} />
+          </View>
+          <View style={{ gap: spacing.xs }}>
+            <Text selectable style={{ color: colors.textMuted, fontSize: 15 }}>
+              {t("dashboard.overviewAddedRange", {
+                first: formatDate(summary.addedRange.first),
+                last: formatDate(summary.addedRange.last),
+              })}
+            </Text>
+          </View>
+          <Link href="/highlights" asChild>
+            <Button
+              accessibilityLabel={t("dashboard.highlightsButton")}
+              label={t("dashboard.highlightsButton")}
+              variant="secondary"
+            />
+          </Link>
+          <Link href="/records" asChild>
+            <Button accessibilityLabel={t("dashboard.browseRecords")} label={t("dashboard.browseRecords")} />
+          </Link>
+          <View style={{ gap: spacing.sm, marginTop: "auto" }}>
+            {topBreakdownRows.map((row) => (
+              <BreakdownRow count={row.count} key={row.label} label={row.label} max={row.count} />
+            ))}
+          </View>
         </View>
-        <View style={{ gap: spacing.xs }}>
-          <Text selectable style={{ color: colors.textMuted, fontSize: 15 }}>
-            {t("dashboard.overviewAddedRange", {
-              first: formatDate(summary.addedRange.first),
-              last: formatDate(summary.addedRange.last),
-            })}
-          </Text>
-        </View>
-        <Link href="/records" asChild>
-          <Button accessibilityLabel={t("dashboard.browseRecords")} label={t("dashboard.browseRecords")} />
-        </Link>
-      </Section>
-
-      <Section title={t("dashboard.highlightsTitle")}>
-        <View
-          accessibilityLabel={t("dashboard.pickerLabel")}
-          style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}
-        >
-          {highlightOptions.map((option) => {
-            const isSelected = option.dimension === activeHighlight.dimension;
-
-            return (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityState={{ selected: isSelected }}
-                key={option.dimension}
-                onPress={() => setSelectedHighlight(option.dimension)}
-                style={{
-                  backgroundColor: isSelected ? colors.primary : colors.surfaceMuted,
-                  borderColor: isSelected ? colors.primary : colors.border,
-                  borderCurve: "continuous",
-                  borderRadius: radius.md,
-                  borderWidth: 1,
-                  minHeight: 40,
-                  paddingHorizontal: spacing.md,
-                  paddingVertical: spacing.sm,
-                }}
-              >
-                <Text
-                  selectable
-                  style={{
-                    color: isSelected ? colors.primaryDark : colors.text,
-                    fontSize: 14,
-                    fontWeight: "700",
-                  }}
-                >
-                  {option.title}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-        <BreakdownList
-          dimension={activeHighlight.dimension}
-          items={activeHighlight.items}
-          title={activeHighlight.title}
-          withSection={false}
-        />
       </Section>
     </ScrollView>
   );

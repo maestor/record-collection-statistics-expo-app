@@ -1,16 +1,17 @@
 import * as React from "react";
-import { Text, View } from "react-native";
+import { Text, View, type StyleProp, type ViewStyle } from "react-native";
 
 import { colors } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 
 type SectionProps = React.PropsWithChildren<{
+  style?: StyleProp<ViewStyle>;
   title: string;
 }>;
 
-export function Section({ children, title }: SectionProps) {
+export function Section({ children, style, title }: SectionProps) {
   return (
-    <View style={{ gap: spacing.md }}>
+    <View style={[{ gap: spacing.md }, style]}>
       <Text
         selectable
         style={{
@@ -25,4 +26,3 @@ export function Section({ children, title }: SectionProps) {
     </View>
   );
 }
-

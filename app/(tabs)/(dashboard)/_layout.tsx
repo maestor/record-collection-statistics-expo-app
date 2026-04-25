@@ -14,6 +14,7 @@ export default function DashboardStackLayout() {
       }}
     >
       <Stack.Screen name="index" options={{ title: translate("navigation.dashboard") }} />
+      <Stack.Screen name="highlights" options={{ title: translate("navigation.highlights") }} />
       <Stack.Screen name="breakdowns/[dimension]" options={{ title: translate("navigation.breakdown") }} />
     </Stack>
   );

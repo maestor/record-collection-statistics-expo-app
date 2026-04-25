@@ -20,15 +20,6 @@ export function BreakdownList({ dimension, items, title, withSection = true }: B
   const max = Math.max(...items.map((item) => item.releaseCount), 1);
   const content = (
     <>
-      <View style={{ gap: spacing.sm }}>
-        {items.length === 0 ? (
-          <Text selectable style={{ color: colors.textMuted }}>
-            {translate("common.noValuesYet")}
-          </Text>
-        ) : (
-          items.map((item) => <BreakdownRow item={item} key={item.value} max={max} />)
-        )}
-      </View>
       {dimension && (
         <Link
           accessibilityRole="link"
@@ -38,6 +29,22 @@ export function BreakdownList({ dimension, items, title, withSection = true }: B
           {`${translate("breakdowns.viewFullPrefix")} ${title.toLowerCase()}`}
         </Link>
       )}
+      <View style={{ gap: spacing.sm }}>
+        {items.length === 0 ? (
+          <Text selectable style={{ color: colors.textMuted }}>
+            {translate("common.noValuesYet")}
+          </Text>
+        ) : (
+          items.map((item) => (
+            <BreakdownRow
+              count={item.releaseCount}
+              key={item.value}
+              label={item.value}
+              max={max}
+            />
+          ))
+        )}
+      </View>
     </>
   );
 
@@ -66,12 +73,18 @@ export function BreakdownList({ dimension, items, title, withSection = true }: B
   );
 }
 
-function BreakdownRow({ item, max }: { item: BreakdownItem; max: number }) {
-  const width = `${Math.max((item.releaseCount / max) * 100, 4)}%` as `${number}%`;
+type BreakdownRowProps = {
+  count: number;
+  label: string;
+  max: number;
+};
+
+export function BreakdownRow({ count, label, max }: BreakdownRowProps) {
+  const width = `${Math.max((count / max) * 100, 4)}%` as `${number}%`;
 
   return (
     <View
-      accessibilityLabel={`${item.value}, ${formatCount(item.releaseCount)} releases`}
+      accessibilityLabel={`${label}, ${formatCount(count)} releases`}
       style={{
         backgroundColor: colors.surface,
         borderColor: colors.border,
@@ -87,13 +100,13 @@ function BreakdownRow({ item, max }: { item: BreakdownItem; max: number }) {
           selectable
           style={{ color: colors.text, flex: 1, fontSize: 15, fontWeight: "700" }}
         >
-          {item.value}
+          {label}
         </Text>
         <Text
           selectable
           style={{ color: colors.textMuted, fontSize: 14, fontVariant: ["tabular-nums"] }}
         >
-          {formatCount(item.releaseCount)}
+          {formatCount(count)}
         </Text>
       </View>
       <View

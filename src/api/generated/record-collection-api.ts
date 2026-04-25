@@ -259,9 +259,10 @@ export interface components {
                 /** Format: date-time */
                 last: string | null;
             };
-            releaseYearRange: {
-                min: number | null;
-                max: number | null;
+            collectionValue: {
+                minimum: number | null;
+                median: number | null;
+                maximum: number | null;
             };
         };
         FilterCatalog: {
@@ -483,6 +484,7 @@ export interface operations {
     listRecords: {
         parameters: {
             query?: {
+                /** @description Case-insensitive free-text match against title, artist, label, format descriptions, and format free text. */
                 q?: string;
                 artist?: string;
                 label?: string;

@@ -310,7 +310,7 @@ const FilterSheet = ({
               justifyContent: "space-between",
             }}
           >
-            <Text selectable style={[sectionTitleStyle, { flex: 1 }]}>
+            <Text style={[sectionTitleStyle, { flex: 1 }]}>
               {t("records.filtersButton")}
             </Text>
             <Button

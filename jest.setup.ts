@@ -57,6 +57,46 @@ jest.mock("react-native-gesture-handler", () => {
   };
 });
 
+jest.mock("react-native-gifted-charts", () => {
+  const React = require("react");
+  const { View } = require("react-native");
+
+  const createChart = (displayName: string) => {
+    const Chart = ({
+      accessibilityLabel,
+      centerLabelComponent,
+      data,
+      focusedPieIndex,
+      testID,
+    }: {
+      accessibilityLabel?: string;
+      centerLabelComponent?: ((selectedIndex?: number) => React.ReactNode) | undefined;
+      data?: unknown;
+      focusedPieIndex?: number;
+      testID?: string;
+    }) =>
+      React.createElement(
+        View,
+        {
+          accessibilityLabel,
+          data,
+          testID,
+        },
+        centerLabelComponent ? centerLabelComponent(focusedPieIndex ?? 0) : null,
+      );
+
+    Chart.displayName = displayName;
+
+    return Chart;
+  };
+
+  return {
+    BarChart: createChart("MockBarChart"),
+    LineChart: createChart("MockLineChart"),
+    PieChart: createChart("MockPieChart"),
+  };
+});
+
 jest.mock("expo-router", () => {
   const React = require("react");
   const { Text } = require("react-native");

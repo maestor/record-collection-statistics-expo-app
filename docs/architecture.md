@@ -45,6 +45,8 @@ UI reuse follows a small-step approach:
 
 This keeps Expo UI code direct to read while still giving repeated interactive patterns, such as chips or panels, a single implementation.
 
+Statistics stays on a single `/statistics` route and owns two report modes inside the screen: a list view backed by the dashboard payload and a graph view that fetches the full selected `/stats/breakdowns/{dimension}` dataset on demand. Both modes share the same dimension switcher so the selected breakdown context stays stable while the representation changes.
+
 ## Runtime Configuration
 
 API URL and required read API key come from Expo/EAS environment variables. `app.config.js` maps `API_URL` and `API_KEY` into Expo config so the client can read them at runtime. The app also accepts `EXPO_PUBLIC_API_URL` and `EXPO_PUBLIC_API_KEY` for local public Expo env workflows.

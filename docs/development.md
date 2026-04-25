@@ -28,6 +28,19 @@ Use Expo Go first:
 npm start
 ```
 
+App branding assets live in `assets/`:
+
+- `icon.png`: primary app icon for Expo/iOS and the base Android launcher icon.
+- `adaptive-icon-foreground.png`: transparent foreground used with the Android adaptive icon background color.
+- `splash-icon.png`: centered splash mark shown on top of the splash background color.
+- `favicon.png`: web favicon.
+
+If Expo Go keeps showing an older icon or splash screen after asset changes, restart the bundler with a cleared cache:
+
+```bash
+npx expo start --clear
+```
+
 The app reads API connection values from Expo config:
 
 - `API_URL`: remote API URL, usually your Vercel domain.

@@ -56,17 +56,17 @@ describe("DashboardScreen", () => {
 
     expect(screen.getByText(t("dashboard.loadingTitle"))).toBeTruthy();
     expect(screen.getByText(t("dashboard.loadingMessage"))).toBeTruthy();
-    expect(screen.queryByRole("button", { name: t("dashboard.highlightsButton") })).toBeNull();
+    expect(screen.queryByRole("button", { name: t("dashboard.statisticsButton") })).toBeNull();
 
     resolveDashboardResponse?.(jsonResponse(dashboardPayload));
 
-    expect(await screen.findByRole("button", { name: t("dashboard.highlightsButton") })).toBeTruthy();
+    expect(await screen.findByRole("button", { name: t("dashboard.statisticsButton") })).toBeTruthy();
   });
 
   it("renders dashboard overview actions with the updated summary cards", async () => {
     renderWithProviders(<DashboardScreen />);
 
-    expect(await screen.findByRole("button", { name: t("dashboard.highlightsButton") })).toBeTruthy();
+    expect(await screen.findByRole("button", { name: t("dashboard.statisticsButton") })).toBeTruthy();
     expect(screen.getByText("2 345")).toBeTruthy();
     expect(screen.getByText("59 €")).toBeTruthy();
     expect(screen.getByText("405")).toBeTruthy();
@@ -76,8 +76,8 @@ describe("DashboardScreen", () => {
     expect(screen.getByText("Eniten formaattia: CD")).toBeTruthy();
     expect(screen.queryByText("Herodes")).toBeNull();
 
-    const highlightsButton = screen.getByRole("button", { name: t("dashboard.highlightsButton") });
-    expect(highlightsButton.props.href).toBe("/highlights");
+    const statisticsButton = screen.getByRole("button", { name: t("dashboard.statisticsButton") });
+    expect(statisticsButton.props.href).toBe("/statistics");
 
     const browseButton = screen.getByRole("button", { name: t("dashboard.browseRecords") });
     expect(browseButton.props.href).toBe("/records");
@@ -85,7 +85,7 @@ describe("DashboardScreen", () => {
     expect((globalThis.fetch as jest.Mock).mock.calls[0]?.[0]).toContain("/stats/dashboard?limit=8");
   });
 
-  it("omits top breakdown rows when highlight sources are empty", async () => {
+  it("omits top breakdown rows when statistic sources are empty", async () => {
     globalThis.fetch = jest.fn(
       async () =>
         jsonResponse({
@@ -100,7 +100,7 @@ describe("DashboardScreen", () => {
 
     renderWithProviders(<DashboardScreen />);
 
-    expect(await screen.findByRole("button", { name: t("dashboard.highlightsButton") })).toBeTruthy();
+    expect(await screen.findByRole("button", { name: t("dashboard.statisticsButton") })).toBeTruthy();
     expect(screen.queryByText("Eniten artistilta: Klamydia")).toBeNull();
     expect(screen.queryByText("Eniten formaattia: CD")).toBeNull();
   });

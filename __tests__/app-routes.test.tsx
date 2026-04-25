@@ -6,12 +6,13 @@ import RootLayout from "../app/_layout";
 import TabsLayout from "../app/(tabs)/_layout";
 import DashboardStackLayout from "../app/(tabs)/(dashboard)/_layout";
 import DashboardRoute from "../app/(tabs)/(dashboard)/index";
-import HighlightsRoute from "../app/(tabs)/(dashboard)/highlights";
-import BreakdownRoute from "../app/(tabs)/(dashboard)/breakdowns/[dimension]";
 import InfoRoute from "../app/(tabs)/info";
 import RecordsStackLayout from "../app/(tabs)/records/_layout";
 import RecordsRoute from "../app/(tabs)/records/index";
 import RecordDetailRoute from "../app/(tabs)/records/[releaseId]";
+import StatisticsStackLayout from "../app/(tabs)/statistics/_layout";
+import StatisticsRoute from "../app/(tabs)/statistics/index";
+import BreakdownRoute from "../app/(tabs)/statistics/breakdowns/[dimension]";
 import { jsonResponse, renderWithProviders, t } from "../test/test-utils";
 
 const dashboardPayload = {
@@ -196,18 +197,23 @@ describe("Expo Router routes", () => {
     const tabScreens = (Tabs.Screen as jest.Mock).mock.calls.map(([props]) => props);
     const dashboardTab = tabScreens.find((props) => props.name === "(dashboard)");
     const recordsTab = tabScreens.find((props) => props.name === "records");
+    const statisticsTab = tabScreens.find((props) => props.name === "statistics");
     const infoTab = tabScreens.find((props) => props.name === "info");
 
     expect(dashboardTab?.options.title).toBe(t("navigation.dashboard"));
     expect(recordsTab?.options.title).toBe(t("navigation.records"));
+    expect(statisticsTab?.options.title).toBe(t("navigation.statistics"));
     expect(infoTab?.options.title).toBe(t("navigation.info"));
     expect(dashboardTab?.options.headerShown).toBe(false);
     expect(recordsTab?.options.headerShown).toBe(false);
+    expect(statisticsTab?.options.headerShown).toBe(false);
 
     expect(dashboardTab?.options.tabBarIcon({ color: "red", focused: true, size: 20 })).toBeTruthy();
     expect(dashboardTab?.options.tabBarIcon({ color: "red", focused: false, size: 20 })).toBeTruthy();
     expect(recordsTab?.options.tabBarIcon({ color: "red", focused: true, size: 20 })).toBeTruthy();
     expect(recordsTab?.options.tabBarIcon({ color: "red", focused: false, size: 20 })).toBeTruthy();
+    expect(statisticsTab?.options.tabBarIcon({ color: "red", focused: true, size: 20 })).toBeTruthy();
+    expect(statisticsTab?.options.tabBarIcon({ color: "red", focused: false, size: 20 })).toBeTruthy();
     expect(infoTab?.options.tabBarIcon({ color: "red", focused: true, size: 20 })).toBeTruthy();
     expect(infoTab?.options.tabBarIcon({ color: "red", focused: false, size: 20 })).toBeTruthy();
   });
@@ -222,10 +228,15 @@ describe("Expo Router routes", () => {
       }),
       undefined,
     );
+  });
+
+  it("registers the statistics stack screens inside the statistics tab", () => {
+    renderWithProviders(<StatisticsStackLayout />);
+
     expect(Stack.Screen).toHaveBeenCalledWith(
       expect.objectContaining({
-        name: "highlights",
-        options: { title: t("navigation.highlights") },
+        name: "index",
+        options: { title: t("navigation.statistics") },
       }),
       undefined,
     );
@@ -262,9 +273,9 @@ describe("Expo Router routes", () => {
     expect(await screen.findByText(t("dashboard.overviewTitle"))).toBeTruthy();
     dashboardView.unmount();
 
-    const highlightsView = renderWithProviders(<HighlightsRoute />);
+    const statisticsView = renderWithProviders(<StatisticsRoute />);
     expect(await screen.findByRole("button", { name: t("dimensions.artist") })).toBeTruthy();
-    highlightsView.unmount();
+    statisticsView.unmount();
 
     const recordsView = renderWithProviders(<RecordsRoute />);
     expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();

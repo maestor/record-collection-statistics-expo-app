@@ -1,7 +1,7 @@
 import * as React from "react";
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 
-import { HighlightsScreen } from "@/features/dashboard/highlights-screen";
+import { StatisticsScreen } from "@/features/statistics/statistics-screen";
 import { jsonResponse, renderWithProviders, t } from "../test/test-utils";
 
 const dashboardPayload = {
@@ -36,7 +36,7 @@ const dashboardPayload = {
   meta: { limit: 8 },
 };
 
-const highlightCases = [
+const statisticCases = [
   { dimension: "artist", value: "Klamydia" },
   { dimension: "label", value: "Herodes" },
   { dimension: "format", value: "CD" },
@@ -46,7 +46,7 @@ const highlightCases = [
   { dimension: "added_year", value: "2026" },
 ] as const;
 
-describe("HighlightsScreen", () => {
+describe("StatisticsScreen", () => {
   beforeEach(() => {
     jest.restoreAllMocks();
     globalThis.fetch = jest.fn(async () => jsonResponse(dashboardPayload));
@@ -62,7 +62,7 @@ describe("HighlightsScreen", () => {
         }),
     );
 
-    renderWithProviders(<HighlightsScreen />);
+    renderWithProviders(<StatisticsScreen />);
 
     expect(screen.getByText(t("dashboard.loadingTitle"))).toBeTruthy();
     expect(screen.getByText(t("dashboard.loadingMessage"))).toBeTruthy();
@@ -73,12 +73,12 @@ describe("HighlightsScreen", () => {
     expect(await screen.findByRole("button", { name: t("dimensions.artist") })).toBeTruthy();
   });
 
-  it("renders dashboard highlight data and supports every highlight action", async () => {
-    renderWithProviders(<HighlightsScreen />);
+  it("renders statistics data and supports every statistic action", async () => {
+    renderWithProviders(<StatisticsScreen />);
 
     expect(await screen.findByText("Klamydia")).toBeTruthy();
 
-    for (const { dimension, value } of highlightCases) {
+    for (const { dimension, value } of statisticCases) {
       const title = t(`dimensions.${dimension}`);
       const button = screen.getByRole("button", { name: title });
 
@@ -93,7 +93,7 @@ describe("HighlightsScreen", () => {
 
       expect(viewFullLink.props.href).toEqual({
         params: { dimension },
-        pathname: "/breakdowns/[dimension]",
+        pathname: "/statistics/breakdowns/[dimension]",
       });
     }
 
@@ -103,7 +103,7 @@ describe("HighlightsScreen", () => {
   it("renders an API error with retry", async () => {
     globalThis.fetch = jest.fn(async () => jsonResponse({ error: "API down" }, 503));
 
-    renderWithProviders(<HighlightsScreen />);
+    renderWithProviders(<StatisticsScreen />);
 
     expect(await screen.findByRole("alert")).toBeTruthy();
     expect(screen.getByText("API down")).toBeTruthy();

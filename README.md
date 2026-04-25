@@ -4,7 +4,7 @@ React Native and Expo app for browsing a personal Discogs-backed record collecti
 
 ## Features
 - Finnish-first interface with a typed localization layer for future locales.
-- Dashboard with collection totals, median collection value, year ranges, and a dedicated highlights subpage.
+- Dashboard with collection totals, median collection value, year ranges, and a dedicated statistics tab.
 - Searchable records catalog with sync status, sorting, filters, pagination, thumbnails, and detail pages.
 - Record detail view with cover art, release metadata, formats, labels, tracks, identifiers, community stats, and collection data.
 - API URL and required read API key configured through Expo/EAS environment variables.

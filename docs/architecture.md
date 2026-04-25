@@ -5,12 +5,13 @@
 Expo Router owns navigation:
 
 - `/` dashboard
+- `/statistics` collection statistics
 - `/records` catalog
 - `/records/[releaseId]` detail
-- `/breakdowns/[dimension]` full stats breakdowns
+- `/statistics/breakdowns/[dimension]` full stats breakdowns
 
 Route files stay thin and delegate to feature components under `src/features`.
-Dashboard and records each own a nested stack inside the tab navigator so subpages keep the bottom tab bar visible while still getting their own headers.
+Dashboard, statistics, and records each own a nested stack inside the tab navigator so subpages keep the bottom tab bar visible while still getting their own headers.
 
 ## API Layer
 

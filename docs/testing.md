@@ -22,6 +22,7 @@ Tests use `jest-expo` and `@testing-library/react-native`.
 - API configuration from Expo environment values.
 - API key header behavior without putting the key in URLs, query keys, screenshots, or rendered UI.
 - Dashboard loading, success, error, and refresh.
+- Statistics loading, success, error, and dimension switching.
 - Records search, sort, filters, pagination, empty result, and API error.
 - Record detail success, 404/error, and invalid release id.
 - App routes render their intended screens, parse route params, reject unsupported params, and register stack/tab navigation with the expected labels and options.

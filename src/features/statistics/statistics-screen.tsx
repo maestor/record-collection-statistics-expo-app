@@ -10,10 +10,10 @@ import { StatusMessage } from "@/components/status-message";
 import { useTranslation } from "@/localization/i18n";
 import { screenStyles, wrapRowStyle } from "@/theme/styles";
 
-export const HighlightsScreen = () => {
+export const StatisticsScreen = () => {
   const { t } = useTranslation();
   const dashboardQuery = useDashboardStatsQuery(8);
-  const [selectedHighlight, setSelectedHighlight] =
+  const [selectedStatistic, setSelectedStatistic] =
     React.useState<BreakdownDimension>("artist");
 
   if (dashboardQuery.isLoading) {
@@ -43,7 +43,7 @@ export const HighlightsScreen = () => {
   }
 
   const dashboard = dashboardQuery.data!.data;
-  const highlightOptions: {
+  const statisticOptions: {
     dimension: BreakdownDimension;
     items: readonly BreakdownItem[];
     title: string;
@@ -84,8 +84,8 @@ export const HighlightsScreen = () => {
       title: t("dimensions.added_year"),
     },
   ];
-  const activeHighlight = highlightOptions.find(
-    (option) => option.dimension === selectedHighlight,
+  const activeStatistic = statisticOptions.find(
+    (option) => option.dimension === selectedStatistic,
   )!;
 
   return (
@@ -95,26 +95,26 @@ export const HighlightsScreen = () => {
       contentContainerStyle={screenStyles.content}
     >
       <View
-        accessibilityLabel={t("dashboard.pickerLabel")}
+        accessibilityLabel={t("statistics.pickerLabel")}
         style={wrapRowStyle}
       >
-        {highlightOptions.map((option) => {
-          const isSelected = option.dimension === activeHighlight.dimension;
+        {statisticOptions.map((option) => {
+          const isSelected = option.dimension === activeStatistic.dimension;
 
           return (
             <Chip
               key={option.dimension}
               label={option.title}
-              onPress={() => setSelectedHighlight(option.dimension)}
+              onPress={() => setSelectedStatistic(option.dimension)}
               selected={isSelected}
             />
           );
         })}
       </View>
       <BreakdownList
-        dimension={activeHighlight.dimension}
-        items={activeHighlight.items}
-        title={activeHighlight.title}
+        dimension={activeStatistic.dimension}
+        items={activeStatistic.items}
+        title={activeStatistic.title}
         withSection={false}
       />
     </ScrollView>

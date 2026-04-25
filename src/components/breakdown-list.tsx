@@ -29,7 +29,10 @@ export const BreakdownList = ({
       {dimension && (
         <Link
           accessibilityRole="link"
-          href={{ pathname: "/breakdowns/[dimension]", params: { dimension } }}
+          href={{
+            pathname: "/statistics/breakdowns/[dimension]",
+            params: { dimension },
+          }}
           style={{ color: colors.primary, fontSize: 16, fontWeight: "700" }}
         >
           {`${translate("breakdowns.viewFullPrefix")} ${title.toLowerCase()}`}

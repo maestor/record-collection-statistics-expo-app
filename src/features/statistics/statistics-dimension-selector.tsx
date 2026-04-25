@@ -1,17 +1,12 @@
 import * as React from "react";
-import {
-  Modal,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 
 import { Panel } from "@/components/panel";
+import { SelectionTrigger } from "@/components/selection-trigger";
 import { useTranslation } from "@/localization/i18n";
 import { colors, radius } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
-import { filterChipStyle, sectionTitleStyle } from "@/theme/styles";
+import { sectionTitleStyle } from "@/theme/styles";
 import type { StatisticDimension } from "./statistics-model";
 
 type StatisticOption = {
@@ -36,46 +31,14 @@ export const StatisticsDimensionSelector = ({
 
   return (
     <>
-      <Pressable
+      <SelectionTrigger
         accessibilityLabel={t("statistics.currentDimensionLabel", {
           title: activeOption.title,
         })}
-        accessibilityRole="button"
+        actionLabel={t("statistics.changeDimension")}
+        label={activeOption.title}
         onPress={() => setIsOpen(true)}
-        style={({ pressed }) => [
-          filterChipStyle,
-          {
-            alignItems: "center",
-            backgroundColor: pressed ? colors.surface : colors.surfaceMuted,
-            borderColor: colors.border,
-            flexDirection: "row",
-            justifyContent: "space-between",
-          },
-        ]}
-      >
-        <Text
-          selectable
-          style={{
-            color: colors.text,
-            flex: 1,
-            fontSize: 14,
-            fontWeight: "700",
-          }}
-        >
-          {activeOption.title}
-        </Text>
-        <Text
-          selectable
-          style={{
-            color: colors.textMuted,
-            fontSize: 13,
-            fontWeight: "800",
-            marginLeft: spacing.md,
-          }}
-        >
-          {t("statistics.changeDimension")}
-        </Text>
-      </Pressable>
+      />
       <Modal
         animationType="fade"
         onRequestClose={() => setIsOpen(false)}

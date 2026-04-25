@@ -3,6 +3,7 @@ import { act, fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
 
 import { RecordsScreen } from "@/features/records/records-screen";
+import { colors } from "@/theme/colors";
 import {
   endPressablePressedState,
   jsonResponse,
@@ -121,10 +122,10 @@ describe("RecordsScreen", () => {
       name: t("records.filtersButton"),
     });
     startPressablePressedState(filtersButton);
-    expect(filtersButton).toHaveStyle({ opacity: 0.8 });
+    expect(filtersButton).toHaveStyle({ backgroundColor: colors.surface });
     endPressablePressedState(filtersButton);
     await waitFor(() => {
-      expect(filtersButton).toHaveStyle({ opacity: 1 });
+      expect(filtersButton).toHaveStyle({ backgroundColor: colors.surfaceMuted });
     });
     fireEvent.changeText(
       screen.getByLabelText(t("records.searchLabel")),
@@ -230,6 +231,28 @@ describe("RecordsScreen", () => {
     ).toBeNull();
     expect(screen.getByRole("button", { name: t("records.filtersButton") })).toHaveStyle({
       width: "100%",
+    });
+  });
+
+  it("shows pressed styling for filter sheet buttons", async () => {
+    renderWithProviders(<RecordsScreen />);
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+
+    fireEvent.press(
+      screen.getByRole("button", { name: t("records.filtersButton") }),
+    );
+
+    const closeButton = screen.getByRole("button", {
+      name: t("records.closeFilters"),
+    });
+
+    startPressablePressedState(closeButton);
+    expect(closeButton).toHaveStyle({ opacity: 0.8 });
+
+    endPressablePressedState(closeButton);
+    await waitFor(() => {
+      expect(closeButton).toHaveStyle({ opacity: 1 });
     });
   });
 

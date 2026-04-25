@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 
 import { useFiltersQuery, useRecordsQuery } from "@/api/queries";
 import type { RecordListParams } from "@/api/types";
@@ -16,10 +16,12 @@ import { RecordCard } from "./record-card";
 
 type SortValue = "artist" | "date_added" | "release_year" | "title";
 type OrderValue = NonNullable<RecordListParams["order"]>;
-type FilterKey = "artist" | "country" | "format" | "genre";
+type FilterKey = "artist" | "format" | "genre";
 
 const sortOptions: SortValue[] = ["date_added", "release_year", "artist", "title"];
 const orderOptions: OrderValue[] = ["desc", "asc"];
+const AUTO_SEARCH_DELAY_MS = 500;
+const AUTO_SEARCH_MIN_LENGTH = 3;
 
 function labelForSort(sort: SortValue): string {
   switch (sort) {
@@ -65,6 +67,10 @@ function buildParams(
   return params;
 }
 
+function normalizeSearchQuery(value: string): string {
+  return value.trim();
+}
+
 export function RecordsScreen() {
   const { t } = useTranslation();
   const [draftQuery, setDraftQuery] = React.useState("");
@@ -83,11 +89,34 @@ export function RecordsScreen() {
   const firstPage = recordsQuery.data?.pages[0];
   const activeFilterCount = Object.values(selectedFilters).filter(Boolean).length + (query ? 1 : 0);
 
+  React.useEffect(() => {
+    const normalizedDraftQuery = normalizeSearchQuery(draftQuery);
+
+    if (normalizedDraftQuery === query) {
+      return;
+    }
+
+    if (normalizedDraftQuery.length !== 0 && normalizedDraftQuery.length < AUTO_SEARCH_MIN_LENGTH) {
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      setQuery(normalizedDraftQuery);
+    }, AUTO_SEARCH_DELAY_MS);
+
+    return () => clearTimeout(timeout);
+  }, [draftQuery, query]);
+
   function setFilter(key: FilterKey, value: string) {
     setSelectedFilters((current) => ({
       ...current,
       [key]: current[key] === value ? undefined : value,
     }));
+  }
+
+  function applySearch(nextQuery: string) {
+    const normalizedQuery = normalizeSearchQuery(nextQuery);
+    setQuery(normalizedQuery);
   }
 
   function clearFilters() {
@@ -110,7 +139,7 @@ export function RecordsScreen() {
             accessibilityLabel={t("records.searchLabel")}
             autoCapitalize="none"
             onChangeText={setDraftQuery}
-            onSubmitEditing={() => setQuery(draftQuery)}
+            onSubmitEditing={() => applySearch(draftQuery)}
             placeholder={t("records.searchPlaceholder")}
             placeholderTextColor={colors.textMuted}
             returnKeyType="search"
@@ -127,30 +156,16 @@ export function RecordsScreen() {
             value={draftQuery}
           />
           <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
-            <Button label={t("records.searchButton")} onPress={() => setQuery(draftQuery)} style={{ flexGrow: 1 }} />
+            <Button label={t("records.searchButton")} onPress={() => applySearch(draftQuery)} style={{ flexGrow: 1 }} />
             <Button
               label={`${t("records.filtersButton")}${activeFilterCount ? ` (${activeFilterCount})` : ""}`}
-              onPress={() => setFiltersOpen((value) => !value)}
+              onPress={() => setFiltersOpen(true)}
               style={{ flexGrow: 1 }}
               variant="secondary"
             />
           </View>
         </View>
       </Section>
-
-      {filtersOpen && (
-        <FilterPanel
-          clearFilters={clearFilters}
-          filters={filtersQuery.data?.data}
-          isLoading={filtersQuery.isLoading}
-          order={order}
-          selectedFilters={selectedFilters}
-          setFilter={setFilter}
-          setOrder={setOrder}
-          setSort={setSort}
-          sort={sort}
-        />
-      )}
 
       {recordsQuery.isLoading && (
         <StatusMessage
@@ -169,6 +184,20 @@ export function RecordsScreen() {
           tone="error"
         />
       )}
+
+      <FilterSheet
+        clearFilters={clearFilters}
+        closeFilters={() => setFiltersOpen(false)}
+        filters={filtersQuery.data?.data}
+        isLoading={filtersQuery.isLoading}
+        isOpen={filtersOpen}
+        order={order}
+        selectedFilters={selectedFilters}
+        setFilter={setFilter}
+        setOrder={setOrder}
+        setSort={setSort}
+        sort={sort}
+      />
 
       {firstPage && (
         <Section title={t("records.resultsTitle", { count: formatCount(firstPage.meta.total) })}>
@@ -196,14 +225,16 @@ export function RecordsScreen() {
   );
 }
 
-type FilterPanelProps = {
+type FilterSheetProps = {
   clearFilters: () => void;
+  closeFilters: () => void;
   filters: ReturnType<typeof useFiltersQuery>["data"] extends infer Result
     ? Result extends { data: infer Data }
       ? Data
       : undefined
     : undefined;
   isLoading: boolean;
+  isOpen: boolean;
   order: OrderValue;
   selectedFilters: Partial<Record<FilterKey, string>>;
   setFilter: (key: FilterKey, value: string) => void;
@@ -211,6 +242,71 @@ type FilterPanelProps = {
   setSort: (sort: SortValue) => void;
   sort: SortValue;
 };
+
+function FilterSheet({
+  clearFilters,
+  closeFilters,
+  filters,
+  isLoading,
+  isOpen,
+  order,
+  selectedFilters,
+  setFilter,
+  setOrder,
+  setSort,
+  sort,
+}: FilterSheetProps) {
+  const { t } = useTranslation();
+
+  return (
+    <Modal animationType="fade" onRequestClose={closeFilters} transparent visible={isOpen}>
+      <View
+        style={{
+          backgroundColor: "rgba(3, 31, 52, 0.72)",
+          flex: 1,
+          justifyContent: "flex-end",
+          padding: spacing.lg,
+        }}
+      >
+        <View
+          accessibilityLabel={t("records.filterPanelLabel")}
+          style={{
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+            borderCurve: "continuous",
+            borderRadius: radius.lg,
+            borderWidth: 1,
+            gap: spacing.lg,
+            maxHeight: "82%",
+            padding: spacing.lg,
+          }}
+        >
+          <View style={{ alignItems: "center", flexDirection: "row", gap: spacing.md, justifyContent: "space-between" }}>
+            <Text selectable style={{ color: colors.text, flex: 1, fontSize: 20, fontWeight: "800" }}>
+              {t("records.filtersButton")}
+            </Text>
+            <Button label={t("records.closeFilters")} onPress={closeFilters} variant="secondary" />
+          </View>
+          <ScrollView contentContainerStyle={{ gap: spacing.lg }} showsVerticalScrollIndicator={false}>
+            <FilterPanel
+              clearFilters={clearFilters}
+              filters={filters}
+              isLoading={isLoading}
+              order={order}
+              selectedFilters={selectedFilters}
+              setFilter={setFilter}
+              setOrder={setOrder}
+              setSort={setSort}
+              sort={sort}
+            />
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+type FilterPanelProps = Omit<FilterSheetProps, "closeFilters" | "isOpen">;
 
 function FilterPanel({
   clearFilters,
@@ -226,18 +322,7 @@ function FilterPanel({
   const { t } = useTranslation();
 
   return (
-    <View
-      accessibilityLabel={t("records.filterPanelLabel")}
-      style={{
-        backgroundColor: colors.surface,
-        borderColor: colors.border,
-        borderCurve: "continuous",
-        borderRadius: radius.md,
-        borderWidth: 1,
-        gap: spacing.lg,
-        padding: spacing.lg,
-      }}
-    >
+    <View style={{ gap: spacing.lg }}>
       <ChipGroup
         label={t("records.sortBy")}
         options={sortOptions.map((value) => ({ label: labelForSort(value), value }))}
@@ -267,22 +352,16 @@ function FilterPanel({
             onSelect={(value) => setFilter("format", value)}
           />
           <ChipGroup
-            label={t("records.filterGenres")}
-            options={filters.genres.map((item) => ({ label: item.value, value: item.value }))}
-            selected={selectedFilters.genre ?? ""}
-            onSelect={(value) => setFilter("genre", value)}
-          />
-          <ChipGroup
-            label={t("records.filterCountries")}
-            options={filters.countries.map((item) => ({ label: item.value, value: item.value }))}
-            selected={selectedFilters.country ?? ""}
-            onSelect={(value) => setFilter("country", value)}
-          />
-          <ChipGroup
             label={t("records.filterArtists")}
             options={filters.artists.map((item) => ({ label: item.value, value: item.value }))}
             selected={selectedFilters.artist ?? ""}
             onSelect={(value) => setFilter("artist", value)}
+          />
+          <ChipGroup
+            label={t("records.filterGenres")}
+            options={filters.genres.map((item) => ({ label: item.value, value: item.value }))}
+            selected={selectedFilters.genre ?? ""}
+            onSelect={(value) => setFilter("genre", value)}
           />
         </>
       )}

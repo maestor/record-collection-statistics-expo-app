@@ -1,5 +1,5 @@
 import * as React from "react";
-import { fireEvent, screen, waitFor } from "@testing-library/react-native";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
 
 import { RecordsScreen } from "@/features/records/records-screen";
@@ -125,6 +125,8 @@ describe("RecordsScreen", () => {
     fireEvent.press(screen.getByRole("button", { name: `${t("records.filtersButton")} (1)` }));
 
     expect(await screen.findByText("Vinyl")).toBeTruthy();
+    expect(screen.getByText(t("records.filterArtists"))).toBeTruthy();
+    expect(screen.queryByText(t("records.filterCountries"))).toBeNull();
     fireEvent.press(screen.getByRole("button", { name: "Vinyl" }));
     fireEvent.press(screen.getByRole("button", { name: t("records.sortArtist") }));
     fireEvent.press(screen.getByRole("button", { name: t("records.orderAscending") }));
@@ -152,7 +154,6 @@ describe("RecordsScreen", () => {
     fireEvent.press(screen.getByRole("button", { name: `${t("records.filtersButton")} (1)` }));
 
     fireEvent.press(screen.getByRole("button", { name: "Rock" }));
-    fireEvent.press(screen.getByRole("button", { name: "Worldwide" }));
     fireEvent.press(screen.getByRole("button", { name: "Muse" }));
     fireEvent.press(screen.getByRole("button", { name: "Vinyl" }));
     fireEvent.press(screen.getByRole("button", { name: "Vinyl" }));
@@ -163,7 +164,6 @@ describe("RecordsScreen", () => {
       const urls = (globalThis.fetch as jest.Mock).mock.calls.map((call) => String(call[0]));
       expect(urls.some((url) => url.includes("q=Muse"))).toBe(true);
       expect(urls.some((url) => url.includes("genre=Rock"))).toBe(true);
-      expect(urls.some((url) => url.includes("country=Worldwide"))).toBe(true);
       expect(urls.some((url) => url.includes("artist=Muse"))).toBe(true);
       expect(urls.some((url) => url.includes("format=Vinyl"))).toBe(true);
       expect(urls.some((url) => url.includes("sort=artist"))).toBe(true);
@@ -182,12 +182,74 @@ describe("RecordsScreen", () => {
             url.includes("order=desc") &&
             !url.includes("q=") &&
             !url.includes("artist=") &&
-            !url.includes("country=") &&
             !url.includes("genre=") &&
             !url.includes("format="),
         ),
       ).toBe(true);
     });
+  });
+
+  it("starts search automatically after a short pause and clears it when input is emptied", async () => {
+    jest.useFakeTimers();
+
+    try {
+      renderWithProviders(<RecordsScreen />);
+
+      expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+
+      const searchInput = screen.getByLabelText(t("records.searchLabel"));
+      const recordsCallCount = () =>
+        (globalThis.fetch as jest.Mock).mock.calls
+          .map((call) => String(call[0]))
+          .filter((url) => url.includes("/records")).length;
+
+      const initialRecordCalls = recordsCallCount();
+
+      fireEvent.changeText(searchInput, "Mu");
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+
+      await waitFor(() => {
+        expect(recordsCallCount()).toBe(initialRecordCalls);
+      });
+
+      fireEvent.changeText(searchInput, "Muse");
+      act(() => {
+        jest.advanceTimersByTime(499);
+      });
+
+      expect(recordsCallCount()).toBe(initialRecordCalls);
+
+      act(() => {
+        jest.advanceTimersByTime(1);
+      });
+
+      await waitFor(() => {
+        const urls = (globalThis.fetch as jest.Mock).mock.calls.map((call) => String(call[0]));
+        expect(urls.some((url) => url.includes("q=Muse"))).toBe(true);
+      });
+
+      const callsAfterAutoSearch = recordsCallCount();
+
+      fireEvent.changeText(searchInput, "");
+      act(() => {
+        jest.advanceTimersByTime(500);
+      });
+
+      await waitFor(() => {
+        expect(recordsCallCount()).toBe(callsAfterAutoSearch + 1);
+        const latestRecordUrl = (globalThis.fetch as jest.Mock).mock.calls
+          .map((call) => String(call[0]))
+          .filter((url) => url.includes("/records"))
+          .at(-1);
+
+        expect(latestRecordUrl).toContain("sort=date_added");
+        expect(latestRecordUrl).not.toContain("q=");
+      });
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("shows an empty state", async () => {
@@ -292,12 +354,17 @@ describe("RecordsScreen", () => {
 
     expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
     fireEvent.press(screen.getByRole("button", { name: t("records.filtersButton") }));
+    expect(screen.getByLabelText(t("records.filterPanelLabel"))).toBeTruthy();
 
     expect(screen.getByText(t("records.loadingFilters"))).toBeTruthy();
 
     resolveFiltersResponse?.(jsonResponse(filtersPayload));
 
     expect(await screen.findByText("Vinyl")).toBeTruthy();
+    fireEvent.press(screen.getByRole("button", { name: t("records.closeFilters") }));
+    await waitFor(() => {
+      expect(screen.queryByLabelText(t("records.filterPanelLabel"))).toBeNull();
+    });
   });
 
   it("shows a loading state while records are still loading", async () => {

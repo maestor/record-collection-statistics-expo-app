@@ -89,10 +89,11 @@ export const translations = {
     },
     records: {
       clearFilters: "Tyhjennä suodattimet",
+      closeFilters: "Sulje",
       emptyMessage: "Nykyisillä hauilla ja suodattimilla ei löytynyt levyjä.",
       emptyTitle: "Levyjä ei löytynyt",
       errorTitle: "Levyt eivät ole saatavilla",
-      filterArtists: "Artistit",
+      filterArtists: "Suosikkiartistit",
       filterCountries: "Maat",
       filterFormats: "Formaatit",
       filterGenres: "Genret",

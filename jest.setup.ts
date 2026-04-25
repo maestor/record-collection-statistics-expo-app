@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const { act, cleanup } = require("@testing-library/react-native");
 const { notifyManager } = require("@tanstack/react-query");
 
@@ -31,8 +32,15 @@ jest.mock("expo-image", () => {
   const { View } = require("react-native");
 
   return {
-    Image: ({ accessibilityLabel, style, testID }: { accessibilityLabel?: string; style?: unknown; testID?: string }) =>
-      React.createElement(View, { accessibilityLabel, style, testID }),
+    Image: ({
+      accessibilityLabel,
+      style,
+      testID,
+    }: {
+      accessibilityLabel?: string;
+      style?: unknown;
+      testID?: string;
+    }) => React.createElement(View, { accessibilityLabel, style, testID }),
   };
 });
 
@@ -41,7 +49,10 @@ jest.mock("react-native-gesture-handler", () => {
   const { View } = require("react-native");
 
   return {
-    GestureHandlerRootView: ({ children, style }: React.PropsWithChildren<{ style?: unknown }>) =>
+    GestureHandlerRootView: ({
+      children,
+      style,
+    }: React.PropsWithChildren<{ style?: unknown }>) =>
       React.createElement(View, { style }, children),
   };
 });
@@ -50,28 +61,25 @@ jest.mock("expo-router", () => {
   const React = require("react");
   const { Text } = require("react-native");
 
-  function Link({
+  const Link = ({
     asChild,
     children,
     ...props
   }: {
     asChild?: boolean;
     children: React.ReactElement | React.ReactNode;
-  }) {
+  }) => {
     if (asChild && React.isValidElement(children)) {
       return React.cloneElement(children, props);
     }
 
     return React.createElement(Text, props, children);
-  }
+  };
 
-  function Shell({ children }: React.PropsWithChildren) {
-    return React.createElement(React.Fragment, null, children);
-  }
+  const Shell = ({ children }: React.PropsWithChildren) =>
+    React.createElement(React.Fragment, null, children);
 
-  function Screen() {
-    return null;
-  }
+  const Screen = () => null;
 
   const Stack = Object.assign(Shell, {
     Screen: jest.fn(Screen),

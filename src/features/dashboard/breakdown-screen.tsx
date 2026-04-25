@@ -6,8 +6,7 @@ import type { BreakdownDimension } from "@/api/types";
 import { BreakdownList } from "@/components/breakdown-list";
 import { StatusMessage } from "@/components/status-message";
 import { translate, useTranslation } from "@/localization/i18n";
-import { colors } from "@/theme/colors";
-import { spacing } from "@/theme/spacing";
+import { screenStyles } from "@/theme/styles";
 import { getErrorMessage } from "@/api/client";
 
 const supportedDimensions = new Set<BreakdownDimension>([
@@ -21,23 +20,27 @@ const supportedDimensions = new Set<BreakdownDimension>([
   "added_year",
 ]);
 
-function titleForDimension(dimension: BreakdownDimension): string {
-  return translate(`dimensions.${dimension}` as const);
-}
+const titleForDimension = (dimension: BreakdownDimension): string =>
+  translate(`dimensions.${dimension}` as const);
 
-export function isBreakdownDimension(value: string): value is BreakdownDimension {
-  return supportedDimensions.has(value as BreakdownDimension);
-}
+export const isBreakdownDimension = (
+  value: string,
+): value is BreakdownDimension =>
+  supportedDimensions.has(value as BreakdownDimension);
 
-export function BreakdownScreen({ dimension }: { dimension: BreakdownDimension }) {
+export const BreakdownScreen = ({
+  dimension,
+}: {
+  dimension: BreakdownDimension;
+}) => {
   const { t } = useTranslation();
   const query = useBreakdownQuery(dimension);
 
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
-      style={{ backgroundColor: colors.background }}
-      contentContainerStyle={{ gap: spacing.xl, padding: spacing.lg }}
+      style={screenStyles.scrollView}
+      contentContainerStyle={screenStyles.content}
     >
       {query.isLoading && (
         <StatusMessage
@@ -56,8 +59,11 @@ export function BreakdownScreen({ dimension }: { dimension: BreakdownDimension }
         />
       )}
       {query.data && (
-        <BreakdownList items={query.data.data} title={titleForDimension(dimension)} />
+        <BreakdownList
+          items={query.data.data}
+          title={titleForDimension(dimension)}
+        />
       )}
     </ScrollView>
   );
-}
+};

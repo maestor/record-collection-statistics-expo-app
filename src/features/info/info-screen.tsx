@@ -1,12 +1,14 @@
 import * as React from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Linking, Pressable, ScrollView, Text, View } from "react-native";
+import { Linking, ScrollView, Text, View } from "react-native";
 
+import { Chip } from "@/components/chip";
 import { CollectionStatusCard } from "@/components/collection-status-card";
 import { Section } from "@/components/section";
 import { useTranslation } from "@/localization/i18n";
-import { colors, radius } from "@/theme/colors";
+import { colors } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
+import { screenStyles, wrapRowStyle } from "@/theme/styles";
 
 const externalLinks = [
   {
@@ -26,19 +28,19 @@ const externalLinks = [
   },
 ] as const;
 
-export function InfoScreen() {
+export const InfoScreen = () => {
   const { t } = useTranslation();
 
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
-      style={{ backgroundColor: colors.background }}
-      contentContainerStyle={{ gap: spacing.xl, padding: spacing.lg }}
+      style={screenStyles.scrollView}
+      contentContainerStyle={screenStyles.content}
     >
       <CollectionStatusCard />
 
       <Section title={t("info.externalLinksTitle")}>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
+        <View style={wrapRowStyle}>
           {externalLinks.map((link) => (
             <ExternalLinkChip
               icon={link.icon}
@@ -64,9 +66,9 @@ export function InfoScreen() {
       </Text>
     </ScrollView>
   );
-}
+};
 
-function ExternalLinkChip({
+const ExternalLinkChip = ({
   icon,
   label,
   url,
@@ -74,32 +76,21 @@ function ExternalLinkChip({
   icon: React.ComponentProps<typeof MaterialCommunityIcons>["name"];
   label: string;
   url: string;
-}) {
+}) => {
   const { t } = useTranslation();
 
   return (
-    <Pressable
+    <Chip
       accessibilityLabel={t("info.openExternalLink", { label })}
       accessibilityRole="link"
+      label={label}
+      leadingAccessory={
+        <MaterialCommunityIcons color={colors.text} name={icon} size={20} />
+      }
       onPress={() => void Linking.openURL(url)}
-      style={({ pressed }) => ({
-        alignItems: "center",
-        backgroundColor: pressed ? colors.primary : colors.surfaceMuted,
-        borderColor: colors.border,
-        borderCurve: "continuous",
-        borderRadius: radius.md,
-        borderWidth: 1,
-        flexDirection: "row",
-        gap: spacing.sm,
-        minHeight: 48,
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm,
-      })}
-    >
-      <MaterialCommunityIcons color={colors.text} name={icon} size={20} />
-      <Text selectable style={{ color: colors.text, fontSize: 15, fontWeight: "700" }}>
-        {label}
-      </Text>
-    </Pressable>
+      pressedBackgroundColor={colors.primary}
+      style={{ minHeight: 48 }}
+      textStyle={{ fontSize: 15 }}
+    />
   );
-}
+};

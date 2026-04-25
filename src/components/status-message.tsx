@@ -1,8 +1,9 @@
 import * as React from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, Text } from "react-native";
 
 import { Button } from "./button";
-import { colors, radius } from "@/theme/colors";
+import { Panel } from "./panel";
+import { colors } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 
 type StatusMessageProps = {
@@ -13,29 +14,26 @@ type StatusMessageProps = {
   title: string;
 };
 
-export function StatusMessage({
+export const StatusMessage = ({
   actionLabel,
   message,
   onAction,
   title,
   tone = "info",
-}: StatusMessageProps) {
+}: StatusMessageProps) => {
   const isError = tone === "error";
-  const action = actionLabel && onAction ? { label: actionLabel, onPress: onAction } : undefined;
+  const action =
+    actionLabel && onAction
+      ? { label: actionLabel, onPress: onAction }
+      : undefined;
 
   return (
-    <View
+    <Panel
       accessibilityRole={isError ? "alert" : undefined}
       accessible={isError}
-      style={{
-        backgroundColor: isError ? colors.dangerSoft : colors.surfaceMuted,
-        borderColor: isError ? colors.danger : colors.border,
-        borderCurve: "continuous",
-        borderRadius: radius.md,
-        borderWidth: 1,
-        gap: spacing.md,
-        padding: spacing.lg,
-      }}
+      backgroundColor={isError ? colors.dangerSoft : colors.surfaceMuted}
+      borderColor={isError ? colors.danger : colors.border}
+      style={{ gap: spacing.md, padding: spacing.lg }}
     >
       {tone === "loading" && <ActivityIndicator color={colors.primary} />}
       <Text
@@ -50,11 +48,21 @@ export function StatusMessage({
       </Text>
       <Text
         selectable
-        style={{ color: isError ? colors.text : colors.textMuted, fontSize: 15, lineHeight: 22 }}
+        style={{
+          color: isError ? colors.text : colors.textMuted,
+          fontSize: 15,
+          lineHeight: 22,
+        }}
       >
         {message}
       </Text>
-      {action && <Button label={action.label} onPress={action.onPress} variant="danger" />}
-    </View>
+      {action && (
+        <Button
+          label={action.label}
+          onPress={action.onPress}
+          variant="danger"
+        />
+      )}
+    </Panel>
   );
-}
+};

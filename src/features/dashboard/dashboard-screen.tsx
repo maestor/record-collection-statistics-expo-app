@@ -11,10 +11,11 @@ import { StatusMessage } from "@/components/status-message";
 import { useTranslation } from "@/localization/i18n";
 import { colors } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
+import { screenStyles } from "@/theme/styles";
 import { formatCount, formatCurrency, formatDate } from "@/utils/format";
 import { getErrorMessage } from "@/api/client";
 
-export function DashboardScreen() {
+export const DashboardScreen = () => {
   const { t } = useTranslation();
   const dashboardQuery = useDashboardStatsQuery(8);
   const isRefreshing = dashboardQuery.isFetching;
@@ -25,7 +26,7 @@ export function DashboardScreen() {
 
   if (dashboardQuery.isLoading) {
     return (
-      <ScrollView contentContainerStyle={{ padding: spacing.lg }}>
+      <ScrollView contentContainerStyle={screenStyles.paddedContent}>
         <StatusMessage
           message={t("dashboard.loadingMessage")}
           title={t("dashboard.loadingTitle")}
@@ -37,7 +38,7 @@ export function DashboardScreen() {
 
   if (dashboardQuery.isError) {
     return (
-      <ScrollView contentContainerStyle={{ padding: spacing.lg }}>
+      <ScrollView contentContainerStyle={screenStyles.paddedContent}>
         <StatusMessage
           actionLabel={t("common.tryAgain")}
           message={getErrorMessage(dashboardQuery.error)}
@@ -55,13 +56,17 @@ export function DashboardScreen() {
     dashboard.topArtists[0]
       ? {
           count: dashboard.topArtists[0].releaseCount,
-          label: t("dashboard.topArtistSummary", { value: dashboard.topArtists[0].value }),
+          label: t("dashboard.topArtistSummary", {
+            value: dashboard.topArtists[0].value,
+          }),
         }
       : null,
     dashboard.formats[0]
       ? {
           count: dashboard.formats[0].releaseCount,
-          label: t("dashboard.topFormatSummary", { value: dashboard.formats[0].value }),
+          label: t("dashboard.topFormatSummary", {
+            value: dashboard.formats[0].value,
+          }),
         }
       : null,
   ].filter((row) => row !== null);
@@ -69,13 +74,17 @@ export function DashboardScreen() {
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
-      refreshControl={<RefreshControl onRefresh={refresh} refreshing={isRefreshing} />}
-      style={{ backgroundColor: colors.background }}
-      contentContainerStyle={{ flexGrow: 1, gap: spacing.xl, padding: spacing.lg }}
+      refreshControl={
+        <RefreshControl onRefresh={refresh} refreshing={isRefreshing} />
+      }
+      style={screenStyles.scrollView}
+      contentContainerStyle={[screenStyles.content, { flexGrow: 1 }]}
     >
       <Section style={{ flex: 1 }} title={t("dashboard.overviewTitle")}>
         <View style={{ flex: 1, gap: spacing.md }}>
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.md }}>
+          <View
+            style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.md }}
+          >
             <MetricCard
               label={t("dashboard.metricCollectionItems")}
               value={formatCount(summary.totals.releases)}
@@ -84,8 +93,14 @@ export function DashboardScreen() {
               label={t("dashboard.metricMedianValue")}
               value={formatCurrency(summary.collectionValue.median)}
             />
-            <MetricCard label={t("dashboard.metricArtists")} value={formatCount(summary.totals.uniqueArtists)} />
-            <MetricCard label={t("dashboard.metricLabels")} value={formatCount(summary.totals.labels)} />
+            <MetricCard
+              label={t("dashboard.metricArtists")}
+              value={formatCount(summary.totals.uniqueArtists)}
+            />
+            <MetricCard
+              label={t("dashboard.metricLabels")}
+              value={formatCount(summary.totals.labels)}
+            />
           </View>
           <View style={{ gap: spacing.xs }}>
             <Text selectable style={{ color: colors.textMuted, fontSize: 15 }}>
@@ -103,15 +118,23 @@ export function DashboardScreen() {
             />
           </Link>
           <Link href="/records" asChild>
-            <Button accessibilityLabel={t("dashboard.browseRecords")} label={t("dashboard.browseRecords")} />
+            <Button
+              accessibilityLabel={t("dashboard.browseRecords")}
+              label={t("dashboard.browseRecords")}
+            />
           </Link>
           <View style={{ gap: spacing.sm, marginTop: "auto" }}>
             {topBreakdownRows.map((row) => (
-              <BreakdownRow count={row.count} key={row.label} label={row.label} max={row.count} />
+              <BreakdownRow
+                count={row.count}
+                key={row.label}
+                label={row.label}
+                max={row.count}
+              />
             ))}
           </View>
         </View>
       </Section>
     </ScrollView>
   );
-}
+};

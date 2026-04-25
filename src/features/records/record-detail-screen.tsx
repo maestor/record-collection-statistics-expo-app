@@ -10,19 +10,20 @@ import { StatusMessage } from "@/components/status-message";
 import { useTranslation } from "@/localization/i18n";
 import { colors, radius } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
+import { screenStyles } from "@/theme/styles";
 import { formatDate, joinValues } from "@/utils/format";
 
 type RecordDetailScreenProps = {
   releaseId: number;
 };
 
-export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
+export const RecordDetailScreen = ({ releaseId }: RecordDetailScreenProps) => {
   const { t } = useTranslation();
   const query = useRecordDetailQuery(releaseId);
 
   if (!Number.isFinite(releaseId)) {
     return (
-      <ScrollView contentContainerStyle={{ padding: spacing.lg }}>
+      <ScrollView contentContainerStyle={screenStyles.paddedContent}>
         <StatusMessage
           message={t("recordDetail.invalidMessage")}
           title={t("recordDetail.invalidTitle")}
@@ -34,7 +35,7 @@ export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
 
   if (query.isLoading) {
     return (
-      <ScrollView contentContainerStyle={{ padding: spacing.lg }}>
+      <ScrollView contentContainerStyle={screenStyles.paddedContent}>
         <StatusMessage
           message={t("recordDetail.loadingMessage")}
           title={t("recordDetail.loadingTitle")}
@@ -46,7 +47,7 @@ export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
 
   if (query.isError) {
     return (
-      <ScrollView contentContainerStyle={{ padding: spacing.lg }}>
+      <ScrollView contentContainerStyle={screenStyles.paddedContent}>
         <StatusMessage
           actionLabel={t("common.tryAgain")}
           message={getErrorMessage(query.error)}
@@ -63,12 +64,14 @@ export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
-      style={{ backgroundColor: colors.background }}
-      contentContainerStyle={{ gap: spacing.xl, padding: spacing.lg }}
+      style={screenStyles.scrollView}
+      contentContainerStyle={screenStyles.content}
     >
       <View style={{ gap: spacing.lg }}>
         <Image
-          accessibilityLabel={t("recordDetail.coverImage", { title: record.title })}
+          accessibilityLabel={t("recordDetail.coverImage", {
+            title: record.title,
+          })}
           contentFit="cover"
           source={record.coverImage ? { uri: record.coverImage } : null}
           style={{
@@ -79,10 +82,16 @@ export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
           }}
         />
         <View style={{ gap: spacing.sm }}>
-          <Text selectable style={{ color: colors.text, fontSize: 28, fontWeight: "900" }}>
+          <Text
+            selectable
+            style={{ color: colors.text, fontSize: 28, fontWeight: "900" }}
+          >
             {record.title}
           </Text>
-          <Text selectable style={{ color: colors.textMuted, fontSize: 18, lineHeight: 25 }}>
+          <Text
+            selectable
+            style={{ color: colors.textMuted, fontSize: 18, lineHeight: 25 }}
+          >
             {record.artistsSort ?? t("common.unknownArtist")}
           </Text>
         </View>
@@ -90,29 +99,49 @@ export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
 
       <Section title={t("recordDetail.release")}>
         <View style={{ gap: spacing.lg }}>
-          <FieldRow label={t("recordDetail.releaseReleased")} value={formatDate(record.released)} />
-          <FieldRow label={t("recordDetail.releaseCountry")} value={record.country ?? t("common.unknown")} />
-          <FieldRow label={t("recordDetail.releaseFormats")} value={record.formats.map(formatReleaseFormat).join("\n")} />
-          <FieldRow label={t("recordDetail.releaseGenres")} value={joinValues(record.genres)} />
-          <FieldRow label={t("recordDetail.releaseStyles")} value={joinValues(record.styles)} />
+          <FieldRow
+            label={t("recordDetail.releaseReleased")}
+            value={formatDate(record.released)}
+          />
+          <FieldRow
+            label={t("recordDetail.releaseCountry")}
+            value={record.country ?? t("common.unknown")}
+          />
+          <FieldRow
+            label={t("recordDetail.releaseFormats")}
+            value={record.formats.map(formatReleaseFormat).join("\n")}
+          />
+          <FieldRow
+            label={t("recordDetail.releaseGenres")}
+            value={joinValues(record.genres)}
+          />
+          <FieldRow
+            label={t("recordDetail.releaseStyles")}
+            value={joinValues(record.styles)}
+          />
         </View>
       </Section>
 
       <Section title={t("recordDetail.collection")}>
         <View style={{ gap: spacing.lg }}>
-          <FieldRow label={t("recordDetail.collectionAddedOn")} value={formatDate(record.dateAdded)} />
+          <FieldRow
+            label={t("recordDetail.collectionAddedOn")}
+            value={formatDate(record.dateAdded)}
+          />
         </View>
       </Section>
 
       <Section title={t("recordDetail.labels")}>
         <View style={{ gap: spacing.md }}>
-          {groupLabels(record.labels, t("recordDetail.noCatalogNumber")).map(([name, values], index) => (
-            <FieldRow
-              key={`${name}-${index}`}
-              label={name}
-              value={values.join("\n")}
-            />
-          ))}
+          {groupLabels(record.labels, t("recordDetail.noCatalogNumber")).map(
+            ([name, values], index) => (
+              <FieldRow
+                key={`${name}-${index}`}
+                label={name}
+                value={values.join("\n")}
+              />
+            ),
+          )}
         </View>
       </Section>
 
@@ -127,7 +156,11 @@ export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
               <FieldRow
                 key={`${track.position ?? index}-${track.title}`}
                 label={track.position ?? String(index + 1)}
-                value={track.duration ? `${track.title} (${track.duration})` : track.title}
+                value={
+                  track.duration
+                    ? `${track.title} (${track.duration})`
+                    : track.title
+                }
               />
             ))
           )}
@@ -141,35 +174,46 @@ export function RecordDetailScreen({ releaseId }: RecordDetailScreenProps) {
               {t("recordDetail.identifiersEmpty")}
             </Text>
           ) : (
-            groupIdentifiers(record.identifiers).map(([type, values], index) => (
-              <FieldRow
-                key={`${type}-${index}`}
-                label={type}
-                value={values.join("\n")}
-              />
-            ))
+            groupIdentifiers(record.identifiers).map(
+              ([type, values], index) => (
+                <FieldRow
+                  key={`${type}-${index}`}
+                  label={type}
+                  value={values.join("\n")}
+                />
+              ),
+            )
           )}
         </View>
       </Section>
     </ScrollView>
   );
-}
+};
 
-function formatReleaseFormat(format: { descriptions: string[]; freeText: string | null; name: string }) {
-  return [format.name, ...format.descriptions, format.freeText].filter(Boolean).join(", ");
-}
+const formatReleaseFormat = (format: {
+  descriptions: string[];
+  freeText: string | null;
+  name: string;
+}) =>
+  [format.name, ...format.descriptions, format.freeText]
+    .filter(Boolean)
+    .join(", ");
 
-function formatIdentifierValue(identifier: { description: string | null; value: string }) {
-  return identifier.description ? `${identifier.value} · ${identifier.description}` : identifier.value;
-}
+const formatIdentifierValue = (identifier: {
+  description: string | null;
+  value: string;
+}) =>
+  identifier.description
+    ? `${identifier.value} · ${identifier.description}`
+    : identifier.value;
 
-function groupIdentifiers(
+const groupIdentifiers = (
   identifiers: {
     description: string | null;
     type: string;
     value: string;
   }[],
-) {
+) => {
   const grouped = new Map<string, string[]>();
 
   for (const identifier of identifiers) {
@@ -184,15 +228,15 @@ function groupIdentifiers(
   }
 
   return Array.from(grouped.entries());
-}
+};
 
-function groupLabels(
+const groupLabels = (
   labels: {
     catno: string | null;
     name: string;
   }[],
   emptyValue: string,
-) {
+) => {
   const grouped = new Map<string, string[]>();
 
   for (const label of labels) {
@@ -207,4 +251,4 @@ function groupLabels(
   }
 
   return Array.from(grouped.entries());
-}
+};

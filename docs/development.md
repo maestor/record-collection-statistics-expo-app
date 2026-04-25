@@ -1,6 +1,7 @@
 # Development
 
 ## Local API
+
 Run the Record Collection Statistics API first. The app expects the API to expose OpenAPI at:
 
 ```bash
@@ -20,6 +21,7 @@ npm run check:api-types
 ```
 
 ## Start The App
+
 Use Expo Go first:
 
 ```bash
@@ -46,11 +48,15 @@ For a physical Android device, the API must be reachable from the phone over the
 The read API key is embedded in the app bundle. Treat it as a client-visible gate key, not a private server secret.
 
 ## Verification
+
 Before verification, review the task diff for unused implementation:
 
 - Remove helpers, fallback branches, optional inputs, and defensive checks that no current user path reaches.
 - Keep parameter types as narrow as the current call sites allow.
 - Make sure every behavior added by the task has user-behavior test coverage. If that cannot be done, stop and decide the exception separately.
+- Prefer `const` arrow functions over function declarations. ESLint enforces this with `func-style`.
+- In Expo UI code, inline styles are fine for one-off layout. Extract only repeated visual recipes into shared theme styles such as screen containers, card frames, wrap rows, or filter chips.
+- Promote a repeated UI pattern to a shared component only when it carries styling plus behavior, interaction state, or accessibility semantics. Keep purely visual reuse in shared style objects.
 
 ```bash
 npm run typecheck

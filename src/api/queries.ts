@@ -9,19 +9,23 @@ import {
   getRecordDetail,
   listRecords,
 } from "./client";
-import type { BreakdownDimension, RecordListParams, RecordsResponse } from "./types";
+import type {
+  BreakdownDimension,
+  RecordListParams,
+  RecordsResponse,
+} from "./types";
 
 const apiConfig = getApiConfig();
 
-function useApiQueryBase() {
+const useApiQueryBase = () => {
   return {
-    enabled: true,
     queryScope: [apiConfig.baseUrl] as const,
     config: apiConfig,
+    enabled: true,
   };
-}
+};
 
-export function useHealthQuery() {
+export const useHealthQuery = () => {
   const { config, enabled, queryScope } = useApiQueryBase();
 
   return useQuery({
@@ -29,9 +33,9 @@ export function useHealthQuery() {
     queryFn: () => getHealth(config),
     queryKey: ["health", ...queryScope],
   });
-}
+};
 
-export function useDashboardStatsQuery(limit: number) {
+export const useDashboardStatsQuery = (limit: number) => {
   const { config, enabled, queryScope } = useApiQueryBase();
 
   return useQuery({
@@ -39,9 +43,9 @@ export function useDashboardStatsQuery(limit: number) {
     queryFn: () => getDashboardStats(config, limit),
     queryKey: ["dashboard", ...queryScope, limit],
   });
-}
+};
 
-export function useFiltersQuery(limit: number) {
+export const useFiltersQuery = (limit: number) => {
   const { config, enabled, queryScope } = useApiQueryBase();
 
   return useQuery({
@@ -49,9 +53,9 @@ export function useFiltersQuery(limit: number) {
     queryFn: () => getFilters(config, limit),
     queryKey: ["filters", ...queryScope, limit],
   });
-}
+};
 
-export function useRecordsQuery(params: Omit<RecordListParams, "page">) {
+export const useRecordsQuery = (params: Omit<RecordListParams, "page">) => {
   const { config, enabled, queryScope } = useApiQueryBase();
 
   return useInfiniteQuery<RecordsResponse>({
@@ -68,9 +72,9 @@ export function useRecordsQuery(params: Omit<RecordListParams, "page">) {
       }),
     queryKey: ["records", ...queryScope, params],
   });
-}
+};
 
-export function useRecordDetailQuery(releaseId: number) {
+export const useRecordDetailQuery = (releaseId: number) => {
   const { config, enabled, queryScope } = useApiQueryBase();
 
   return useQuery({
@@ -78,9 +82,9 @@ export function useRecordDetailQuery(releaseId: number) {
     queryFn: () => getRecordDetail(config, releaseId),
     queryKey: ["record-detail", ...queryScope, releaseId],
   });
-}
+};
 
-export function useBreakdownQuery(dimension: BreakdownDimension) {
+export const useBreakdownQuery = (dimension: BreakdownDimension) => {
   const { config, enabled, queryScope } = useApiQueryBase();
 
   return useQuery({
@@ -88,4 +92,4 @@ export function useBreakdownQuery(dimension: BreakdownDimension) {
     queryFn: () => getBreakdown(config, dimension),
     queryKey: ["breakdown", ...queryScope, dimension],
   });
-}
+};

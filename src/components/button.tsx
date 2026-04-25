@@ -38,14 +38,14 @@ const variantStyles = {
   },
 } as const;
 
-export function Button({
+export const Button = ({
   disabled,
   isLoading = false,
   label,
   style,
   variant = "primary",
   ...props
-}: ButtonProps) {
+}: ButtonProps) => {
   const styles = variantStyles[variant];
   const isDisabled = disabled || isLoading;
 
@@ -87,4 +87,4 @@ export function Button({
       </Text>
     </Pressable>
   );
-}
+};

@@ -1,27 +1,17 @@
+const { defineConfig } = require("eslint/config");
 const expoConfig = require("eslint-config-expo/flat");
 
-module.exports = [
-  ...expoConfig,
+module.exports = defineConfig([
+  expoConfig,
   {
-    ignores: [
-      ".agents/**",
-      ".expo/**",
-      "coverage/**",
-      "docs/plans/**",
-      "node_modules/**",
-      "src/api/generated/**"
-    ],
-  },
-  {
-    files: ["app/_layout.tsx"],
     rules: {
-      "import/no-duplicates": "off",
+      "func-style": ["error", "expression", { allowArrowFunctions: true }],
     },
   },
   {
-    files: ["jest.setup.ts"],
-    rules: {
-      "@typescript-eslint/no-require-imports": "off",
-    },
+    ignores: ["dist/*"],
   },
-];
+  {
+    ignores: [".agents/**", ".expo/**", "coverage/**"],
+  },
+]);

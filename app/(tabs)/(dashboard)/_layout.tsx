@@ -4,7 +4,7 @@ import { Stack } from "expo-router";
 import { translate } from "@/localization/i18n";
 import { colors } from "@/theme/colors";
 
-export default function DashboardStackLayout() {
+const DashboardStackLayout = () => {
   return (
     <Stack
       screenOptions={{
@@ -13,9 +13,20 @@ export default function DashboardStackLayout() {
         headerTintColor: colors.text,
       }}
     >
-      <Stack.Screen name="index" options={{ title: translate("navigation.dashboard") }} />
-      <Stack.Screen name="highlights" options={{ title: translate("navigation.highlights") }} />
-      <Stack.Screen name="breakdowns/[dimension]" options={{ title: translate("navigation.breakdown") }} />
+      <Stack.Screen
+        name="index"
+        options={{ title: translate("navigation.dashboard") }}
+      />
+      <Stack.Screen
+        name="highlights"
+        options={{ title: translate("navigation.highlights") }}
+      />
+      <Stack.Screen
+        name="breakdowns/[dimension]"
+        options={{ title: translate("navigation.breakdown") }}
+      />
     </Stack>
   );
-}
+};
+
+export default DashboardStackLayout;

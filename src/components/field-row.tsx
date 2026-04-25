@@ -9,16 +9,21 @@ type FieldRowProps = {
   value: string;
 };
 
-export function FieldRow({ label, value }: FieldRowProps) {
+export const FieldRow = ({ label, value }: FieldRowProps) => {
   return (
     <View style={{ gap: spacing.xs }}>
-      <Text selectable style={{ color: colors.textMuted, fontSize: 13, fontWeight: "700" }}>
+      <Text
+        selectable
+        style={{ color: colors.textMuted, fontSize: 13, fontWeight: "700" }}
+      >
         {label}
       </Text>
-      <Text selectable style={{ color: colors.text, fontSize: 16, lineHeight: 22 }}>
+      <Text
+        selectable
+        style={{ color: colors.text, fontSize: 16, lineHeight: 22 }}
+      >
         {value}
       </Text>
     </View>
   );
-}
-
+};

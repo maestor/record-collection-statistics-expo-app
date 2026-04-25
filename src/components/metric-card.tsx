@@ -1,32 +1,34 @@
 import * as React from "react";
 import { Text, View } from "react-native";
 
-import { colors, radius } from "@/theme/colors";
+import { colors } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
+import { surfaceCardStyle } from "@/theme/styles";
 
 type MetricCardProps = {
   label: string;
   value: string;
 };
 
-export function MetricCard({ label, value }: MetricCardProps) {
+export const MetricCard = ({ label, value }: MetricCardProps) => {
   return (
     <View
       accessibilityLabel={`${label}: ${value}`}
-      style={{
-        backgroundColor: colors.surface,
-        borderColor: colors.border,
-        borderCurve: "continuous",
-        borderRadius: radius.md,
-        borderWidth: 1,
-        flexBasis: "47%",
-        flexGrow: 1,
-        gap: spacing.xs,
-        minHeight: 96,
-        padding: spacing.lg,
-      }}
+      style={[
+        surfaceCardStyle,
+        {
+          flexBasis: "47%",
+          flexGrow: 1,
+          gap: spacing.xs,
+          minHeight: 96,
+          padding: spacing.lg,
+        },
+      ]}
     >
-      <Text selectable style={{ color: colors.textMuted, fontSize: 13, fontWeight: "700" }}>
+      <Text
+        selectable
+        style={{ color: colors.textMuted, fontSize: 13, fontWeight: "700" }}
+      >
         {label}
       </Text>
       <Text
@@ -42,5 +44,4 @@ export function MetricCard({ label, value }: MetricCardProps) {
       </Text>
     </View>
   );
-}
-
+};

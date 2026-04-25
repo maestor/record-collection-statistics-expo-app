@@ -54,7 +54,7 @@ const filtersPayload = {
   meta: { limit: 10 },
 };
 
-function recordsPayload(page: number) {
+const recordsPayload = (page: number) => {
   return {
     data: page === 1 ? [firstRecord] : [secondRecord],
     filters: {
@@ -79,7 +79,7 @@ function recordsPayload(page: number) {
       totalPages: 2,
     },
   };
-}
+};
 
 describe("RecordsScreen", () => {
   beforeEach(() => {
@@ -101,7 +101,9 @@ describe("RecordsScreen", () => {
 
     expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
     expect(screen.getByText("Vinyl, EP, Limited edition")).toBeTruthy();
-    const recordLink = screen.getByRole("link", { name: "Muscle Museum EP - Muse" });
+    const recordLink = screen.getByRole("link", {
+      name: "Muscle Museum EP - Muse",
+    });
     startPressablePressedState(recordLink);
     expect(recordLink).toHaveStyle({ opacity: 0.84 });
     endPressablePressedState(recordLink);
@@ -109,37 +111,54 @@ describe("RecordsScreen", () => {
       expect(recordLink).toHaveStyle({ opacity: 1 });
     });
     fireEvent.press(recordLink);
-    expect((useRouter as jest.Mock).mock.results[0]?.value.push).toHaveBeenCalledWith({
+    expect(
+      (useRouter as jest.Mock).mock.results[0]?.value.push,
+    ).toHaveBeenCalledWith({
       params: { releaseId: "37098591" },
       pathname: "/records/[releaseId]",
     });
-    const searchButton = screen.getByRole("button", { name: t("records.searchButton") });
+    const searchButton = screen.getByRole("button", {
+      name: t("records.searchButton"),
+    });
     startPressablePressedState(searchButton);
     expect(searchButton).toHaveStyle({ opacity: 0.8 });
     endPressablePressedState(searchButton);
     await waitFor(() => {
       expect(searchButton).toHaveStyle({ opacity: 1 });
     });
-    fireEvent.changeText(screen.getByLabelText(t("records.searchLabel")), "Muse");
+    fireEvent.changeText(
+      screen.getByLabelText(t("records.searchLabel")),
+      "Muse",
+    );
     fireEvent.press(searchButton);
-    fireEvent.press(screen.getByRole("button", { name: `${t("records.filtersButton")} (1)` }));
+    fireEvent.press(
+      screen.getByRole("button", { name: `${t("records.filtersButton")} (1)` }),
+    );
 
     expect(await screen.findByText("Vinyl")).toBeTruthy();
     expect(screen.getByText(t("records.filterArtists"))).toBeTruthy();
     expect(screen.queryByText(t("records.filterCountries"))).toBeNull();
     fireEvent.press(screen.getByRole("button", { name: "Vinyl" }));
-    fireEvent.press(screen.getByRole("button", { name: t("records.sortArtist") }));
-    fireEvent.press(screen.getByRole("button", { name: t("records.orderAscending") }));
+    fireEvent.press(
+      screen.getByRole("button", { name: t("records.sortArtist") }),
+    );
+    fireEvent.press(
+      screen.getByRole("button", { name: t("records.orderAscending") }),
+    );
 
     await waitFor(() => {
-      const urls = (globalThis.fetch as jest.Mock).mock.calls.map((call) => String(call[0]));
+      const urls = (globalThis.fetch as jest.Mock).mock.calls.map((call) =>
+        String(call[0]),
+      );
       expect(urls.some((url) => url.includes("q=Muse"))).toBe(true);
       expect(urls.some((url) => url.includes("format=Vinyl"))).toBe(true);
       expect(urls.some((url) => url.includes("sort=artist"))).toBe(true);
       expect(urls.some((url) => url.includes("order=asc"))).toBe(true);
     });
 
-    fireEvent.press(screen.getByRole("button", { name: t("records.loadMore") }));
+    fireEvent.press(
+      screen.getByRole("button", { name: t("records.loadMore") }),
+    );
     expect(await screen.findByText("Aikuiselämää")).toBeTruthy();
   });
 
@@ -151,17 +170,25 @@ describe("RecordsScreen", () => {
     const searchInput = screen.getByLabelText(t("records.searchLabel"));
     fireEvent.changeText(searchInput, " Muse ");
     fireEvent(searchInput, "submitEditing");
-    fireEvent.press(screen.getByRole("button", { name: `${t("records.filtersButton")} (1)` }));
+    fireEvent.press(
+      screen.getByRole("button", { name: `${t("records.filtersButton")} (1)` }),
+    );
 
     fireEvent.press(screen.getByRole("button", { name: "Rock" }));
     fireEvent.press(screen.getByRole("button", { name: "Muse" }));
     fireEvent.press(screen.getByRole("button", { name: "Vinyl" }));
     fireEvent.press(screen.getByRole("button", { name: "Vinyl" }));
-    fireEvent.press(screen.getByRole("button", { name: t("records.sortArtist") }));
-    fireEvent.press(screen.getByRole("button", { name: t("records.orderAscending") }));
+    fireEvent.press(
+      screen.getByRole("button", { name: t("records.sortArtist") }),
+    );
+    fireEvent.press(
+      screen.getByRole("button", { name: t("records.orderAscending") }),
+    );
 
     await waitFor(() => {
-      const urls = (globalThis.fetch as jest.Mock).mock.calls.map((call) => String(call[0]));
+      const urls = (globalThis.fetch as jest.Mock).mock.calls.map((call) =>
+        String(call[0]),
+      );
       expect(urls.some((url) => url.includes("q=Muse"))).toBe(true);
       expect(urls.some((url) => url.includes("genre=Rock"))).toBe(true);
       expect(urls.some((url) => url.includes("artist=Muse"))).toBe(true);
@@ -170,10 +197,14 @@ describe("RecordsScreen", () => {
       expect(urls.some((url) => url.includes("order=asc"))).toBe(true);
     });
 
-    fireEvent.press(screen.getByRole("button", { name: t("records.clearFilters") }));
+    fireEvent.press(
+      screen.getByRole("button", { name: t("records.clearFilters") }),
+    );
 
     await waitFor(() => {
-      const urls = (globalThis.fetch as jest.Mock).mock.calls.map((call) => String(call[0]));
+      const urls = (globalThis.fetch as jest.Mock).mock.calls.map((call) =>
+        String(call[0]),
+      );
       expect(
         urls.some(
           (url) =>
@@ -226,7 +257,9 @@ describe("RecordsScreen", () => {
       });
 
       await waitFor(() => {
-        const urls = (globalThis.fetch as jest.Mock).mock.calls.map((call) => String(call[0]));
+        const urls = (globalThis.fetch as jest.Mock).mock.calls.map((call) =>
+          String(call[0]),
+        );
         expect(urls.some((url) => url.includes("q=Muse"))).toBe(true);
       });
 
@@ -258,7 +291,11 @@ describe("RecordsScreen", () => {
 
       return url.includes("/filters")
         ? jsonResponse(filtersPayload)
-        : jsonResponse({ ...recordsPayload(1), data: [], meta: { page: 1, pageSize: 25, total: 0, totalPages: 0 } });
+        : jsonResponse({
+            ...recordsPayload(1),
+            data: [],
+            meta: { page: 1, pageSize: 25, total: 0, totalPages: 0 },
+          });
     });
 
     renderWithProviders(<RecordsScreen />);
@@ -292,7 +329,11 @@ describe("RecordsScreen", () => {
 
     renderWithProviders(<RecordsScreen />);
 
-    expect(await screen.findByRole("link", { name: "Untitled Release - Tuntematon artisti" })).toBeTruthy();
+    expect(
+      await screen.findByRole("link", {
+        name: "Untitled Release - Tuntematon artisti",
+      }),
+    ).toBeTruthy();
     expect(screen.getByText("Tuntematon artisti")).toBeTruthy();
     expect(screen.getByText("Tuntematon · Tuntematon maa")).toBeTruthy();
     expect(screen.getByText("Lisätty Tuntematon")).toBeTruthy();
@@ -320,12 +361,17 @@ describe("RecordsScreen", () => {
     renderWithProviders(<RecordsScreen />);
 
     expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
-    const loadMoreButton = screen.getByRole("button", { name: t("records.loadMore") });
+    const loadMoreButton = screen.getByRole("button", {
+      name: t("records.loadMore"),
+    });
 
     fireEvent.press(loadMoreButton);
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: t("records.loadMore") }).props.accessibilityState).toEqual({
+      expect(
+        screen.getByRole("button", { name: t("records.loadMore") }).props
+          .accessibilityState,
+      ).toEqual({
         busy: true,
         disabled: true,
       });
@@ -353,7 +399,9 @@ describe("RecordsScreen", () => {
     renderWithProviders(<RecordsScreen />);
 
     expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
-    fireEvent.press(screen.getByRole("button", { name: t("records.filtersButton") }));
+    fireEvent.press(
+      screen.getByRole("button", { name: t("records.filtersButton") }),
+    );
     expect(screen.getByLabelText(t("records.filterPanelLabel"))).toBeTruthy();
 
     expect(screen.getByText(t("records.loadingFilters"))).toBeTruthy();
@@ -361,7 +409,9 @@ describe("RecordsScreen", () => {
     resolveFiltersResponse?.(jsonResponse(filtersPayload));
 
     expect(await screen.findByText("Vinyl")).toBeTruthy();
-    fireEvent.press(screen.getByRole("button", { name: t("records.closeFilters") }));
+    fireEvent.press(
+      screen.getByRole("button", { name: t("records.closeFilters") }),
+    );
     await waitFor(() => {
       expect(screen.queryByLabelText(t("records.filterPanelLabel"))).toBeNull();
     });

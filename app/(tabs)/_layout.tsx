@@ -5,7 +5,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { translate } from "@/localization/i18n";
 import { colors } from "@/theme/colors";
 
-export default function TabsLayout() {
+const TabsLayout = () => {
   return (
     <Tabs
       screenOptions={{
@@ -36,7 +36,11 @@ export default function TabsLayout() {
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size, focused }) => (
-            <MaterialCommunityIcons color={color} name={focused ? "album" : "album"} size={size} />
+            <MaterialCommunityIcons
+              color={color}
+              name={focused ? "album" : "album"}
+              size={size}
+            />
           ),
           title: translate("navigation.records"),
         }}
@@ -45,7 +49,11 @@ export default function TabsLayout() {
         name="info"
         options={{
           tabBarIcon: ({ color, size, focused }) => (
-            <MaterialCommunityIcons color={color} name={focused ? "information" : "information-outline"} size={size} />
+            <MaterialCommunityIcons
+              color={color}
+              name={focused ? "information" : "information-outline"}
+              size={size}
+            />
           ),
           headerStyle: { backgroundColor: colors.surfaceMuted },
           headerTintColor: colors.text,
@@ -54,4 +62,6 @@ export default function TabsLayout() {
       />
     </Tabs>
   );
-}
+};
+
+export default TabsLayout;

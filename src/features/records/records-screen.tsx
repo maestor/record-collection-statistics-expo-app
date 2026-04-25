@@ -7,6 +7,7 @@ import { getErrorMessage } from "@/api/client";
 import { Button } from "@/components/button";
 import { Chip } from "@/components/chip";
 import { Panel } from "@/components/panel";
+import { SelectionTrigger } from "@/components/selection-trigger";
 import { Section } from "@/components/section";
 import { StatusMessage } from "@/components/status-message";
 import { useTranslation, translate } from "@/localization/i18n";
@@ -173,11 +174,12 @@ export const RecordsScreen = () => {
             ]}
             value={draftQuery}
           />
-          <Button
+          <SelectionTrigger
+            accessibilityLabel={`${t("records.filtersButton")}${activeFilterCount ? ` (${activeFilterCount})` : ""}`}
+            actionLabel={t("records.selectFilters")}
             label={`${t("records.filtersButton")}${activeFilterCount ? ` (${activeFilterCount})` : ""}`}
             onPress={() => setFiltersOpen(true)}
             style={{ width: "100%" }}
-            variant="secondary"
           />
         </View>
       </Section>

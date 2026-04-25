@@ -10,7 +10,7 @@ export const translations = {
     },
     navigation: {
       breakdown: "Jakauma",
-      dashboard: "Levykirjasto",
+      dashboard: "Yhteenveto",
       info: "Info",
       record: "Levy",
       records: "Levyt",
@@ -25,7 +25,7 @@ export const translations = {
     },
     dashboard: {
       browseRecords: "Selaa äänitteitä",
-      errorTitle: "Levykirjasto ei ole saatavilla",
+      errorTitle: "Yhteenveto ei ole saatavilla",
       healthStatusHealthy: "Kokoelma ajantasalla",
       healthStatusUnavailable: "Kokoelma ei ole saatavilla",
       loadingMessage: "Ladataan kokoelmaa ja yhteenvetoja.",
@@ -139,6 +139,7 @@ export const translations = {
       searchLabel: "Hae levyjä",
       searchPlaceholder: "Artisti, nimi, levymerkki, genre...",
       searchTitle: "Etsi levyjä",
+      selectFilters: "Valitse",
       sortArtist: "Artisti",
       sortBy: "Järjestä",
       sortDateAdded: "Lisäyspäivä",

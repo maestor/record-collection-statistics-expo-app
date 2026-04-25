@@ -74,7 +74,7 @@ export function Button({
       ]}
       {...props}
     >
-      {isLoading ? <ActivityIndicator color={styles.color} /> : null}
+      {isLoading && <ActivityIndicator color={styles.color} />}
       <Text
         style={{
           color: styles.color,

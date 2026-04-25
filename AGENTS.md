@@ -15,6 +15,10 @@
 - Preserve Android as the priority platform. iOS support should not block Android debug workflows.
 - Implement only code needed by the current user-facing behavior. Do not add helpers, branches, optional parameters, fallback handling, or defensive checks for hypothetical future use.
 - Type function inputs as narrowly as the current implementation requires. Use required strings, numbers, and concrete unions when callers always provide those values; widen to `null`, `undefined`, optional, or broader unions only when a real current call path needs it.
+- Use `assertNever` for exhaustive `switch` defaults over union values. Keep the `assertNever` helper ignored from coverage and add `/* istanbul ignore next -- exhaustive type guard for impossible union values */` immediately before each impossible `default` case; the reachable behavior belongs in the real cases, not the impossible default.
+- Prefer `condition && <Element />` for conditional JSX when the fallback is `null`. Use a ternary only when both branches render meaningful UI or values.
+- Use the Pressable responder-state test helper only for user-visible pressed-condition style assertions. Do not use it for actions or normal interaction flows; use Testing Library press interactions there.
+- Coverage ignores are allowed only for documented, currently unreachable guardrails that preserve user-facing resilience without adding a meaningful behavior path to test, such as non-JSON error-body fallbacks or exhaustive type guards.
 - If a requested task seems to require unused code, speculative defensive logic, unreachable branches, or untestable behavior, stop and explain the issue before continuing. Do not change direction just to make coverage or implementation easier.
 
 ## Quality

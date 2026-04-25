@@ -1,9 +1,16 @@
 import * as React from "react";
 import { Linking } from "react-native";
-import { fireEvent, screen } from "@testing-library/react-native";
+import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 
 import { InfoScreen } from "@/features/info/info-screen";
-import { jsonResponse, renderWithProviders, t } from "../test/test-utils";
+import { colors } from "@/theme/colors";
+import {
+  endPressablePressedState,
+  jsonResponse,
+  renderWithProviders,
+  startPressablePressedState,
+  t,
+} from "../test/test-utils";
 
 describe("InfoScreen", () => {
   beforeEach(() => {
@@ -57,9 +64,14 @@ describe("InfoScreen", () => {
     expect(screen.getByText(t("dashboard.syncStatusTitle"))).toBeTruthy();
     expect(screen.getByText(t("info.copyright"))).toBeTruthy();
 
-    fireEvent(screen.getByRole("link", { name: t("info.openExternalLink", { label: "LinkedIn" }) }), "pressIn");
-    fireEvent(screen.getByRole("link", { name: t("info.openExternalLink", { label: "LinkedIn" }) }), "pressOut");
-    fireEvent.press(screen.getByRole("link", { name: t("info.openExternalLink", { label: "LinkedIn" }) }));
+    const linkedInLink = screen.getByRole("link", { name: t("info.openExternalLink", { label: "LinkedIn" }) });
+    startPressablePressedState(linkedInLink);
+    expect(linkedInLink).toHaveStyle({ backgroundColor: colors.primary });
+    endPressablePressedState(linkedInLink);
+    await waitFor(() => {
+      expect(linkedInLink).toHaveStyle({ backgroundColor: colors.surfaceMuted });
+    });
+    fireEvent.press(linkedInLink);
     fireEvent.press(screen.getByRole("link", { name: t("info.openExternalLink", { label: "App" }) }));
     fireEvent.press(screen.getByRole("link", { name: t("info.openExternalLink", { label: "API" }) }));
 

@@ -3,7 +3,13 @@ import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
 
 import { RecordsScreen } from "@/features/records/records-screen";
-import { jsonResponse, renderWithProviders, t } from "../test/test-utils";
+import {
+  endPressablePressedState,
+  jsonResponse,
+  renderWithProviders,
+  startPressablePressedState,
+  t,
+} from "../test/test-utils";
 
 const firstRecord = {
   artistsSort: "Muse",
@@ -95,15 +101,27 @@ describe("RecordsScreen", () => {
 
     expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
     expect(screen.getByText("Vinyl, EP, Limited edition")).toBeTruthy();
-    fireEvent(screen.getByRole("link", { name: "Muscle Museum EP - Muse" }), "pressIn");
-    fireEvent(screen.getByRole("link", { name: "Muscle Museum EP - Muse" }), "pressOut");
-    fireEvent.press(screen.getByRole("link", { name: "Muscle Museum EP - Muse" }));
+    const recordLink = screen.getByRole("link", { name: "Muscle Museum EP - Muse" });
+    startPressablePressedState(recordLink);
+    expect(recordLink).toHaveStyle({ opacity: 0.84 });
+    endPressablePressedState(recordLink);
+    await waitFor(() => {
+      expect(recordLink).toHaveStyle({ opacity: 1 });
+    });
+    fireEvent.press(recordLink);
     expect((useRouter as jest.Mock).mock.results[0]?.value.push).toHaveBeenCalledWith({
       params: { releaseId: "37098591" },
       pathname: "/records/[releaseId]",
     });
+    const searchButton = screen.getByRole("button", { name: t("records.searchButton") });
+    startPressablePressedState(searchButton);
+    expect(searchButton).toHaveStyle({ opacity: 0.8 });
+    endPressablePressedState(searchButton);
+    await waitFor(() => {
+      expect(searchButton).toHaveStyle({ opacity: 1 });
+    });
     fireEvent.changeText(screen.getByLabelText(t("records.searchLabel")), "Muse");
-    fireEvent.press(screen.getByRole("button", { name: t("records.searchButton") }));
+    fireEvent.press(searchButton);
     fireEvent.press(screen.getByRole("button", { name: `${t("records.filtersButton")} (1)` }));
 
     expect(await screen.findByText("Vinyl")).toBeTruthy();
@@ -200,7 +218,7 @@ describe("RecordsScreen", () => {
             ...firstRecord,
             artistsSort: null,
             country: null,
-            dateAdded: null,
+            dateAdded: "not-a-date",
             formats: [{ descriptions: ["EP"], freeText: null, name: "Vinyl" }],
             releaseYear: 0,
             thumb: null,
@@ -216,6 +234,70 @@ describe("RecordsScreen", () => {
     expect(screen.getByText("Tuntematon artisti")).toBeTruthy();
     expect(screen.getByText("Tuntematon · Tuntematon maa")).toBeTruthy();
     expect(screen.getByText("Lisätty Tuntematon")).toBeTruthy();
+  });
+
+  it("keeps the load more button busy and disabled while the next page is loading", async () => {
+    let resolveNextPageResponse: ((response: Response) => void) | undefined;
+
+    globalThis.fetch = jest.fn((input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.includes("/filters")) {
+        return Promise.resolve(jsonResponse(filtersPayload));
+      }
+
+      if (url.includes("page=2")) {
+        return new Promise<Response>((resolve) => {
+          resolveNextPageResponse = resolve;
+        });
+      }
+
+      return Promise.resolve(jsonResponse(recordsPayload(1)));
+    });
+
+    renderWithProviders(<RecordsScreen />);
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+    const loadMoreButton = screen.getByRole("button", { name: t("records.loadMore") });
+
+    fireEvent.press(loadMoreButton);
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: t("records.loadMore") }).props.accessibilityState).toEqual({
+        busy: true,
+        disabled: true,
+      });
+    });
+    resolveNextPageResponse?.(jsonResponse(recordsPayload(2)));
+
+    expect(await screen.findByText("Aikuiselämää")).toBeTruthy();
+  });
+
+  it("shows a filter loading message while filter options are loading", async () => {
+    let resolveFiltersResponse: ((response: Response) => void) | undefined;
+
+    globalThis.fetch = jest.fn((input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.includes("/filters")) {
+        return new Promise<Response>((resolve) => {
+          resolveFiltersResponse = resolve;
+        });
+      }
+
+      return Promise.resolve(jsonResponse(recordsPayload(1)));
+    });
+
+    renderWithProviders(<RecordsScreen />);
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+    fireEvent.press(screen.getByRole("button", { name: t("records.filtersButton") }));
+
+    expect(screen.getByText(t("records.loadingFilters"))).toBeTruthy();
+
+    resolveFiltersResponse?.(jsonResponse(filtersPayload));
+
+    expect(await screen.findByText("Vinyl")).toBeTruthy();
   });
 
   it("shows a loading state while records are still loading", async () => {

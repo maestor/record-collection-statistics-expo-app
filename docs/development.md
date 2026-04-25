@@ -41,6 +41,14 @@ If Expo Go keeps showing an older icon or splash screen after asset changes, res
 npx expo start --clear
 ```
 
+Create an installable Android preview build when you want to run the app on your phone without Expo Go:
+
+```bash
+npm run preview-app
+```
+
+This uses the `preview` EAS profile to create an internal-distribution Android APK. When the build finishes, Expo provides an install link and QR code you can open on your phone.
+
 The app reads API connection values from Expo config:
 
 - `API_URL`: remote API URL, usually your Vercel domain.

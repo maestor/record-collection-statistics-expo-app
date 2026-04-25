@@ -36,6 +36,16 @@ jest.mock("expo-image", () => {
   };
 });
 
+jest.mock("react-native-gesture-handler", () => {
+  const React = require("react");
+  const { View } = require("react-native");
+
+  return {
+    GestureHandlerRootView: ({ children, style }: React.PropsWithChildren<{ style?: unknown }>) =>
+      React.createElement(View, { style }, children),
+  };
+});
+
 jest.mock("expo-router", () => {
   const React = require("react");
   const { Text } = require("react-native");
@@ -63,15 +73,22 @@ jest.mock("expo-router", () => {
     return null;
   }
 
+  const Stack = Object.assign(Shell, {
+    Screen: jest.fn(Screen),
+    displayName: "MockStack",
+  });
+  const Tabs = Object.assign(Shell, {
+    Screen: jest.fn(Screen),
+    displayName: "MockTabs",
+  });
+
   Link.displayName = "MockLink";
-  Shell.displayName = "MockRouterShell";
   Screen.displayName = "MockRouterScreen";
-  Shell.Screen = Screen;
 
   return {
     Link,
-    Stack: Shell,
-    Tabs: Shell,
+    Stack,
+    Tabs,
     useLocalSearchParams: jest.fn(() => ({})),
     useRouter: jest.fn(() => ({
       push: jest.fn(),

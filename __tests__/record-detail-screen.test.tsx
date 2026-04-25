@@ -63,7 +63,28 @@ const recordDetail = {
 
 describe("RecordDetailScreen", () => {
   beforeEach(() => {
+    jest.restoreAllMocks();
     globalThis.fetch = jest.fn(async () => jsonResponse({ data: recordDetail }));
+  });
+
+  it("renders a loading state before record detail data arrives", async () => {
+    let resolveRecordResponse: ((response: Response) => void) | undefined;
+
+    globalThis.fetch = jest.fn(
+      () =>
+        new Promise<Response>((resolve) => {
+          resolveRecordResponse = resolve;
+        }),
+    );
+
+    renderWithProviders(<RecordDetailScreen releaseId={37098591} />);
+
+    expect(screen.getByText(t("recordDetail.loadingTitle"))).toBeTruthy();
+    expect(screen.getByText(t("recordDetail.loadingMessage"))).toBeTruthy();
+
+    resolveRecordResponse?.(jsonResponse({ data: recordDetail }));
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
   });
 
   it("renders record metadata, tracks, and community stats", async () => {
@@ -84,6 +105,67 @@ describe("RecordDetailScreen", () => {
     expect(screen.getByText("5026854087467\n9362499549")).toBeTruthy();
     expect(screen.getByText(t("recordDetail.noCatalogNumber"))).toBeTruthy();
     expect(screen.getByText("Sober")).toBeTruthy();
+  });
+
+  it("renders empty and fallback detail values", async () => {
+    globalThis.fetch = jest.fn(async () =>
+      jsonResponse({
+        data: {
+          ...recordDetail,
+          artistsSort: null,
+          country: null,
+          coverImage: null,
+          dateAdded: null,
+          genres: [],
+          identifiers: [],
+          labels: [{ catno: null, labelId: 1, name: "Unknown Label", position: 0 }],
+          released: null,
+          styles: [],
+          tracks: [],
+        },
+      }),
+    );
+
+    renderWithProviders(<RecordDetailScreen releaseId={37098591} />);
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+    expect(screen.getByText(t("common.unknownArtist"))).toBeTruthy();
+    expect(screen.getAllByText(t("common.unknown")).length).toBeGreaterThanOrEqual(4);
+    expect(screen.getByText(t("recordDetail.tracksEmpty"))).toBeTruthy();
+    expect(screen.getByText(t("recordDetail.identifiersEmpty"))).toBeTruthy();
+    expect(screen.getByText("Unknown Label")).toBeTruthy();
+    expect(screen.getByText(t("recordDetail.noCatalogNumber"))).toBeTruthy();
+  });
+
+  it("renders track durations when the API provides them", async () => {
+    globalThis.fetch = jest.fn(async () =>
+      jsonResponse({
+        data: {
+          ...recordDetail,
+          tracks: [{ duration: "3:12", position: "A1", title: "Muscle Museum", type: "track" }],
+        },
+      }),
+    );
+
+    renderWithProviders(<RecordDetailScreen releaseId={37098591} />);
+
+    expect(await screen.findByText("Muscle Museum (3:12)")).toBeTruthy();
+  });
+
+  it("falls back to the track index when the position is missing", async () => {
+    globalThis.fetch = jest.fn(async () =>
+      jsonResponse({
+        data: {
+          ...recordDetail,
+          tracks: [{ duration: "", position: null, title: "Hidden Track", type: "track" }],
+        },
+      }),
+    );
+
+    renderWithProviders(<RecordDetailScreen releaseId={37098591} />);
+
+    expect(await screen.findByText("1")).toBeTruthy();
+    expect(screen.getByText("Hidden Track")).toBeTruthy();
   });
 
   it("renders invalid release id state", async () => {

@@ -12,7 +12,9 @@
       "jest"
     ],
     "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true
+    "exactOptionalPropertyTypes": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   },
   "include": [
     "app",

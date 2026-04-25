@@ -6,13 +6,13 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
 
 import { translate } from "@/localization/i18n";
-import { AppProviders } from "@/providers/app-providers";
+import { AppProviders, appQueryClient } from "@/providers/app-providers";
 import { colors } from "@/theme/colors";
 
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <AppProviders>
+      <AppProviders client={appQueryClient}>
         <StatusBar style="light" />
         <Stack
           screenOptions={{

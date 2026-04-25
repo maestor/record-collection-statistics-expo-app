@@ -14,12 +14,15 @@ export function createQueryClient() {
   });
 }
 
-const queryClient = createQueryClient();
+export const appQueryClient = createQueryClient();
 
-export function AppProviders({ children }: React.PropsWithChildren) {
+export function AppProviders({
+  children,
+  client,
+}: React.PropsWithChildren<{ client: QueryClient }>) {
   return (
     <LocalizationProvider>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
     </LocalizationProvider>
   );
 }

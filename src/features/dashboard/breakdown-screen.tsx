@@ -39,14 +39,14 @@ export function BreakdownScreen({ dimension }: { dimension: BreakdownDimension }
       style={{ backgroundColor: colors.background }}
       contentContainerStyle={{ gap: spacing.xl, padding: spacing.lg }}
     >
-      {query.isLoading ? (
+      {query.isLoading && (
         <StatusMessage
           message={t("breakdowns.loadingMessage")}
           title={t("breakdowns.loadingTitle")}
           tone="loading"
         />
-      ) : null}
-      {query.isError ? (
+      )}
+      {query.isError && (
         <StatusMessage
           actionLabel={t("common.tryAgain")}
           message={getErrorMessage(query.error)}
@@ -54,10 +54,10 @@ export function BreakdownScreen({ dimension }: { dimension: BreakdownDimension }
           title={t("navigation.breakdown")}
           tone="error"
         />
-      ) : null}
-      {query.data ? (
+      )}
+      {query.data && (
         <BreakdownList items={query.data.data} title={titleForDimension(dimension)} />
-      ) : null}
+      )}
     </ScrollView>
   );
 }

@@ -15,7 +15,7 @@ React Native and Expo app for browsing a personal Discogs-backed record collecti
 - Expo Go for the fastest local development loop.
 - Record Collection Statistics API running locally for live data and API type generation.
 
-Set `API_URL` and `API_KEY` in the Expo project environments for EAS builds and updates. Use `sensitive` or `plain text` visibility for the key so app config can embed it. Without `API_URL`, the app falls back to `http://127.0.0.1:3003` on desktop/web and `http://10.0.2.2:3003` on Android.
+Set `API_URL` and `API_KEY` in the Expo project environments for EAS builds and updates. Use `sensitive` or `plain text` visibility for the key so app config can embed it. Without `API_URL`, the app falls back to the Android emulator API URL `http://10.0.2.2:3003`.
 
 ## Commands
 ```bash

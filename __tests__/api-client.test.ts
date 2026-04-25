@@ -1,6 +1,5 @@
 import {
   ANDROID_EMULATOR_API_BASE_URL,
-  getDeviceReachableBaseUrl,
   getHealth,
   listRecords,
 } from "@/api/client";
@@ -34,7 +33,7 @@ describe("api client", () => {
     expect(headers.get("x-api-key")).toBe("secret-key");
   });
 
-  it("serializes record query params and omits empty values", async () => {
+  it("serializes record query params without leaking the API key", async () => {
     globalThis.fetch = jest.fn(async () =>
       jsonResponse({
         data: [],
@@ -89,6 +88,14 @@ describe("api client", () => {
     );
   });
 
+  it("falls back to the status when an API error body has no message", async () => {
+    globalThis.fetch = jest.fn(async () => jsonResponse({}, 503));
+
+    await expect(getHealth({ apiKey: "", baseUrl: "http://example.test" })).rejects.toThrow(
+      "Request failed with status 503",
+    );
+  });
+
   it("handles abort errors when DOMException is unavailable", async () => {
     const originalDomException = globalThis.DOMException;
     Object.defineProperty(globalThis, "DOMException", {
@@ -109,6 +116,24 @@ describe("api client", () => {
     });
   });
 
+  it("times out requests that do not complete", async () => {
+    jest.useFakeTimers();
+    globalThis.fetch = jest.fn(
+      (_input: RequestInfo | URL, init?: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () => {
+            reject({ name: "AbortError" });
+          });
+        }),
+    );
+
+    const request = getHealth({ apiKey: "", baseUrl: "http://example.test" });
+
+    jest.advanceTimersByTime(10_000);
+
+    await expect(request).rejects.toThrow("Request timed out");
+  });
+
   it("explains loopback network failures for Android", async () => {
     globalThis.fetch = jest.fn(async () => {
       throw new TypeError("Network request failed");
@@ -117,11 +142,5 @@ describe("api client", () => {
     await expect(
       getHealth({ apiKey: "", baseUrl: "http://127.0.0.1:3003" }),
     ).rejects.toThrow(`Use ${ANDROID_EMULATOR_API_BASE_URL} for the emulator`);
-  });
-
-  it("can migrate the Android loopback default to the emulator URL", () => {
-    expect(getDeviceReachableBaseUrl("http://127.0.0.1:3003", "android")).toBe(
-      ANDROID_EMULATOR_API_BASE_URL,
-    );
   });
 });

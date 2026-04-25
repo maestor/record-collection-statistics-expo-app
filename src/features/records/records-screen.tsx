@@ -10,10 +10,11 @@ import { StatusMessage } from "@/components/status-message";
 import { useTranslation, translate } from "@/localization/i18n";
 import { colors, radius } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
+import { assertNever } from "@/utils/assert-never";
 import { formatCount } from "@/utils/format";
 import { RecordCard } from "./record-card";
 
-type SortValue = NonNullable<RecordListParams["sort"]>;
+type SortValue = "artist" | "date_added" | "release_year" | "title";
 type OrderValue = NonNullable<RecordListParams["order"]>;
 type FilterKey = "artist" | "country" | "format" | "genre";
 
@@ -30,8 +31,9 @@ function labelForSort(sort: SortValue): string {
       return translate("records.sortArtist");
     case "title":
       return translate("records.sortTitle");
+    /* istanbul ignore next -- exhaustive type guard for impossible union values */
     default:
-      return translate("records.sortDateAdded");
+      return assertNever(sort);
   }
 }
 
@@ -136,7 +138,7 @@ export function RecordsScreen() {
         </View>
       </Section>
 
-      {filtersOpen ? (
+      {filtersOpen && (
         <FilterPanel
           clearFilters={clearFilters}
           filters={filtersQuery.data?.data}
@@ -148,17 +150,17 @@ export function RecordsScreen() {
           setSort={setSort}
           sort={sort}
         />
-      ) : null}
+      )}
 
-      {recordsQuery.isLoading ? (
+      {recordsQuery.isLoading && (
         <StatusMessage
           message={t("records.loadingMessage")}
           title={t("records.loadingTitle")}
           tone="loading"
         />
-      ) : null}
+      )}
 
-      {recordsQuery.isError ? (
+      {recordsQuery.isError && (
         <StatusMessage
           actionLabel={t("common.tryAgain")}
           message={getErrorMessage(recordsQuery.error)}
@@ -166,9 +168,9 @@ export function RecordsScreen() {
           title={t("records.errorTitle")}
           tone="error"
         />
-      ) : null}
+      )}
 
-      {firstPage ? (
+      {firstPage && (
         <Section title={t("records.resultsTitle", { count: formatCount(firstPage.meta.total) })}>
           <View style={{ gap: spacing.md }}>
             {records.length === 0 ? (
@@ -180,16 +182,16 @@ export function RecordsScreen() {
               records.map((record) => <RecordCard key={record.releaseId} record={record} />)
             )}
           </View>
-          {recordsQuery.hasNextPage ? (
+          {recordsQuery.hasNextPage && (
             <Button
               isLoading={recordsQuery.isFetchingNextPage}
               label={t("records.loadMore")}
               onPress={() => void recordsQuery.fetchNextPage()}
               variant="secondary"
             />
-          ) : null}
+          )}
         </Section>
-      ) : null}
+      )}
     </ScrollView>
   );
 }
@@ -251,12 +253,12 @@ function FilterPanel({
         selected={order}
         onSelect={(value) => setOrder(value as OrderValue)}
       />
-      {isLoading ? (
+      {isLoading && (
         <Text selectable style={{ color: colors.textMuted }}>
           {t("records.loadingFilters")}
         </Text>
-      ) : null}
-      {filters ? (
+      )}
+      {filters && (
         <>
           <ChipGroup
             label={t("records.filterFormats")}
@@ -283,7 +285,7 @@ function FilterPanel({
             onSelect={(value) => setFilter("artist", value)}
           />
         </>
-      ) : null}
+      )}
       <Button label={t("records.clearFilters")} onPress={clearFilters} variant="secondary" />
     </View>
   );

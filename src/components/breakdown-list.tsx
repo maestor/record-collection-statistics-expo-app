@@ -29,7 +29,7 @@ export function BreakdownList({ dimension, items, title, withSection = true }: B
           items.map((item) => <BreakdownRow item={item} key={item.value} max={max} />)
         )}
       </View>
-      {dimension ? (
+      {dimension && (
         <Link
           accessibilityRole="link"
           href={{ pathname: "/breakdowns/[dimension]", params: { dimension } }}
@@ -37,7 +37,7 @@ export function BreakdownList({ dimension, items, title, withSection = true }: B
         >
           {`${translate("breakdowns.viewFullPrefix")} ${title.toLowerCase()}`}
         </Link>
-      ) : null}
+      )}
     </>
   );
 

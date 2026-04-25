@@ -1,8 +1,15 @@
 import * as React from "react";
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
+import { useRouter } from "expo-router";
 
 import { RecordsScreen } from "@/features/records/records-screen";
-import { jsonResponse, renderWithProviders, t } from "../test/test-utils";
+import {
+  endPressablePressedState,
+  jsonResponse,
+  renderWithProviders,
+  startPressablePressedState,
+  t,
+} from "../test/test-utils";
 
 const firstRecord = {
   artistsSort: "Muse",
@@ -76,6 +83,7 @@ function recordsPayload(page: number) {
 
 describe("RecordsScreen", () => {
   beforeEach(() => {
+    jest.restoreAllMocks();
     globalThis.fetch = jest.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
 
@@ -93,8 +101,27 @@ describe("RecordsScreen", () => {
 
     expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
     expect(screen.getByText("Vinyl, EP, Limited edition")).toBeTruthy();
+    const recordLink = screen.getByRole("link", { name: "Muscle Museum EP - Muse" });
+    startPressablePressedState(recordLink);
+    expect(recordLink).toHaveStyle({ opacity: 0.84 });
+    endPressablePressedState(recordLink);
+    await waitFor(() => {
+      expect(recordLink).toHaveStyle({ opacity: 1 });
+    });
+    fireEvent.press(recordLink);
+    expect((useRouter as jest.Mock).mock.results[0]?.value.push).toHaveBeenCalledWith({
+      params: { releaseId: "37098591" },
+      pathname: "/records/[releaseId]",
+    });
+    const searchButton = screen.getByRole("button", { name: t("records.searchButton") });
+    startPressablePressedState(searchButton);
+    expect(searchButton).toHaveStyle({ opacity: 0.8 });
+    endPressablePressedState(searchButton);
+    await waitFor(() => {
+      expect(searchButton).toHaveStyle({ opacity: 1 });
+    });
     fireEvent.changeText(screen.getByLabelText(t("records.searchLabel")), "Muse");
-    fireEvent.press(screen.getByRole("button", { name: t("records.searchButton") }));
+    fireEvent.press(searchButton);
     fireEvent.press(screen.getByRole("button", { name: `${t("records.filtersButton")} (1)` }));
 
     expect(await screen.findByText("Vinyl")).toBeTruthy();
@@ -114,6 +141,55 @@ describe("RecordsScreen", () => {
     expect(await screen.findByText("Aikuiselämää")).toBeTruthy();
   });
 
+  it("supports keyboard search submit, filter toggles, and clearing filters", async () => {
+    renderWithProviders(<RecordsScreen />);
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+
+    const searchInput = screen.getByLabelText(t("records.searchLabel"));
+    fireEvent.changeText(searchInput, " Muse ");
+    fireEvent(searchInput, "submitEditing");
+    fireEvent.press(screen.getByRole("button", { name: `${t("records.filtersButton")} (1)` }));
+
+    fireEvent.press(screen.getByRole("button", { name: "Rock" }));
+    fireEvent.press(screen.getByRole("button", { name: "Worldwide" }));
+    fireEvent.press(screen.getByRole("button", { name: "Muse" }));
+    fireEvent.press(screen.getByRole("button", { name: "Vinyl" }));
+    fireEvent.press(screen.getByRole("button", { name: "Vinyl" }));
+    fireEvent.press(screen.getByRole("button", { name: t("records.sortArtist") }));
+    fireEvent.press(screen.getByRole("button", { name: t("records.orderAscending") }));
+
+    await waitFor(() => {
+      const urls = (globalThis.fetch as jest.Mock).mock.calls.map((call) => String(call[0]));
+      expect(urls.some((url) => url.includes("q=Muse"))).toBe(true);
+      expect(urls.some((url) => url.includes("genre=Rock"))).toBe(true);
+      expect(urls.some((url) => url.includes("country=Worldwide"))).toBe(true);
+      expect(urls.some((url) => url.includes("artist=Muse"))).toBe(true);
+      expect(urls.some((url) => url.includes("format=Vinyl"))).toBe(true);
+      expect(urls.some((url) => url.includes("sort=artist"))).toBe(true);
+      expect(urls.some((url) => url.includes("order=asc"))).toBe(true);
+    });
+
+    fireEvent.press(screen.getByRole("button", { name: t("records.clearFilters") }));
+
+    await waitFor(() => {
+      const urls = (globalThis.fetch as jest.Mock).mock.calls.map((call) => String(call[0]));
+      expect(
+        urls.some(
+          (url) =>
+            url.includes("/records?") &&
+            url.includes("sort=date_added") &&
+            url.includes("order=desc") &&
+            !url.includes("q=") &&
+            !url.includes("artist=") &&
+            !url.includes("country=") &&
+            !url.includes("genre=") &&
+            !url.includes("format="),
+        ),
+      ).toBe(true);
+    });
+  });
+
   it("shows an empty state", async () => {
     globalThis.fetch = jest.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
@@ -125,5 +201,154 @@ describe("RecordsScreen", () => {
 
     renderWithProviders(<RecordsScreen />);
     expect(await screen.findByText(t("records.emptyMessage"))).toBeTruthy();
+  });
+
+  it("renders record cards with fallback metadata from the API response", async () => {
+    globalThis.fetch = jest.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.includes("/filters")) {
+        return jsonResponse(filtersPayload);
+      }
+
+      return jsonResponse({
+        ...recordsPayload(1),
+        data: [
+          {
+            ...firstRecord,
+            artistsSort: null,
+            country: null,
+            dateAdded: "not-a-date",
+            formats: [{ descriptions: ["EP"], freeText: null, name: "Vinyl" }],
+            releaseYear: 0,
+            thumb: null,
+            title: "Untitled Release",
+          },
+        ],
+      });
+    });
+
+    renderWithProviders(<RecordsScreen />);
+
+    expect(await screen.findByRole("link", { name: "Untitled Release - Tuntematon artisti" })).toBeTruthy();
+    expect(screen.getByText("Tuntematon artisti")).toBeTruthy();
+    expect(screen.getByText("Tuntematon · Tuntematon maa")).toBeTruthy();
+    expect(screen.getByText("Lisätty Tuntematon")).toBeTruthy();
+  });
+
+  it("keeps the load more button busy and disabled while the next page is loading", async () => {
+    let resolveNextPageResponse: ((response: Response) => void) | undefined;
+
+    globalThis.fetch = jest.fn((input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.includes("/filters")) {
+        return Promise.resolve(jsonResponse(filtersPayload));
+      }
+
+      if (url.includes("page=2")) {
+        return new Promise<Response>((resolve) => {
+          resolveNextPageResponse = resolve;
+        });
+      }
+
+      return Promise.resolve(jsonResponse(recordsPayload(1)));
+    });
+
+    renderWithProviders(<RecordsScreen />);
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+    const loadMoreButton = screen.getByRole("button", { name: t("records.loadMore") });
+
+    fireEvent.press(loadMoreButton);
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: t("records.loadMore") }).props.accessibilityState).toEqual({
+        busy: true,
+        disabled: true,
+      });
+    });
+    resolveNextPageResponse?.(jsonResponse(recordsPayload(2)));
+
+    expect(await screen.findByText("Aikuiselämää")).toBeTruthy();
+  });
+
+  it("shows a filter loading message while filter options are loading", async () => {
+    let resolveFiltersResponse: ((response: Response) => void) | undefined;
+
+    globalThis.fetch = jest.fn((input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.includes("/filters")) {
+        return new Promise<Response>((resolve) => {
+          resolveFiltersResponse = resolve;
+        });
+      }
+
+      return Promise.resolve(jsonResponse(recordsPayload(1)));
+    });
+
+    renderWithProviders(<RecordsScreen />);
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+    fireEvent.press(screen.getByRole("button", { name: t("records.filtersButton") }));
+
+    expect(screen.getByText(t("records.loadingFilters"))).toBeTruthy();
+
+    resolveFiltersResponse?.(jsonResponse(filtersPayload));
+
+    expect(await screen.findByText("Vinyl")).toBeTruthy();
+  });
+
+  it("shows a loading state while records are still loading", async () => {
+    let resolveRecordsResponse: ((response: Response) => void) | undefined;
+
+    globalThis.fetch = jest.fn((input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.includes("/filters")) {
+        return Promise.resolve(jsonResponse(filtersPayload));
+      }
+
+      return new Promise<Response>((resolve) => {
+        resolveRecordsResponse = resolve;
+      });
+    });
+
+    renderWithProviders(<RecordsScreen />);
+
+    expect(screen.getByText(t("records.loadingTitle"))).toBeTruthy();
+    expect(screen.getByText(t("records.loadingMessage"))).toBeTruthy();
+
+    resolveRecordsResponse?.(jsonResponse(recordsPayload(1)));
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+  });
+
+  it("shows an error state and retries record loading", async () => {
+    globalThis.fetch = jest.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.includes("/filters")) {
+        return jsonResponse(filtersPayload);
+      }
+
+      return jsonResponse({ error: "Records failed" }, 503);
+    });
+
+    renderWithProviders(<RecordsScreen />);
+
+    expect(await screen.findByRole("alert")).toBeTruthy();
+    expect(screen.getByText("Records failed")).toBeTruthy();
+
+    fireEvent.press(screen.getByRole("button", { name: t("common.tryAgain") }));
+
+    await waitFor(() => {
+      const recordCalls = (globalThis.fetch as jest.Mock).mock.calls
+        .map((call) => String(call[0]))
+        .filter((url) => url.includes("/records"));
+
+      expect(recordCalls).toHaveLength(2);
+    });
   });
 });

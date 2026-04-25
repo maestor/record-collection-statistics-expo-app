@@ -21,6 +21,7 @@ export function StatusMessage({
   tone = "info",
 }: StatusMessageProps) {
   const isError = tone === "error";
+  const action = actionLabel && onAction ? { label: actionLabel, onPress: onAction } : undefined;
 
   return (
     <View
@@ -36,11 +37,11 @@ export function StatusMessage({
         padding: spacing.lg,
       }}
     >
-      {tone === "loading" ? <ActivityIndicator color={colors.primary} /> : null}
+      {tone === "loading" && <ActivityIndicator color={colors.primary} />}
       <Text
         selectable
         style={{
-          color: isError ? colors.text : colors.text,
+          color: colors.text,
           fontSize: 18,
           fontWeight: "700",
         }}
@@ -53,9 +54,7 @@ export function StatusMessage({
       >
         {message}
       </Text>
-      {actionLabel && onAction ? (
-        <Button label={actionLabel} onPress={onAction} variant={isError ? "danger" : "secondary"} />
-      ) : null}
+      {action && <Button label={action.label} onPress={action.onPress} variant="danger" />}
     </View>
   );
 }

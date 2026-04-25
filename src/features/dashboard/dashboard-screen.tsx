@@ -110,10 +110,10 @@ export const DashboardScreen = () => {
               })}
             </Text>
           </View>
-          <Link href="/highlights" asChild>
+          <Link href="/statistics" asChild>
             <Button
-              accessibilityLabel={t("dashboard.highlightsButton")}
-              label={t("dashboard.highlightsButton")}
+              accessibilityLabel={t("dashboard.statisticsButton")}
+              label={t("dashboard.statisticsButton")}
               variant="secondary"
             />
           </Link>

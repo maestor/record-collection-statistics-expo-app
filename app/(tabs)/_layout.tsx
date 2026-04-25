@@ -46,6 +46,20 @@ const TabsLayout = () => {
         }}
       />
       <Tabs.Screen
+        name="statistics"
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color, size, focused }) => (
+            <MaterialCommunityIcons
+              color={color}
+              name={focused ? "chart-box" : "chart-box-outline"}
+              size={size}
+            />
+          ),
+          title: translate("navigation.statistics"),
+        }}
+      />
+      <Tabs.Screen
         name="info"
         options={{
           tabBarIcon: ({ color, size, focused }) => (

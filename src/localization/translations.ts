@@ -11,10 +11,10 @@ export const translations = {
     navigation: {
       breakdown: "Jakauma",
       dashboard: "Yhteenveto",
-      highlights: "Kohokohdat",
       info: "Info",
       record: "Levy",
       records: "Levyt",
+      statistics: "Tilastot",
     },
     breakdowns: {
       loadingMessage: "Ladataan kokoelman jakauman arvoja.",
@@ -28,7 +28,6 @@ export const translations = {
       errorTitle: "Yhteenveto ei ole saatavilla",
       healthStatusHealthy: "Kokoelma ajantasalla",
       healthStatusUnavailable: "Kokoelman ei ole saatavilla",
-      highlightsButton: "Kokoelman kohokohdat",
       loadingMessage: "Ladataan kokoelmaa ja yhteenvetoja.",
       loadingTitle: "Ladataan kokoelmaa",
       metricArtists: "Artistit",
@@ -39,11 +38,14 @@ export const translations = {
       topArtistSummary: "Eniten artistilta: {value}",
       topFormatSummary: "Eniten formaattia: {value}",
       overviewTitle: "Yleiskuva",
-      pickerLabel: "Valitse kohokohtalista",
+      statisticsButton: "Kokoelman tilastot",
       syncStatusLoading: "Tarkistetaan synkronoinnin tilaa.",
       syncStatusTitle: "Synkronoinnin tila",
       syncUnavailableMessage: "Viimeisimmän synkronoinnin tietoja ei saatu haettua.",
       syncLastSuccessful: "Viimeisin onnistunut synkronointi {date}.",
+    },
+    statistics: {
+      pickerLabel: "Valitse tilastonäkymä",
     },
     dimensions: {
       added_year: "Lisäysvuodet",

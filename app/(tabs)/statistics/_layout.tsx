@@ -4,7 +4,7 @@ import { Stack } from "expo-router";
 import { translate } from "@/localization/i18n";
 import { colors } from "@/theme/colors";
 
-const DashboardStackLayout = () => {
+const StatisticsStackLayout = () => {
   return (
     <Stack
       screenOptions={{
@@ -15,10 +15,14 @@ const DashboardStackLayout = () => {
     >
       <Stack.Screen
         name="index"
-        options={{ title: translate("navigation.dashboard") }}
+        options={{ title: translate("navigation.statistics") }}
+      />
+      <Stack.Screen
+        name="breakdowns/[dimension]"
+        options={{ title: translate("navigation.breakdown") }}
       />
     </Stack>
   );
 };
 
-export default DashboardStackLayout;
+export default StatisticsStackLayout;

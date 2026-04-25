@@ -112,7 +112,7 @@ export const BreakdownRow = ({ count, label, max }: BreakdownRowProps) => {
       </View>
       <View
         style={{
-          backgroundColor: colors.primarySoft,
+          backgroundColor: colors.primaryDark,
           borderCurve: "continuous",
           borderRadius: radius.sm,
           height: 8,

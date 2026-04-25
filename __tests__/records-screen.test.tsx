@@ -117,20 +117,20 @@ describe("RecordsScreen", () => {
       params: { releaseId: "37098591" },
       pathname: "/records/[releaseId]",
     });
-    const searchButton = screen.getByRole("button", {
-      name: t("records.searchButton"),
+    const filtersButton = screen.getByRole("button", {
+      name: t("records.filtersButton"),
     });
-    startPressablePressedState(searchButton);
-    expect(searchButton).toHaveStyle({ opacity: 0.8 });
-    endPressablePressedState(searchButton);
+    startPressablePressedState(filtersButton);
+    expect(filtersButton).toHaveStyle({ opacity: 0.8 });
+    endPressablePressedState(filtersButton);
     await waitFor(() => {
-      expect(searchButton).toHaveStyle({ opacity: 1 });
+      expect(filtersButton).toHaveStyle({ opacity: 1 });
     });
     fireEvent.changeText(
       screen.getByLabelText(t("records.searchLabel")),
       "Muse",
     );
-    fireEvent.press(searchButton);
+    fireEvent(screen.getByLabelText(t("records.searchLabel")), "submitEditing");
     fireEvent.press(
       screen.getByRole("button", { name: `${t("records.filtersButton")} (1)` }),
     );
@@ -217,6 +217,19 @@ describe("RecordsScreen", () => {
             !url.includes("format="),
         ),
       ).toBe(true);
+    });
+  });
+
+  it("does not render a manual search button and keeps the filters trigger full width", async () => {
+    renderWithProviders(<RecordsScreen />);
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+
+    expect(
+      screen.queryByRole("button", { name: /hae/i }),
+    ).toBeNull();
+    expect(screen.getByRole("button", { name: t("records.filtersButton") })).toHaveStyle({
+      width: "100%",
     });
   });
 

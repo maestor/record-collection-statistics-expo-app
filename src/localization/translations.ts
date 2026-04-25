@@ -10,7 +10,7 @@ export const translations = {
     },
     navigation: {
       breakdown: "Jakauma",
-      dashboard: "Yhteenveto",
+      dashboard: "Levykirjasto",
       info: "Info",
       record: "Levy",
       records: "Levyt",
@@ -25,9 +25,9 @@ export const translations = {
     },
     dashboard: {
       browseRecords: "Selaa äänitteitä",
-      errorTitle: "Yhteenveto ei ole saatavilla",
+      errorTitle: "Levykirjasto ei ole saatavilla",
       healthStatusHealthy: "Kokoelma ajantasalla",
-      healthStatusUnavailable: "Kokoelman ei ole saatavilla",
+      healthStatusUnavailable: "Kokoelma ei ole saatavilla",
       loadingMessage: "Ladataan kokoelmaa ja yhteenvetoja.",
       loadingTitle: "Ladataan kokoelmaa",
       metricArtists: "Artistit",
@@ -49,7 +49,7 @@ export const translations = {
     },
     dimensions: {
       added_year: "Lisäysvuodet",
-      artist: "Top artistit",
+      artist: "Artistit",
       country: "Maat",
       format: "Formaatit",
       genre: "Genret",
@@ -109,7 +109,6 @@ export const translations = {
       orderAscending: "Nouseva",
       orderDescending: "Laskeva",
       resultsTitle: "{count} äänitettä",
-      searchButton: "Hae",
       searchLabel: "Hae levyjä",
       searchPlaceholder: "Artisti, nimi, levymerkki, genre...",
       searchTitle: "Etsi levyjä",

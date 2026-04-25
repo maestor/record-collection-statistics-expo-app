@@ -264,8 +264,9 @@ function FilterSheet({
         style={{
           backgroundColor: "rgba(3, 31, 52, 0.72)",
           flex: 1,
-          justifyContent: "flex-end",
+          justifyContent: "center",
           padding: spacing.lg,
+          paddingVertical: spacing.xl,
         }}
       >
         <View

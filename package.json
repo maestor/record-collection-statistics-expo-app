@@ -8,6 +8,7 @@
     "start": "npm run env:pull:development && expo start",
     "android": "npm run env:pull:development && expo start --android",
     "android:dev-client": "npm run env:pull:development && expo start --dev-client --android",
+    "preview-app": "npx eas-cli@latest build -p android --profile preview",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "jest --coverage --watchman=false --runInBand",

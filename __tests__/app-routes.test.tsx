@@ -6,6 +6,7 @@ import RootLayout from "../app/_layout";
 import TabsLayout from "../app/(tabs)/_layout";
 import DashboardStackLayout from "../app/(tabs)/(dashboard)/_layout";
 import DashboardRoute from "../app/(tabs)/(dashboard)/index";
+import HighlightsRoute from "../app/(tabs)/(dashboard)/highlights";
 import BreakdownRoute from "../app/(tabs)/(dashboard)/breakdowns/[dimension]";
 import InfoRoute from "../app/(tabs)/info";
 import RecordsStackLayout from "../app/(tabs)/records/_layout";
@@ -26,9 +27,10 @@ const dashboardPayload = {
         first: "2019-08-15T05:09:03.000Z",
         last: "2026-04-19T09:53:55.000Z",
       },
-      releaseYearRange: {
-        max: 2026,
-        min: 1969,
+      collectionValue: {
+        maximum: 72.25,
+        median: 58.5,
+        minimum: 41.75,
       },
       totals: {
         collectionItems: 1,
@@ -222,6 +224,13 @@ describe("Expo Router routes", () => {
     );
     expect(Stack.Screen).toHaveBeenCalledWith(
       expect.objectContaining({
+        name: "highlights",
+        options: { title: t("navigation.highlights") },
+      }),
+      undefined,
+    );
+    expect(Stack.Screen).toHaveBeenCalledWith(
+      expect.objectContaining({
         name: "breakdowns/[dimension]",
         options: { title: t("navigation.breakdown") },
       }),
@@ -252,6 +261,10 @@ describe("Expo Router routes", () => {
     const dashboardView = renderWithProviders(<DashboardRoute />);
     expect(await screen.findByText(t("dashboard.overviewTitle"))).toBeTruthy();
     dashboardView.unmount();
+
+    const highlightsView = renderWithProviders(<HighlightsRoute />);
+    expect(await screen.findByRole("button", { name: t("dimensions.artist") })).toBeTruthy();
+    highlightsView.unmount();
 
     const recordsView = renderWithProviders(<RecordsRoute />);
     expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();

@@ -4,6 +4,12 @@ const numberFormatter = new Intl.NumberFormat("fi-FI", {
   maximumFractionDigits: 0,
 });
 
+const currencyFormatter = new Intl.NumberFormat("fi-FI", {
+  currency: "EUR",
+  maximumFractionDigits: 0,
+  style: "currency",
+});
+
 const dateFormatter = new Intl.DateTimeFormat("fi-FI", {
   day: "numeric",
   month: "short",
@@ -12,6 +18,14 @@ const dateFormatter = new Intl.DateTimeFormat("fi-FI", {
 
 export function formatCount(value: number): string {
   return numberFormatter.format(value);
+}
+
+export function formatCurrency(value: number | null): string {
+  if (value === null) {
+    return translate("common.unknown");
+  }
+
+  return currencyFormatter.format(value);
 }
 
 export function formatDate(value: string | null | undefined): string {

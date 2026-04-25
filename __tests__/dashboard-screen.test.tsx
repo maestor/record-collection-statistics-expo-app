@@ -17,9 +17,10 @@ const dashboardPayload = {
         first: "2019-08-15T05:09:03.000Z",
         last: "2026-04-19T09:53:55.000Z",
       },
-      releaseYearRange: {
-        max: 2026,
-        min: 1969,
+      collectionValue: {
+        maximum: 72.25,
+        median: 58.5,
+        minimum: 41.75,
       },
       totals: {
         collectionItems: 2346,
@@ -34,16 +35,6 @@ const dashboardPayload = {
   },
   meta: { limit: 8 },
 };
-
-const highlightCases = [
-  { dimension: "artist", value: "Klamydia" },
-  { dimension: "label", value: "Herodes" },
-  { dimension: "format", value: "CD" },
-  { dimension: "genre", value: "Rock" },
-  { dimension: "style", value: "Pop Rock" },
-  { dimension: "country", value: "Finland" },
-  { dimension: "added_year", value: "2026" },
-] as const;
 
 describe("DashboardScreen", () => {
   beforeEach(() => {
@@ -65,46 +56,76 @@ describe("DashboardScreen", () => {
 
     expect(screen.getByText(t("dashboard.loadingTitle"))).toBeTruthy();
     expect(screen.getByText(t("dashboard.loadingMessage"))).toBeTruthy();
-    expect(screen.queryByText(t("dashboard.highlightsTitle"))).toBeNull();
+    expect(screen.queryByRole("button", { name: t("dashboard.highlightsButton") })).toBeNull();
 
     resolveDashboardResponse?.(jsonResponse(dashboardPayload));
 
-    expect(await screen.findByText(t("dashboard.highlightsTitle"))).toBeTruthy();
+    expect(await screen.findByRole("button", { name: t("dashboard.highlightsButton") })).toBeTruthy();
   });
 
-  it("renders dashboard data and supports every highlight action", async () => {
+  it("renders dashboard overview actions with the updated summary cards", async () => {
     renderWithProviders(<DashboardScreen />);
 
-    expect(await screen.findByText(t("dashboard.highlightsTitle"))).toBeTruthy();
-    expect(screen.getByText("2 346")).toBeTruthy();
+    expect(await screen.findByRole("button", { name: t("dashboard.highlightsButton") })).toBeTruthy();
     expect(screen.getByText("2 345")).toBeTruthy();
+    expect(screen.getByText("59 €")).toBeTruthy();
     expect(screen.getByText("405")).toBeTruthy();
     expect(screen.getByText("456")).toBeTruthy();
     expect(screen.getByText("Äänitteet lisätty välillä 15.8.2019 - 19.4.2026")).toBeTruthy();
+    expect(screen.getByText("Eniten artistilta: Klamydia")).toBeTruthy();
+    expect(screen.getByText("Eniten formaattia: CD")).toBeTruthy();
+    expect(screen.queryByText("Herodes")).toBeNull();
+
+    const highlightsButton = screen.getByRole("button", { name: t("dashboard.highlightsButton") });
+    expect(highlightsButton.props.href).toBe("/highlights");
 
     const browseButton = screen.getByRole("button", { name: t("dashboard.browseRecords") });
     expect(browseButton.props.href).toBe("/records");
 
-    for (const { dimension, value } of highlightCases) {
-      const title = t(`dimensions.${dimension}`);
-      const button = screen.getByRole("button", { name: title });
-
-      fireEvent.press(button);
-
-      expect(await screen.findByText(value)).toBeTruthy();
-      expect(screen.getByRole("button", { name: title }).props.accessibilityState.selected).toBe(true);
-
-      const viewFullLink = screen.getByRole("link", {
-        name: `${t("breakdowns.viewFullPrefix")} ${title.toLowerCase()}`,
-      });
-
-      expect(viewFullLink.props.href).toEqual({
-        params: { dimension },
-        pathname: "/breakdowns/[dimension]",
-      });
-    }
-
     expect((globalThis.fetch as jest.Mock).mock.calls[0]?.[0]).toContain("/stats/dashboard?limit=8");
+  });
+
+  it("omits top breakdown rows when highlight sources are empty", async () => {
+    globalThis.fetch = jest.fn(
+      async () =>
+        jsonResponse({
+          ...dashboardPayload,
+          data: {
+            ...dashboardPayload.data,
+            formats: [],
+            topArtists: [],
+          },
+        }),
+    );
+
+    renderWithProviders(<DashboardScreen />);
+
+    expect(await screen.findByRole("button", { name: t("dashboard.highlightsButton") })).toBeTruthy();
+    expect(screen.queryByText("Eniten artistilta: Klamydia")).toBeNull();
+    expect(screen.queryByText("Eniten formaattia: CD")).toBeNull();
+  });
+
+  it("renders an unknown median value when collection value data is missing", async () => {
+    globalThis.fetch = jest.fn(
+      async () =>
+        jsonResponse({
+          ...dashboardPayload,
+          data: {
+            ...dashboardPayload.data,
+            summary: {
+              ...dashboardPayload.data.summary,
+              collectionValue: {
+                ...dashboardPayload.data.summary.collectionValue,
+                median: null,
+              },
+            },
+          },
+        }),
+    );
+
+    renderWithProviders(<DashboardScreen />);
+
+    expect(await screen.findByText("Tuntematon")).toBeTruthy();
   });
 
   it("renders an API error with retry", async () => {

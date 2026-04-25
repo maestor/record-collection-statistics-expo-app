@@ -7,6 +7,7 @@ import { Section } from "./section";
 import type { BreakdownDimension, BreakdownItem } from "@/api/types";
 import { colors, radius } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
+import { sectionTitleStyle, surfaceCardStyle } from "@/theme/styles";
 import { formatCount } from "@/utils/format";
 
 type BreakdownListProps = {
@@ -16,7 +17,12 @@ type BreakdownListProps = {
   withSection?: boolean;
 };
 
-export function BreakdownList({ dimension, items, title, withSection = true }: BreakdownListProps) {
+export const BreakdownList = ({
+  dimension,
+  items,
+  title,
+  withSection = true,
+}: BreakdownListProps) => {
   const max = Math.max(...items.map((item) => item.releaseCount), 1);
   const content = (
     <>
@@ -51,14 +57,7 @@ export function BreakdownList({ dimension, items, title, withSection = true }: B
   if (!withSection) {
     return (
       <View style={{ gap: spacing.md }}>
-        <Text
-          selectable
-          style={{
-            color: colors.text,
-            fontSize: 18,
-            fontWeight: "800",
-          }}
-        >
+        <Text selectable style={[sectionTitleStyle, { fontSize: 18 }]}>
           {title}
         </Text>
         {content}
@@ -66,12 +65,8 @@ export function BreakdownList({ dimension, items, title, withSection = true }: B
     );
   }
 
-  return (
-    <Section title={title}>
-      {content}
-    </Section>
-  );
-}
+  return <Section title={title}>{content}</Section>;
+};
 
 type BreakdownRowProps = {
   count: number;
@@ -79,32 +74,35 @@ type BreakdownRowProps = {
   max: number;
 };
 
-export function BreakdownRow({ count, label, max }: BreakdownRowProps) {
+export const BreakdownRow = ({ count, label, max }: BreakdownRowProps) => {
   const width = `${Math.max((count / max) * 100, 4)}%` as `${number}%`;
 
   return (
     <View
       accessibilityLabel={`${label}, ${formatCount(count)} releases`}
-      style={{
-        backgroundColor: colors.surface,
-        borderColor: colors.border,
-        borderCurve: "continuous",
-        borderRadius: radius.md,
-        borderWidth: 1,
-        gap: spacing.sm,
-        padding: spacing.md,
-      }}
+      style={[surfaceCardStyle, { gap: spacing.sm, padding: spacing.md }]}
     >
-      <View style={{ alignItems: "center", flexDirection: "row", gap: spacing.md }}>
+      <View
+        style={{ alignItems: "center", flexDirection: "row", gap: spacing.md }}
+      >
         <Text
           selectable
-          style={{ color: colors.text, flex: 1, fontSize: 15, fontWeight: "700" }}
+          style={{
+            color: colors.text,
+            flex: 1,
+            fontSize: 15,
+            fontWeight: "700",
+          }}
         >
           {label}
         </Text>
         <Text
           selectable
-          style={{ color: colors.textMuted, fontSize: 14, fontVariant: ["tabular-nums"] }}
+          style={{
+            color: colors.textMuted,
+            fontSize: 14,
+            fontVariant: ["tabular-nums"],
+          }}
         >
           {formatCount(count)}
         </Text>
@@ -128,4 +126,4 @@ export function BreakdownRow({ count, label, max }: BreakdownRowProps) {
       </View>
     </View>
   );
-}
+};

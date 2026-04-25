@@ -4,7 +4,7 @@ import { Stack } from "expo-router";
 import { translate } from "@/localization/i18n";
 import { colors } from "@/theme/colors";
 
-export default function RecordsStackLayout() {
+const RecordsStackLayout = () => {
   return (
     <Stack
       screenOptions={{
@@ -13,8 +13,16 @@ export default function RecordsStackLayout() {
         headerTintColor: colors.text,
       }}
     >
-      <Stack.Screen name="index" options={{ title: translate("navigation.records") }} />
-      <Stack.Screen name="[releaseId]" options={{ title: translate("navigation.record") }} />
+      <Stack.Screen
+        name="index"
+        options={{ title: translate("navigation.records") }}
+      />
+      <Stack.Screen
+        name="[releaseId]"
+        options={{ title: translate("navigation.record") }}
+      />
     </Stack>
   );
-}
+};
+
+export default RecordsStackLayout;

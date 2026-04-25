@@ -3,8 +3,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { LocalizationProvider } from "@/localization/i18n";
 
-export function createQueryClient() {
-  return new QueryClient({
+export const createQueryClient = () =>
+  new QueryClient({
     defaultOptions: {
       queries: {
         retry: 1,
@@ -12,17 +12,16 @@ export function createQueryClient() {
       },
     },
   });
-}
 
 export const appQueryClient = createQueryClient();
 
-export function AppProviders({
+export const AppProviders = ({
   children,
   client,
-}: React.PropsWithChildren<{ client: QueryClient }>) {
+}: React.PropsWithChildren<{ client: QueryClient }>) => {
   return (
     <LocalizationProvider>
       <QueryClientProvider client={client}>{children}</QueryClientProvider>
     </LocalizationProvider>
   );
-}
+};

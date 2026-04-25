@@ -19,17 +19,16 @@ type AppExtra = {
 
 const appExtra = Constants.expoConfig!.extra as AppExtra;
 
-function getDefaultApiBaseUrl(): string {
-  return (
-    process.env.EXPO_PUBLIC_API_URL?.trim() ||
-    appExtra.recordCollectionApiUrl?.trim() ||
-    ANDROID_EMULATOR_API_BASE_URL
-  );
-}
+const getDefaultApiBaseUrl = (): string =>
+  process.env.EXPO_PUBLIC_API_URL?.trim() ||
+  appExtra.recordCollectionApiUrl?.trim() ||
+  ANDROID_EMULATOR_API_BASE_URL;
 
 export const DEFAULT_API_BASE_URL = getDefaultApiBaseUrl();
 export const DEFAULT_API_KEY =
-  process.env.EXPO_PUBLIC_API_KEY?.trim() || appExtra.recordCollectionApiKey?.trim() || "";
+  process.env.EXPO_PUBLIC_API_KEY?.trim() ||
+  appExtra.recordCollectionApiKey?.trim() ||
+  "";
 
 export type ApiConfig = {
   apiKey: string;
@@ -48,31 +47,28 @@ export class ApiError extends Error {
   }
 }
 
-export function normalizeBaseUrl(baseUrl: string): string {
-  return baseUrl.trim().replace(/\/+$/, "");
-}
+export const normalizeBaseUrl = (baseUrl: string): string =>
+  baseUrl.trim().replace(/\/+$/, "");
 
-export function getApiConfig(): ApiConfig {
+export const getApiConfig = (): ApiConfig => {
   return {
     apiKey: DEFAULT_API_KEY,
     baseUrl: DEFAULT_API_BASE_URL,
   };
-}
+};
 
-export function getErrorMessage(error: Error): string {
-  return error.message;
-}
+export const getErrorMessage = (error: Error): string => error.message;
 
-function hasErrorName(error: unknown, name: string): boolean {
+const hasErrorName = (error: unknown, name: string): boolean => {
   return (
     typeof error === "object" &&
     error !== null &&
     "name" in error &&
     (error as { name?: unknown }).name === name
   );
-}
+};
 
-function getHeaders(config: ApiConfig): Headers {
+const getHeaders = (config: ApiConfig): Headers => {
   const headers = new Headers({ Accept: "application/json" });
   const apiKey = config.apiKey.trim();
 
@@ -81,9 +77,13 @@ function getHeaders(config: ApiConfig): Headers {
   }
 
   return headers;
-}
+};
 
-function buildUrl(config: ApiConfig, path: string, params: QueryParams = {}): string {
+const buildUrl = (
+  config: ApiConfig,
+  path: string,
+  params: QueryParams = {},
+): string => {
   const url = new URL(`${normalizeBaseUrl(config.baseUrl)}${path}`);
 
   for (const [key, value] of Object.entries(params)) {
@@ -91,31 +91,33 @@ function buildUrl(config: ApiConfig, path: string, params: QueryParams = {}): st
   }
 
   return url.toString();
-}
+};
 
-function getNetworkErrorMessage(config: ApiConfig): string {
+const getNetworkErrorMessage = (config: ApiConfig): string => {
   const baseUrl = normalizeBaseUrl(config.baseUrl);
 
   return `Network request failed for ${baseUrl}. On Android, localhost points to the device. Use ${ANDROID_EMULATOR_API_BASE_URL} for the emulator, or http://<computer-lan-ip>:3003 for a physical phone.`;
-}
+};
 
-async function readError(response: Response): Promise<string> {
+const readError = async (response: Response): Promise<string> => {
   const fallback = `Request failed with status ${response.status}`;
 
   try {
     const payload = (await response.json()) as { error?: unknown };
-    return typeof payload.error === "string" && payload.error ? payload.error : fallback;
+    return typeof payload.error === "string" && payload.error
+      ? payload.error
+      : fallback;
   } catch {
     /* istanbul ignore next -- defensive fallback for non-JSON error responses */
     return fallback;
   }
-}
+};
 
-async function requestJson<T>(
+const requestJson = async <T>(
   config: ApiConfig,
   path: string,
   params?: QueryParams,
-): Promise<T> {
+): Promise<T> => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10_000);
 
@@ -143,34 +145,37 @@ async function requestJson<T>(
   } finally {
     clearTimeout(timeout);
   }
-}
+};
 
-export function getHealth(config: ApiConfig): Promise<Health> {
-  return requestJson<Health>(config, "/health");
-}
+export const getHealth = (config: ApiConfig): Promise<Health> =>
+  requestJson<Health>(config, "/health");
 
-export function getDashboardStats(config: ApiConfig, limit: number): Promise<DashboardResponse> {
-  return requestJson<DashboardResponse>(config, "/stats/dashboard", { limit });
-}
+export const getDashboardStats = (
+  config: ApiConfig,
+  limit: number,
+): Promise<DashboardResponse> =>
+  requestJson<DashboardResponse>(config, "/stats/dashboard", { limit });
 
-export function getFilters(config: ApiConfig, limit: number): Promise<FilterCatalogResponse> {
-  return requestJson<FilterCatalogResponse>(config, "/filters", { limit });
-}
+export const getFilters = (
+  config: ApiConfig,
+  limit: number,
+): Promise<FilterCatalogResponse> =>
+  requestJson<FilterCatalogResponse>(config, "/filters", { limit });
 
-export function listRecords(config: ApiConfig, params: RecordListParams): Promise<RecordsResponse> {
-  return requestJson<RecordsResponse>(config, "/records", params as QueryParams);
-}
+export const listRecords = (
+  config: ApiConfig,
+  params: RecordListParams,
+): Promise<RecordsResponse> =>
+  requestJson<RecordsResponse>(config, "/records", params as QueryParams);
 
-export function getRecordDetail(
+export const getRecordDetail = (
   config: ApiConfig,
   releaseId: number,
-): Promise<RecordDetailResponse> {
-  return requestJson<RecordDetailResponse>(config, `/records/${releaseId}`);
-}
+): Promise<RecordDetailResponse> =>
+  requestJson<RecordDetailResponse>(config, `/records/${releaseId}`);
 
-export function getBreakdown(
+export const getBreakdown = (
   config: ApiConfig,
   dimension: BreakdownDimension,
-): Promise<BreakdownResponse> {
-  return requestJson<BreakdownResponse>(config, `/stats/breakdowns/${dimension}`);
-}
+): Promise<BreakdownResponse> =>
+  requestJson<BreakdownResponse>(config, `/stats/breakdowns/${dimension}`);

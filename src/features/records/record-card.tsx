@@ -7,13 +7,14 @@ import type { RecordListItem } from "@/api/types";
 import { translate } from "@/localization/i18n";
 import { colors, radius } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
+import { cardFrameStyle } from "@/theme/styles";
 import { formatDate, formatYear } from "@/utils/format";
 
 type RecordCardProps = {
   record: RecordListItem;
 };
 
-export function RecordCard({ record }: RecordCardProps) {
+export const RecordCard = ({ record }: RecordCardProps) => {
   const router = useRouter();
 
   return (
@@ -29,21 +30,30 @@ export function RecordCard({ record }: RecordCardProps) {
           pathname: "/records/[releaseId]",
         })
       }
-      style={({ pressed }) => ({
-        backgroundColor: colors.primaryDark,
-        borderColor: colors.border,
-        borderCurve: "continuous",
-        borderRadius: radius.md,
-        borderWidth: 1,
-        minHeight: 98,
-        opacity: pressed ? 0.84 : 1,
-        padding: spacing.sm,
-        width: "100%",
-      })}
+      style={({ pressed }) => [
+        cardFrameStyle,
+        {
+          backgroundColor: colors.primaryDark,
+          borderColor: colors.border,
+          minHeight: 98,
+          opacity: pressed ? 0.84 : 1,
+          padding: spacing.sm,
+          width: "100%",
+        },
+      ]}
     >
-      <View style={{ alignItems: "center", flexDirection: "row", gap: spacing.md, width: "100%" }}>
+      <View
+        style={{
+          alignItems: "center",
+          flexDirection: "row",
+          gap: spacing.md,
+          width: "100%",
+        }}
+      >
         <Image
-          accessibilityLabel={translate("recordCard.coverImage", { title: record.title })}
+          accessibilityLabel={translate("recordCard.coverImage", {
+            title: record.title,
+          })}
           contentFit="cover"
           source={record.thumb ? { uri: record.thumb } : null}
           style={{
@@ -54,15 +64,26 @@ export function RecordCard({ record }: RecordCardProps) {
             width: 78,
           }}
         />
-        <View style={{ flex: 1, gap: 2, justifyContent: "flex-start", minWidth: 0 }}>
+        <View
+          style={{ flex: 1, gap: 2, justifyContent: "flex-start", minWidth: 0 }}
+        >
           <Text
             numberOfLines={2}
             selectable
-            style={{ color: colors.text, fontSize: 16, fontWeight: "800", lineHeight: 20 }}
+            style={{
+              color: colors.text,
+              fontSize: 16,
+              fontWeight: "800",
+              lineHeight: 20,
+            }}
           >
             {record.title}
           </Text>
-          <Text numberOfLines={1} selectable style={{ color: colors.textMuted, fontSize: 14 }}>
+          <Text
+            numberOfLines={1}
+            selectable
+            style={{ color: colors.textMuted, fontSize: 14 }}
+          >
             {record.artistsSort ?? translate("common.unknownArtist")}
           </Text>
           {record.formats.map((format, index) => (
@@ -75,10 +96,19 @@ export function RecordCard({ record }: RecordCardProps) {
               {formatReleaseFormat(format)}
             </Text>
           ))}
-          <Text numberOfLines={1} selectable style={{ color: colors.textMuted, fontSize: 13 }}>
-            {formatYear(record.releaseYear)} · {record.country ?? translate("common.unknownCountry")}
+          <Text
+            numberOfLines={1}
+            selectable
+            style={{ color: colors.textMuted, fontSize: 13 }}
+          >
+            {formatYear(record.releaseYear)} ·{" "}
+            {record.country ?? translate("common.unknownCountry")}
           </Text>
-          <Text numberOfLines={1} selectable style={{ color: colors.textMuted, fontSize: 13 }}>
+          <Text
+            numberOfLines={1}
+            selectable
+            style={{ color: colors.textMuted, fontSize: 13 }}
+          >
             {translate("recordCard.addedOn", {
               date: formatDate(record.dateAdded),
             })}
@@ -87,8 +117,9 @@ export function RecordCard({ record }: RecordCardProps) {
       </View>
     </Pressable>
   );
-}
+};
 
-function formatReleaseFormat(format: RecordListItem["formats"][number]) {
-  return [format.name, ...format.descriptions, format.freeText].filter(Boolean).join(", ");
-}
+const formatReleaseFormat = (format: RecordListItem["formats"][number]) =>
+  [format.name, ...format.descriptions, format.freeText]
+    .filter(Boolean)
+    .join(", ");

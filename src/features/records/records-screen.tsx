@@ -1,15 +1,23 @@
 import * as React from "react";
-import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Modal, ScrollView, Text, TextInput, View } from "react-native";
 
 import { useFiltersQuery, useRecordsQuery } from "@/api/queries";
 import type { RecordListParams } from "@/api/types";
 import { getErrorMessage } from "@/api/client";
 import { Button } from "@/components/button";
+import { Chip } from "@/components/chip";
+import { Panel } from "@/components/panel";
 import { Section } from "@/components/section";
 import { StatusMessage } from "@/components/status-message";
 import { useTranslation, translate } from "@/localization/i18n";
-import { colors, radius } from "@/theme/colors";
+import { colors } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
+import {
+  cardFrameStyle,
+  screenStyles,
+  sectionTitleStyle,
+  wrapRowStyle,
+} from "@/theme/styles";
 import { assertNever } from "@/utils/assert-never";
 import { formatCount } from "@/utils/format";
 import { RecordCard } from "./record-card";
@@ -18,12 +26,17 @@ type SortValue = "artist" | "date_added" | "release_year" | "title";
 type OrderValue = NonNullable<RecordListParams["order"]>;
 type FilterKey = "artist" | "format" | "genre";
 
-const sortOptions: SortValue[] = ["date_added", "release_year", "artist", "title"];
+const sortOptions: SortValue[] = [
+  "date_added",
+  "release_year",
+  "artist",
+  "title",
+];
 const orderOptions: OrderValue[] = ["desc", "asc"];
 const AUTO_SEARCH_DELAY_MS = 500;
 const AUTO_SEARCH_MIN_LENGTH = 3;
 
-function labelForSort(sort: SortValue): string {
+const labelForSort = (sort: SortValue): string => {
   switch (sort) {
     case "date_added":
       return translate("records.sortDateAdded");
@@ -37,14 +50,14 @@ function labelForSort(sort: SortValue): string {
     default:
       return assertNever(sort);
   }
-}
+};
 
-function buildParams(
+const buildParams = (
   query: string,
   sort: SortValue,
   order: OrderValue,
   selectedFilters: Partial<Record<FilterKey, string>>,
-): Omit<RecordListParams, "page"> {
+): Omit<RecordListParams, "page"> => {
   const params: Omit<RecordListParams, "page"> = {
     order,
     page_size: 25,
@@ -65,20 +78,20 @@ function buildParams(
   }
 
   return params;
-}
+};
 
-function normalizeSearchQuery(value: string): string {
-  return value.trim();
-}
+const normalizeSearchQuery = (value: string): string => value.trim();
 
-export function RecordsScreen() {
+export const RecordsScreen = () => {
   const { t } = useTranslation();
   const [draftQuery, setDraftQuery] = React.useState("");
   const [query, setQuery] = React.useState("");
   const [filtersOpen, setFiltersOpen] = React.useState(false);
   const [sort, setSort] = React.useState<SortValue>("date_added");
   const [order, setOrder] = React.useState<OrderValue>("desc");
-  const [selectedFilters, setSelectedFilters] = React.useState<Partial<Record<FilterKey, string>>>({});
+  const [selectedFilters, setSelectedFilters] = React.useState<
+    Partial<Record<FilterKey, string>>
+  >({});
   const params = React.useMemo(
     () => buildParams(query, sort, order, selectedFilters),
     [order, query, selectedFilters, sort],
@@ -87,7 +100,8 @@ export function RecordsScreen() {
   const filtersQuery = useFiltersQuery(10);
   const records = recordsQuery.data?.pages.flatMap((page) => page.data) ?? [];
   const firstPage = recordsQuery.data?.pages[0];
-  const activeFilterCount = Object.values(selectedFilters).filter(Boolean).length + (query ? 1 : 0);
+  const activeFilterCount =
+    Object.values(selectedFilters).filter(Boolean).length + (query ? 1 : 0);
 
   React.useEffect(() => {
     const normalizedDraftQuery = normalizeSearchQuery(draftQuery);
@@ -96,7 +110,10 @@ export function RecordsScreen() {
       return;
     }
 
-    if (normalizedDraftQuery.length !== 0 && normalizedDraftQuery.length < AUTO_SEARCH_MIN_LENGTH) {
+    if (
+      normalizedDraftQuery.length !== 0 &&
+      normalizedDraftQuery.length < AUTO_SEARCH_MIN_LENGTH
+    ) {
       return;
     }
 
@@ -107,31 +124,31 @@ export function RecordsScreen() {
     return () => clearTimeout(timeout);
   }, [draftQuery, query]);
 
-  function setFilter(key: FilterKey, value: string) {
+  const setFilter = (key: FilterKey, value: string) => {
     setSelectedFilters((current) => ({
       ...current,
       [key]: current[key] === value ? undefined : value,
     }));
-  }
+  };
 
-  function applySearch(nextQuery: string) {
+  const applySearch = (nextQuery: string) => {
     const normalizedQuery = normalizeSearchQuery(nextQuery);
     setQuery(normalizedQuery);
-  }
+  };
 
-  function clearFilters() {
+  const clearFilters = () => {
     setDraftQuery("");
     setQuery("");
     setSelectedFilters({});
     setSort("date_added");
     setOrder("desc");
-  }
+  };
 
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
-      style={{ backgroundColor: colors.background }}
-      contentContainerStyle={{ gap: spacing.xl, padding: spacing.lg }}
+      style={screenStyles.scrollView}
+      contentContainerStyle={screenStyles.content}
     >
       <Section title={t("records.searchTitle")}>
         <View style={{ gap: spacing.md }}>
@@ -143,20 +160,25 @@ export function RecordsScreen() {
             placeholder={t("records.searchPlaceholder")}
             placeholderTextColor={colors.textMuted}
             returnKeyType="search"
-            style={{
-              backgroundColor: colors.surface,
-              borderColor: colors.border,
-              borderRadius: radius.md,
-              borderWidth: 1,
-              color: colors.text,
-              fontSize: 16,
-              minHeight: 52,
-              paddingHorizontal: spacing.md,
-            }}
+            style={[
+              cardFrameStyle,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+                color: colors.text,
+                fontSize: 16,
+                minHeight: 52,
+                paddingHorizontal: spacing.md,
+              },
+            ]}
             value={draftQuery}
           />
-          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
-            <Button label={t("records.searchButton")} onPress={() => applySearch(draftQuery)} style={{ flexGrow: 1 }} />
+          <View style={wrapRowStyle}>
+            <Button
+              label={t("records.searchButton")}
+              onPress={() => applySearch(draftQuery)}
+              style={{ flexGrow: 1 }}
+            />
             <Button
               label={`${t("records.filtersButton")}${activeFilterCount ? ` (${activeFilterCount})` : ""}`}
               onPress={() => setFiltersOpen(true)}
@@ -200,7 +222,11 @@ export function RecordsScreen() {
       />
 
       {firstPage && (
-        <Section title={t("records.resultsTitle", { count: formatCount(firstPage.meta.total) })}>
+        <Section
+          title={t("records.resultsTitle", {
+            count: formatCount(firstPage.meta.total),
+          })}
+        >
           <View style={{ gap: spacing.md }}>
             {records.length === 0 ? (
               <StatusMessage
@@ -208,7 +234,9 @@ export function RecordsScreen() {
                 title={t("records.emptyTitle")}
               />
             ) : (
-              records.map((record) => <RecordCard key={record.releaseId} record={record} />)
+              records.map((record) => (
+                <RecordCard key={record.releaseId} record={record} />
+              ))
             )}
           </View>
           {recordsQuery.hasNextPage && (
@@ -223,7 +251,7 @@ export function RecordsScreen() {
       )}
     </ScrollView>
   );
-}
+};
 
 type FilterSheetProps = {
   clearFilters: () => void;
@@ -243,7 +271,7 @@ type FilterSheetProps = {
   sort: SortValue;
 };
 
-function FilterSheet({
+const FilterSheet = ({
   clearFilters,
   closeFilters,
   filters,
@@ -255,11 +283,16 @@ function FilterSheet({
   setOrder,
   setSort,
   sort,
-}: FilterSheetProps) {
+}: FilterSheetProps) => {
   const { t } = useTranslation();
 
   return (
-    <Modal animationType="fade" onRequestClose={closeFilters} transparent visible={isOpen}>
+    <Modal
+      animationType="fade"
+      onRequestClose={closeFilters}
+      transparent
+      visible={isOpen}
+    >
       <View
         style={{
           backgroundColor: "rgba(3, 31, 52, 0.72)",
@@ -269,26 +302,34 @@ function FilterSheet({
           paddingVertical: spacing.xl,
         }}
       >
-        <View
+        <Panel
           accessibilityLabel={t("records.filterPanelLabel")}
-          style={{
-            backgroundColor: colors.surface,
-            borderColor: colors.border,
-            borderCurve: "continuous",
-            borderRadius: radius.lg,
-            borderWidth: 1,
-            gap: spacing.lg,
-            maxHeight: "82%",
-            padding: spacing.lg,
-          }}
+          backgroundColor={colors.surface}
+          borderColor={colors.border}
+          cornerRadius="lg"
+          style={{ gap: spacing.lg, maxHeight: "82%", padding: spacing.lg }}
         >
-          <View style={{ alignItems: "center", flexDirection: "row", gap: spacing.md, justifyContent: "space-between" }}>
-            <Text selectable style={{ color: colors.text, flex: 1, fontSize: 20, fontWeight: "800" }}>
+          <View
+            style={{
+              alignItems: "center",
+              flexDirection: "row",
+              gap: spacing.md,
+              justifyContent: "space-between",
+            }}
+          >
+            <Text selectable style={[sectionTitleStyle, { flex: 1 }]}>
               {t("records.filtersButton")}
             </Text>
-            <Button label={t("records.closeFilters")} onPress={closeFilters} variant="secondary" />
+            <Button
+              label={t("records.closeFilters")}
+              onPress={closeFilters}
+              variant="secondary"
+            />
           </View>
-          <ScrollView contentContainerStyle={{ gap: spacing.lg }} showsVerticalScrollIndicator={false}>
+          <ScrollView
+            contentContainerStyle={{ gap: spacing.lg }}
+            showsVerticalScrollIndicator={false}
+          >
             <FilterPanel
               clearFilters={clearFilters}
               filters={filters}
@@ -301,15 +342,15 @@ function FilterSheet({
               sort={sort}
             />
           </ScrollView>
-        </View>
+        </Panel>
       </View>
     </Modal>
   );
-}
+};
 
 type FilterPanelProps = Omit<FilterSheetProps, "closeFilters" | "isOpen">;
 
-function FilterPanel({
+const FilterPanel = ({
   clearFilters,
   filters,
   isLoading,
@@ -319,21 +360,27 @@ function FilterPanel({
   setOrder,
   setSort,
   sort,
-}: FilterPanelProps) {
+}: FilterPanelProps) => {
   const { t } = useTranslation();
 
   return (
     <View style={{ gap: spacing.lg }}>
       <ChipGroup
         label={t("records.sortBy")}
-        options={sortOptions.map((value) => ({ label: labelForSort(value), value }))}
+        options={sortOptions.map((value) => ({
+          label: labelForSort(value),
+          value,
+        }))}
         selected={sort}
         onSelect={(value) => setSort(value as SortValue)}
       />
       <ChipGroup
         label={t("records.order")}
         options={orderOptions.map((value) => ({
-          label: value === "desc" ? t("records.orderDescending") : t("records.orderAscending"),
+          label:
+            value === "desc"
+              ? t("records.orderDescending")
+              : t("records.orderAscending"),
           value,
         }))}
         selected={order}
@@ -348,30 +395,43 @@ function FilterPanel({
         <>
           <ChipGroup
             label={t("records.filterFormats")}
-            options={filters.formats.map((item) => ({ label: item.value, value: item.value }))}
+            options={filters.formats.map((item) => ({
+              label: item.value,
+              value: item.value,
+            }))}
             selected={selectedFilters.format ?? ""}
             onSelect={(value) => setFilter("format", value)}
           />
           <ChipGroup
             label={t("records.filterArtists")}
-            options={filters.artists.map((item) => ({ label: item.value, value: item.value }))}
+            options={filters.artists.map((item) => ({
+              label: item.value,
+              value: item.value,
+            }))}
             selected={selectedFilters.artist ?? ""}
             onSelect={(value) => setFilter("artist", value)}
           />
           <ChipGroup
             label={t("records.filterGenres")}
-            options={filters.genres.map((item) => ({ label: item.value, value: item.value }))}
+            options={filters.genres.map((item) => ({
+              label: item.value,
+              value: item.value,
+            }))}
             selected={selectedFilters.genre ?? ""}
             onSelect={(value) => setFilter("genre", value)}
           />
         </>
       )}
-      <Button label={t("records.clearFilters")} onPress={clearFilters} variant="secondary" />
+      <Button
+        label={t("records.clearFilters")}
+        onPress={clearFilters}
+        variant="secondary"
+      />
     </View>
   );
-}
+};
 
-function ChipGroup({
+const ChipGroup = ({
   label,
   onSelect,
   options,
@@ -381,39 +441,27 @@ function ChipGroup({
   onSelect: (value: string) => void;
   options: { label: string; value: string }[];
   selected: string;
-}) {
+}) => {
   return (
     <View style={{ gap: spacing.sm }}>
-      <Text selectable style={{ color: colors.text, fontSize: 16, fontWeight: "800" }}>
+      <Text selectable style={[sectionTitleStyle, { fontSize: 16 }]}>
         {label}
       </Text>
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
+      <View style={wrapRowStyle}>
         {options.map((option) => {
           const isSelected = selected === option.value;
 
           return (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityState={{ selected: isSelected }}
+            <Chip
               key={option.value}
+              label={option.label}
               onPress={() => onSelect(option.value)}
-              style={{
-                backgroundColor: isSelected ? colors.primary : colors.surfaceMuted,
-                borderColor: isSelected ? colors.primary : colors.border,
-                borderRadius: radius.md,
-                borderWidth: 1,
-                minHeight: 40,
-                paddingHorizontal: spacing.md,
-                paddingVertical: spacing.sm,
-              }}
-            >
-              <Text style={{ color: isSelected ? colors.surface : colors.text, fontWeight: "700" }}>
-                {option.label}
-              </Text>
-            </Pressable>
+              selected={isSelected}
+              textStyle={{ color: isSelected ? colors.surface : colors.text }}
+            />
           );
         })}
       </View>
     </View>
   );
-}
+};

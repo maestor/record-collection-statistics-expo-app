@@ -16,30 +16,38 @@ export type TranslationKey = NestedTranslationKey<TranslationTree>;
 
 const defaultLocale: Locale = "fi";
 
-function getTranslationValue(locale: Locale, key: TranslationKey): string {
-  return key
+const getTranslationValue = (locale: Locale, key: TranslationKey): string =>
+  key
     .split(".")
-    .reduce<unknown>((current, segment) => (current as Record<string, unknown>)?.[segment], translations[locale]) as string;
-}
+    .reduce<unknown>(
+      (current, segment) => (current as Record<string, unknown>)?.[segment],
+      translations[locale],
+    ) as string;
 
-function interpolate(template: string, values?: Record<string, TranslationValue>) {
+const interpolate = (
+  template: string,
+  values?: Record<string, TranslationValue>,
+) => {
   if (!values) {
     return template;
   }
 
-  return template.replace(/\{(\w+)\}/g, (_, name: string) => String(values[name]));
-}
+  return template.replace(/\{(\w+)\}/g, (_, name: string) =>
+    String(values[name]),
+  );
+};
 
-export function translate(key: TranslationKey, values?: Record<string, TranslationValue>) {
-  return interpolate(getTranslationValue(defaultLocale, key), values);
-}
+export const translate = (
+  key: TranslationKey,
+  values?: Record<string, TranslationValue>,
+) => interpolate(getTranslationValue(defaultLocale, key), values);
 
 const LocalizationContext = React.createContext({
   locale: defaultLocale,
   t: translate,
 });
 
-export function LocalizationProvider({ children }: React.PropsWithChildren) {
+export const LocalizationProvider = ({ children }: React.PropsWithChildren) => {
   const value = React.useMemo(
     () => ({
       locale: defaultLocale,
@@ -48,9 +56,11 @@ export function LocalizationProvider({ children }: React.PropsWithChildren) {
     [],
   );
 
-  return <LocalizationContext.Provider value={value}>{children}</LocalizationContext.Provider>;
-}
+  return (
+    <LocalizationContext.Provider value={value}>
+      {children}
+    </LocalizationContext.Provider>
+  );
+};
 
-export function useTranslation() {
-  return React.useContext(LocalizationContext);
-}
+export const useTranslation = () => React.useContext(LocalizationContext);

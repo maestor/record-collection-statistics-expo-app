@@ -68,6 +68,14 @@ For a physical Android device, the API must be reachable from the phone over the
 
 The read API key is embedded in the app bundle. Treat it as a client-visible gate key, not a private server secret.
 
+## Versioning
+
+The app now versions from `1.0.0`.
+
+- Use `npm run version:auto` after a commit that follows the supported semantic prefixes documented in [Versioning](versioning.md).
+- Use `npm run version:bump -- feature` or `npm run version:bump -- fix` when you want the script to calculate the next version without reading the latest commit message.
+- Use `npm run version:set -- <x.y.z>` only when you want to make an explicit version decision such as a major release.
+
 ## Cached API Data
 
 The app keeps TanStack Query data in local storage for up to 24 hours so repeated launches do not immediately reread stable API endpoints.

@@ -1,6 +1,6 @@
 {
   "name": "record-collection-statistics-expo-app",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "main": "expo-router/entry",
   "scripts": {
@@ -12,6 +12,9 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "jest --coverage --watchman=false --runInBand",
+    "version:auto": "node scripts/version-app.cjs auto",
+    "version:bump": "node scripts/version-app.cjs bump",
+    "version:set": "node scripts/version-app.cjs set",
     "generate:api-types": "node scripts/generate-api-types.mjs",
     "check:api-types": "node scripts/check-api-types.mjs",
     "verify": "npm run typecheck && npm run lint && npm test -- --watchAll=false"

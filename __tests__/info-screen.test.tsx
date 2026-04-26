@@ -39,8 +39,8 @@ describe("InfoScreen", () => {
 
     renderWithProviders(<InfoScreen />);
 
-    expect(screen.getByText(t("dashboard.syncStatusLoading"))).toBeTruthy();
-    expect(screen.getByText(t("dashboard.healthStatusUnavailable"))).toBeTruthy();
+    expect(screen.getByText(t("dashboard.syncStatusLoading"))).toBeOnTheScreen();
+    expect(screen.getByText(t("dashboard.healthStatusUnavailable"))).toBeOnTheScreen();
 
     resolveHealthResponse?.(
       jsonResponse({
@@ -53,16 +53,16 @@ describe("InfoScreen", () => {
       }),
     );
 
-    expect(await screen.findByText(t("dashboard.healthStatusHealthy"))).toBeTruthy();
+    expect(await screen.findByText(t("dashboard.healthStatusHealthy"))).toBeOnTheScreen();
   });
 
   it("renders sync info and opens external links", async () => {
     const openUrlSpy = jest.spyOn(Linking, "openURL").mockResolvedValue(undefined);
     renderWithProviders(<InfoScreen />);
 
-    expect(await screen.findByText(t("dashboard.healthStatusHealthy"))).toBeTruthy();
-    expect(screen.getByText(t("dashboard.syncStatusTitle"))).toBeTruthy();
-    expect(screen.getByText(t("info.copyright"))).toBeTruthy();
+    expect(await screen.findByText(t("dashboard.healthStatusHealthy"))).toBeOnTheScreen();
+    expect(screen.getByText(t("dashboard.syncStatusTitle"))).toBeOnTheScreen();
+    expect(screen.getByText(t("info.copyright"))).toBeOnTheScreen();
 
     const linkedInLink = screen.getByRole("link", { name: t("info.openExternalLink", { label: "LinkedIn" }) });
     startPressablePressedState(linkedInLink);
@@ -96,8 +96,8 @@ describe("InfoScreen", () => {
 
     renderWithProviders(<InfoScreen />);
 
-    expect(await screen.findByText(t("dashboard.healthStatusUnavailable"))).toBeTruthy();
-    expect(screen.getByText(t("dashboard.syncUnavailableMessage"))).toBeTruthy();
+    expect(await screen.findByText(t("dashboard.healthStatusUnavailable"))).toBeOnTheScreen();
+    expect(screen.getByText(t("dashboard.syncUnavailableMessage"))).toBeOnTheScreen();
   });
 
   it("renders sync fetch errors", async () => {
@@ -105,7 +105,7 @@ describe("InfoScreen", () => {
 
     renderWithProviders(<InfoScreen />);
 
-    expect(await screen.findByText("Sync failed")).toBeTruthy();
-    expect(screen.getByText(t("dashboard.healthStatusUnavailable"))).toBeTruthy();
+    expect(await screen.findByText("Sync failed")).toBeOnTheScreen();
+    expect(screen.getByText(t("dashboard.healthStatusUnavailable"))).toBeOnTheScreen();
   });
 });

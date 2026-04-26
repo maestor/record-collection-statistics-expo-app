@@ -100,7 +100,6 @@ export const translations = {
       coverImage: "Kansikuva julkaisulle {title}",
       errorTitle: "Levy ei ole saatavilla",
       identifiers: "Tunnisteet",
-      identifiersEmpty: "Tunnisteita ei ole saatavilla.",
       invalidMessage: "Reitin julkaisun tunniste ei ole kelvollinen.",
       invalidTitle: "Virheellinen julkaisu",
       labels: "Julkaisijat",
@@ -114,7 +113,6 @@ export const translations = {
       releaseReleased: "Julkaisuajankohta",
       releaseStyles: "Tyylit",
       trackList: "Kappalelista",
-      tracksEmpty: "Kappaleita ei ole saatavilla.",
     },
     records: {
       clearFilters: "Tyhjennä suodattimet",

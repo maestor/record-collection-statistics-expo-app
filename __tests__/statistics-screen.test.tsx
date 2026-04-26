@@ -128,7 +128,7 @@ const openDimensionSelector = (dimension: StatisticDimension) => {
 
   expect(
     screen.getByLabelText(t("statistics.selectorLabel")),
-  ).toBeTruthy();
+  ).toBeOnTheScreen();
 };
 
 const selectDimension = (
@@ -167,13 +167,13 @@ describe("StatisticsScreen", () => {
 
     renderWithProviders(<StatisticsScreen />);
 
-    expect(screen.getByText(t("dashboard.loadingTitle"))).toBeTruthy();
-    expect(screen.getByText(t("dashboard.loadingMessage"))).toBeTruthy();
+    expect(screen.getByText(t("dashboard.loadingTitle"))).toBeOnTheScreen();
+    expect(screen.getByText(t("dashboard.loadingMessage"))).toBeOnTheScreen();
     expect(
       screen.queryByRole("button", {
         name: getCurrentDimensionLabel("artist"),
       }),
-    ).toBeNull();
+    ).not.toBeOnTheScreen();
 
     resolveDashboardResponse?.(jsonResponse(dashboardPayload));
 
@@ -181,7 +181,7 @@ describe("StatisticsScreen", () => {
       await screen.findByRole("button", {
         name: getCurrentDimensionLabel("artist"),
       }),
-    ).toBeTruthy();
+    ).toBeOnTheScreen();
   });
 
   it("keeps the loading state when dashboard data has not restored yet", () => {
@@ -195,14 +195,14 @@ describe("StatisticsScreen", () => {
 
     renderWithProviders(<StatisticsScreen />);
 
-    expect(screen.getByText(t("dashboard.loadingTitle"))).toBeTruthy();
-    expect(screen.getByText(t("dashboard.loadingMessage"))).toBeTruthy();
+    expect(screen.getByText(t("dashboard.loadingTitle"))).toBeOnTheScreen();
+    expect(screen.getByText(t("dashboard.loadingMessage"))).toBeOnTheScreen();
   });
 
   it("defaults to list mode and supports every statistic action", async () => {
     renderWithProviders(<StatisticsScreen />);
 
-    expect(await screen.findByText("Klamydia")).toBeTruthy();
+    expect(await screen.findByText("Klamydia")).toBeOnTheScreen();
     expect(
       screen.getByRole("button", { name: t("statistics.viewList") }).props
         .accessibilityState.selected,
@@ -227,12 +227,12 @@ describe("StatisticsScreen", () => {
     for (const { dimension, value } of statisticCases) {
       selectDimension(currentDimension, dimension);
 
-      expect(await screen.findByText(value)).toBeTruthy();
+      expect(await screen.findByText(value)).toBeOnTheScreen();
       expect(
         screen.getByRole("button", {
           name: getCurrentDimensionLabel(dimension),
         }),
-      ).toBeTruthy();
+      ).toBeOnTheScreen();
 
       const viewFullLink = screen.getByRole("link", {
         name: t("breakdowns.viewFullPrefix"),
@@ -252,50 +252,50 @@ describe("StatisticsScreen", () => {
   it("opens and closes the statistic selector from the active one-line trigger", async () => {
     renderWithProviders(<StatisticsScreen />);
 
-    expect(await screen.findByText("Klamydia")).toBeTruthy();
+    expect(await screen.findByText("Klamydia")).toBeOnTheScreen();
 
     openDimensionSelector("artist");
 
     const selector = screen.getByLabelText(t("statistics.selectorLabel"));
 
-    expect(screen.getByText(t("statistics.selectorTitle"))).toBeTruthy();
+    expect(screen.getByText(t("statistics.selectorTitle"))).toBeOnTheScreen();
     expect(
       screen.getByRole("button", { name: t("statistics.closeSelector") }),
-    ).toBeTruthy();
+    ).toBeOnTheScreen();
     expect(
       within(selector).getByRole("button", { name: t("dimensions.artist") })
         .props.accessibilityState,
     ).toEqual({ selected: true });
-    expect(screen.getByText(t("statistics.selectedDimension"))).toBeTruthy();
+    expect(screen.getByText(t("statistics.selectedDimension"))).toBeOnTheScreen();
 
     fireEvent.press(
       screen.getByRole("button", { name: t("statistics.closeSelector") }),
     );
 
-    expect(screen.queryByText(t("statistics.selectorTitle"))).toBeNull();
+    expect(screen.queryByText(t("statistics.selectorTitle"))).not.toBeOnTheScreen();
     expect(
       screen.getByRole("button", {
         name: getCurrentDimensionLabel("artist"),
       }),
-    ).toBeTruthy();
+    ).toBeOnTheScreen();
   });
 
   it("closes the statistic selector when the native dismiss request fires", async () => {
     const view = renderWithProviders(<StatisticsScreen />);
 
-    expect(await screen.findByText("Klamydia")).toBeTruthy();
+    expect(await screen.findByText("Klamydia")).toBeOnTheScreen();
 
     openDimensionSelector("artist");
 
     fireEvent(view.UNSAFE_getByType(Modal), "onRequestClose");
 
-    expect(screen.queryByText(t("statistics.selectorTitle"))).toBeNull();
+    expect(screen.queryByText(t("statistics.selectorTitle"))).not.toBeOnTheScreen();
   });
 
   it("shows pressed styling for selector trigger and modal actions", async () => {
     renderWithProviders(<StatisticsScreen />);
 
-    expect(await screen.findByText("Klamydia")).toBeTruthy();
+    expect(await screen.findByText("Klamydia")).toBeOnTheScreen();
 
     const trigger = screen.getByRole("button", {
       name: getCurrentDimensionLabel("artist"),
@@ -339,7 +339,7 @@ describe("StatisticsScreen", () => {
   it("shows pressed styling for the unselected graph toggle", async () => {
     renderWithProviders(<StatisticsScreen />);
 
-    expect(await screen.findByText("Klamydia")).toBeTruthy();
+    expect(await screen.findByText("Klamydia")).toBeOnTheScreen();
 
     const chartsButton = screen.getByRole("button", {
       name: t("statistics.viewCharts"),
@@ -357,10 +357,10 @@ describe("StatisticsScreen", () => {
   it("preserves the selected dimension when switching to chart mode and back", async () => {
     renderWithProviders(<StatisticsScreen />);
 
-    expect(await screen.findByText("Klamydia")).toBeTruthy();
+    expect(await screen.findByText("Klamydia")).toBeOnTheScreen();
 
     selectDimension("artist", "format");
-    expect(await screen.findByText("CD")).toBeTruthy();
+    expect(await screen.findByText("CD")).toBeOnTheScreen();
 
     fireEvent.press(screen.getByRole("button", { name: t("statistics.viewCharts") }));
 
@@ -370,10 +370,10 @@ describe("StatisticsScreen", () => {
           title: t("dimensions.format"),
         }),
       ),
-    ).toBeTruthy();
-    expect(screen.getByLabelText(t("statistics.chartSectionLabel", { title: t("dimensions.format") }))).toBeTruthy();
-    expect(screen.getByText(t("statistics.chartLegendTitle"))).toBeTruthy();
-    expect(screen.getByText(t("statistics.other"))).toBeTruthy();
+    ).toBeOnTheScreen();
+    expect(screen.getByLabelText(t("statistics.chartSectionLabel", { title: t("dimensions.format") }))).toBeOnTheScreen();
+    expect(screen.getByText(t("statistics.chartLegendTitle"))).toBeOnTheScreen();
+    expect(screen.getByText(t("statistics.other"))).toBeOnTheScreen();
     expect(
       screen.getByLabelText(
         t("statistics.donutCenterLabel", {
@@ -382,7 +382,7 @@ describe("StatisticsScreen", () => {
           percentage: "39,6",
         }),
       ),
-    ).toBeTruthy();
+    ).toBeOnTheScreen();
     expect(
       screen.getByLabelText(
         t("statistics.legendItemAccessibilityLabel", {
@@ -391,7 +391,7 @@ describe("StatisticsScreen", () => {
           percentage: "39,6",
         }),
       ),
-    ).toBeTruthy();
+    ).toBeOnTheScreen();
     expect(
       (globalThis.fetch as jest.Mock).mock.calls.some(([url]) =>
         String(url).includes("/stats/breakdowns/format"),
@@ -404,18 +404,18 @@ describe("StatisticsScreen", () => {
       await screen.findByRole("link", {
         name: t("breakdowns.viewFullPrefix"),
       }),
-    ).toBeTruthy();
+    ).toBeOnTheScreen();
     expect(
       screen.getByRole("button", {
         name: getCurrentDimensionLabel("format"),
       }),
-    ).toBeTruthy();
+    ).toBeOnTheScreen();
   });
 
   it("renders the year graph without an other bucket", async () => {
     renderWithProviders(<StatisticsScreen />);
 
-    expect(await screen.findByText("Klamydia")).toBeTruthy();
+    expect(await screen.findByText("Klamydia")).toBeOnTheScreen();
 
     selectDimension("artist", "added_year");
     fireEvent.press(screen.getByRole("button", { name: t("statistics.viewCharts") }));
@@ -426,16 +426,16 @@ describe("StatisticsScreen", () => {
           title: t("dimensions.added_year"),
         }),
       ),
-    ).toBeTruthy();
+    ).toBeOnTheScreen();
     expect(
       screen.getByLabelText(
         t("statistics.chartScrollLabel", { title: t("dimensions.added_year") }),
       ),
-    ).toBeTruthy();
+    ).toBeOnTheScreen();
     expect(
       screen.getAllByText(/202[4-6]/).map((node) => node.props.children),
     ).toEqual(["2026", "2025", "2024"]);
-    expect(screen.queryByText(t("statistics.other"))).toBeNull();
+    expect(screen.queryByText(t("statistics.other"))).not.toBeOnTheScreen();
   });
 
   it("renders zero totals as zero percent in chart mode", async () => {
@@ -458,7 +458,7 @@ describe("StatisticsScreen", () => {
 
     renderWithProviders(<StatisticsScreen />);
 
-    expect(await screen.findByText("Klamydia")).toBeTruthy();
+    expect(await screen.findByText("Klamydia")).toBeOnTheScreen();
 
     fireEvent.press(screen.getByRole("button", { name: t("statistics.viewCharts") }));
 
@@ -470,7 +470,7 @@ describe("StatisticsScreen", () => {
           percentage: "0",
         }),
       ),
-    ).toBeTruthy();
+    ).toBeOnTheScreen();
     expect(
       await screen.findByLabelText(
         t("statistics.legendItemAccessibilityLabel", {
@@ -479,7 +479,7 @@ describe("StatisticsScreen", () => {
           percentage: "0",
         }),
       ),
-    ).toBeTruthy();
+    ).toBeOnTheScreen();
   });
 
   it("shows a summary instead of a Muut donut slice for long-tail artist data", async () => {
@@ -499,7 +499,7 @@ describe("StatisticsScreen", () => {
 
     renderWithProviders(<StatisticsScreen />);
 
-    expect(await screen.findByText("Klamydia")).toBeTruthy();
+    expect(await screen.findByText("Klamydia")).toBeOnTheScreen();
 
     fireEvent.press(screen.getByRole("button", { name: t("statistics.viewCharts") }));
 
@@ -509,8 +509,8 @@ describe("StatisticsScreen", () => {
           title: t("dimensions.artist"),
         }),
       ),
-    ).toBeTruthy();
-    expect(screen.queryByText(t("statistics.other"))).toBeNull();
+    ).toBeOnTheScreen();
+    expect(screen.queryByText(t("statistics.other"))).not.toBeOnTheScreen();
     expect(
       screen.getByText(
         t("statistics.otherSummary", {
@@ -519,7 +519,7 @@ describe("StatisticsScreen", () => {
           total: "127",
         }),
       ),
-    ).toBeTruthy();
+    ).toBeOnTheScreen();
     expect(
       screen.queryByLabelText(
         t("statistics.legendItemAccessibilityLabel", {
@@ -528,7 +528,7 @@ describe("StatisticsScreen", () => {
           percentage: "6,7",
         }),
       ),
-    ).toBeNull();
+    ).not.toBeOnTheScreen();
   });
 
   it("renders a loading state while the chart breakdown is loading", async () => {
@@ -552,17 +552,17 @@ describe("StatisticsScreen", () => {
 
     renderWithProviders(<StatisticsScreen />);
 
-    expect(await screen.findByText("Klamydia")).toBeTruthy();
+    expect(await screen.findByText("Klamydia")).toBeOnTheScreen();
 
     fireEvent.press(screen.getByRole("button", { name: t("statistics.viewCharts") }));
 
-    expect(screen.getByText(t("statistics.graphLoadingTitle"))).toBeTruthy();
-    expect(screen.getByText(t("statistics.graphLoadingMessage"))).toBeTruthy();
+    expect(screen.getByText(t("statistics.graphLoadingTitle"))).toBeOnTheScreen();
+    expect(screen.getByText(t("statistics.graphLoadingMessage"))).toBeOnTheScreen();
     expect(
       screen.getByRole("button", {
         name: getCurrentDimensionLabel("artist"),
       }),
-    ).toBeTruthy();
+    ).toBeOnTheScreen();
 
     resolveBreakdownResponse?.(jsonResponse(artistBreakdownPayload));
 
@@ -572,7 +572,7 @@ describe("StatisticsScreen", () => {
           title: t("dimensions.artist"),
         }),
       ),
-    ).toBeTruthy();
+    ).toBeOnTheScreen();
   });
 
   it("keeps the chart loading state when breakdown data has not restored yet", async () => {
@@ -593,12 +593,12 @@ describe("StatisticsScreen", () => {
 
     renderWithProviders(<StatisticsScreen />);
 
-    expect(await screen.findByText("Klamydia")).toBeTruthy();
+    expect(await screen.findByText("Klamydia")).toBeOnTheScreen();
 
     fireEvent.press(screen.getByRole("button", { name: t("statistics.viewCharts") }));
 
-    expect(screen.getByText(t("statistics.graphLoadingTitle"))).toBeTruthy();
-    expect(screen.getByText(t("statistics.graphLoadingMessage"))).toBeTruthy();
+    expect(screen.getByText(t("statistics.graphLoadingTitle"))).toBeOnTheScreen();
+    expect(screen.getByText(t("statistics.graphLoadingMessage"))).toBeOnTheScreen();
   });
 
   it("renders an empty chart state when the selected breakdown has no values", async () => {
@@ -621,12 +621,12 @@ describe("StatisticsScreen", () => {
 
     renderWithProviders(<StatisticsScreen />);
 
-    expect(await screen.findByText("Klamydia")).toBeTruthy();
+    expect(await screen.findByText("Klamydia")).toBeOnTheScreen();
 
     fireEvent.press(screen.getByRole("button", { name: t("statistics.viewCharts") }));
 
-    expect(await screen.findByText(t("statistics.graphEmptyTitle"))).toBeTruthy();
-    expect(screen.getByText(t("common.noValuesYet"))).toBeTruthy();
+    expect(await screen.findByText(t("statistics.graphEmptyTitle"))).toBeOnTheScreen();
+    expect(screen.getByText(t("common.noValuesYet"))).toBeOnTheScreen();
   });
 
   it("renders a chart API error with retry", async () => {
@@ -646,13 +646,13 @@ describe("StatisticsScreen", () => {
 
     renderWithProviders(<StatisticsScreen />);
 
-    expect(await screen.findByText("Klamydia")).toBeTruthy();
+    expect(await screen.findByText("Klamydia")).toBeOnTheScreen();
 
     fireEvent.press(screen.getByRole("button", { name: t("statistics.viewCharts") }));
 
-    expect(await screen.findByRole("alert")).toBeTruthy();
-    expect(screen.getByText(t("statistics.graphErrorTitle"))).toBeTruthy();
-    expect(screen.getByText("Breakdown down")).toBeTruthy();
+    expect(await screen.findByRole("alert")).toBeOnTheScreen();
+    expect(screen.getByText(t("statistics.graphErrorTitle"))).toBeOnTheScreen();
+    expect(screen.getByText("Breakdown down")).toBeOnTheScreen();
 
     fireEvent.press(screen.getByRole("button", { name: t("common.tryAgain") }));
 
@@ -666,9 +666,9 @@ describe("StatisticsScreen", () => {
 
     renderWithProviders(<StatisticsScreen />);
 
-    expect(await screen.findByRole("alert")).toBeTruthy();
-    expect(screen.getByText("API down")).toBeTruthy();
-    expect(screen.getByText(t("dashboard.errorTitle"))).toBeTruthy();
+    expect(await screen.findByRole("alert")).toBeOnTheScreen();
+    expect(screen.getByText("API down")).toBeOnTheScreen();
+    expect(screen.getByText(t("dashboard.errorTitle"))).toBeOnTheScreen();
 
     fireEvent.press(screen.getByRole("button", { name: t("common.tryAgain") }));
 

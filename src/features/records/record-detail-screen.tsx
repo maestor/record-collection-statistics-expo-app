@@ -163,18 +163,14 @@ export const RecordDetailScreen = ({ releaseId }: RecordDetailScreenProps) => {
         </Panel>
       </Section>
 
-      <Section title={t("recordDetail.trackList")}>
-        <Panel
-          backgroundColor={colors.surface}
-          borderColor={colors.border}
-          style={{ gap: spacing.sm, padding: spacing.lg }}
-        >
-          {record.tracks.length === 0 ? (
-            <Text selectable style={{ color: colors.textMuted }}>
-              {t("recordDetail.tracksEmpty")}
-            </Text>
-          ) : (
-            record.tracks.map((track, index) => (
+      {record.tracks.length > 0 && (
+        <Section title={t("recordDetail.trackList")}>
+          <Panel
+            backgroundColor={colors.surface}
+            borderColor={colors.border}
+            style={{ gap: spacing.sm, padding: spacing.lg }}
+          >
+            {record.tracks.map((track, index) => (
               <Text
                 key={`${track.position ?? index}-${track.title}`}
                 selectable
@@ -182,34 +178,28 @@ export const RecordDetailScreen = ({ releaseId }: RecordDetailScreenProps) => {
               >
                 {formatTrack(track, index)}
               </Text>
-            ))
-          )}
-        </Panel>
-      </Section>
+            ))}
+          </Panel>
+        </Section>
+      )}
 
-      <Section title={t("recordDetail.identifiers")}>
-        <Panel
-          backgroundColor={colors.surface}
-          borderColor={colors.border}
-          style={{ gap: spacing.sm, padding: spacing.lg }}
-        >
-          {record.identifiers.length === 0 ? (
-            <Text selectable style={{ color: colors.textMuted }}>
-              {t("recordDetail.identifiersEmpty")}
-            </Text>
-          ) : (
-            groupIdentifiers(record.identifiers).map(
-              ([type, values], index) => (
-                <FieldRow
-                  key={`${type}-${index}`}
-                  label={type}
-                  value={values.join("\n")}
-                />
-              ),
-            )
-          )}
-        </Panel>
-      </Section>
+      {record.identifiers.length > 0 && (
+        <Section title={t("recordDetail.identifiers")}>
+          <Panel
+            backgroundColor={colors.surface}
+            borderColor={colors.border}
+            style={{ gap: spacing.sm, padding: spacing.lg }}
+          >
+            {groupIdentifiers(record.identifiers).map(([type, values], index) => (
+              <FieldRow
+                key={`${type}-${index}`}
+                label={type}
+                value={values.join("\n")}
+              />
+            ))}
+          </Panel>
+        </Section>
+      )}
     </ScrollView>
   );
 };

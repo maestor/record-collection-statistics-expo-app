@@ -55,13 +55,13 @@ describe("DashboardScreen", () => {
 
     renderWithProviders(<DashboardScreen />);
 
-    expect(screen.getByText(t("dashboard.loadingTitle"))).toBeTruthy();
-    expect(screen.getByText(t("dashboard.loadingMessage"))).toBeTruthy();
-    expect(screen.queryByRole("button", { name: t("dashboard.statisticsButton") })).toBeNull();
+    expect(screen.getByText(t("dashboard.loadingTitle"))).toBeOnTheScreen();
+    expect(screen.getByText(t("dashboard.loadingMessage"))).toBeOnTheScreen();
+    expect(screen.queryByRole("button", { name: t("dashboard.statisticsButton") })).not.toBeOnTheScreen();
 
     resolveDashboardResponse?.(jsonResponse(dashboardPayload));
 
-    expect(await screen.findByRole("button", { name: t("dashboard.statisticsButton") })).toBeTruthy();
+    expect(await screen.findByRole("button", { name: t("dashboard.statisticsButton") })).toBeOnTheScreen();
   });
 
   it("keeps the loading state when the query has not restored data yet", () => {
@@ -76,22 +76,22 @@ describe("DashboardScreen", () => {
 
     renderWithProviders(<DashboardScreen />);
 
-    expect(screen.getByText(t("dashboard.loadingTitle"))).toBeTruthy();
-    expect(screen.getByText(t("dashboard.loadingMessage"))).toBeTruthy();
+    expect(screen.getByText(t("dashboard.loadingTitle"))).toBeOnTheScreen();
+    expect(screen.getByText(t("dashboard.loadingMessage"))).toBeOnTheScreen();
   });
 
   it("renders dashboard overview actions with the updated summary cards", async () => {
     renderWithProviders(<DashboardScreen />);
 
-    expect(await screen.findByRole("button", { name: t("dashboard.statisticsButton") })).toBeTruthy();
-    expect(screen.getByText("2 345")).toBeTruthy();
-    expect(screen.getByText("59 €")).toBeTruthy();
-    expect(screen.getByText("405")).toBeTruthy();
-    expect(screen.getByText("456")).toBeTruthy();
-    expect(screen.getByText("Äänitteet lisätty välillä 15.8.2019 - 19.4.2026")).toBeTruthy();
-    expect(screen.getByText("Eniten artistilta: Klamydia")).toBeTruthy();
-    expect(screen.getByText("Eniten formaattia: CD")).toBeTruthy();
-    expect(screen.queryByText("Herodes")).toBeNull();
+    expect(await screen.findByRole("button", { name: t("dashboard.statisticsButton") })).toBeOnTheScreen();
+    expect(screen.getByText("2 345")).toBeOnTheScreen();
+    expect(screen.getByText("59 €")).toBeOnTheScreen();
+    expect(screen.getByText("405")).toBeOnTheScreen();
+    expect(screen.getByText("456")).toBeOnTheScreen();
+    expect(screen.getByText("Äänitteet lisätty välillä 15.8.2019 - 19.4.2026")).toBeOnTheScreen();
+    expect(screen.getByText("Eniten artistilta: Klamydia")).toBeOnTheScreen();
+    expect(screen.getByText("Eniten formaattia: CD")).toBeOnTheScreen();
+    expect(screen.queryByText("Herodes")).not.toBeOnTheScreen();
 
     const statisticsButton = screen.getByRole("button", { name: t("dashboard.statisticsButton") });
     expect(statisticsButton.props.href).toBe("/statistics");
@@ -117,9 +117,9 @@ describe("DashboardScreen", () => {
 
     renderWithProviders(<DashboardScreen />);
 
-    expect(await screen.findByRole("button", { name: t("dashboard.statisticsButton") })).toBeTruthy();
-    expect(screen.queryByText("Eniten artistilta: Klamydia")).toBeNull();
-    expect(screen.queryByText("Eniten formaattia: CD")).toBeNull();
+    expect(await screen.findByRole("button", { name: t("dashboard.statisticsButton") })).toBeOnTheScreen();
+    expect(screen.queryByText("Eniten artistilta: Klamydia")).not.toBeOnTheScreen();
+    expect(screen.queryByText("Eniten formaattia: CD")).not.toBeOnTheScreen();
   });
 
   it("renders an unknown median value when collection value data is missing", async () => {
@@ -142,7 +142,7 @@ describe("DashboardScreen", () => {
 
     renderWithProviders(<DashboardScreen />);
 
-    expect(await screen.findByText("Tuntematon")).toBeTruthy();
+    expect(await screen.findByText("Tuntematon")).toBeOnTheScreen();
   });
 
   it("renders an API error with retry", async () => {
@@ -150,9 +150,9 @@ describe("DashboardScreen", () => {
 
     renderWithProviders(<DashboardScreen />);
 
-    expect(await screen.findByRole("alert")).toBeTruthy();
-    expect(screen.getByText("API down")).toBeTruthy();
-    expect(screen.getByText(t("dashboard.errorTitle"))).toBeTruthy();
+    expect(await screen.findByRole("alert")).toBeOnTheScreen();
+    expect(screen.getByText("API down")).toBeOnTheScreen();
+    expect(screen.getByText(t("dashboard.errorTitle"))).toBeOnTheScreen();
 
     fireEvent.press(screen.getByRole("button", { name: t("common.tryAgain") }));
 

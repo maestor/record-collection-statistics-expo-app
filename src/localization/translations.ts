@@ -48,7 +48,7 @@ export const translations = {
       chartLegendTitle: "Yhteenveto",
       chartScrollLabel: "{title} graafi vieritettavana",
       chartSectionLabel: "{title} graafina",
-      chartTitle: "{title} - kaavio",
+      chartTitle: "{title} - graafi",
       changeDimension: "Vaihda",
       closeSelector: "Sulje",
       currentDimensionLabel: "Valittu tilasto: {title}",
@@ -75,7 +75,7 @@ export const translations = {
       viewPickerLabel: "Valitse raporttinäkymä",
     },
     dimensions: {
-      added_year: "Lisäysvuodet",
+      added_year: "Lisätty kokoelmaan",
       artist: "Artistit",
       country: "Maat",
       format: "Formaatit",

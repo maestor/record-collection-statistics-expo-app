@@ -499,6 +499,15 @@ const FilterPanel = ({
       {filters && (
         <>
           <ChipGroup
+            label={t("dimensions.added_year")}
+            options={filters.addedYears.map((item) => ({
+              label: item.value,
+              value: item.value,
+            }))}
+            selected={selectedFilters.added_year ?? ""}
+            onSelect={(value) => setFilter("added_year", value)}
+          />
+          <ChipGroup
             label={t("records.filterFormats")}
             options={filters.formats.map((item) => ({
               label: item.value,

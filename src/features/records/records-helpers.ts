@@ -4,10 +4,10 @@ import { assertNever } from "@/utils/assert-never";
 
 export type SortValue = "artist" | "date_added" | "release_year" | "title";
 export type OrderValue = NonNullable<RecordListParams["order"]>;
-export type FilterKey = "artist" | "format" | "genre";
+export type FilterKey = "added_year" | "artist" | "format" | "genre";
 export type SelectedRecordFilters = Partial<Record<FilterKey, string>>;
 
-export const filterKeys: FilterKey[] = ["artist", "format", "genre"];
+export const filterKeys: FilterKey[] = ["added_year", "artist", "format", "genre"];
 export const sortOptions: SortValue[] = [
   "date_added",
   "release_year",
@@ -53,7 +53,13 @@ export const buildRecordListParams = (
     const value = selectedFilters[key];
 
     if (value) {
-      params[key] = value;
+      if (key === "added_year") {
+        const year = Number(value);
+        params.added_from = `${year}-01-01T00:00:00.000Z`;
+        params.added_to = `${year}-12-31T23:59:59.999Z`;
+      } else {
+        params[key] = value;
+      }
     }
   }
 

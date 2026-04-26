@@ -26,7 +26,12 @@ const FILTERS_STALE_TIME = DAY_MS;
 const RECORDS_STALE_TIME = 15 * MINUTE_MS;
 const DETAIL_STALE_TIME = DAY_MS;
 const BREAKDOWN_STALE_TIME = DAY_MS;
-const recordFilterDimensions: FilterDimension[] = ["artist", "format", "genre"];
+const recordFilterDimensions: FilterDimension[] = [
+  "artist",
+  "format",
+  "genre",
+  "added_year",
+];
 
 const apiConfig = getApiConfig();
 

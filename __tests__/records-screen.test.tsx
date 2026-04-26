@@ -40,7 +40,7 @@ const secondRecord = {
 
 const filtersPayload = {
   data: {
-    addedYears: [],
+    addedYears: [{ itemCount: 1, releaseCount: 1, value: "2026" }],
     artists: [{ itemCount: 1, releaseCount: 1, value: "Muse" }],
     countries: [{ itemCount: 1, releaseCount: 1, value: "Worldwide" }],
     formats: [{ itemCount: 1, releaseCount: 1, value: "Vinyl" }],
@@ -139,12 +139,14 @@ describe("RecordsScreen", () => {
 
     expect(await screen.findByText("Vinyl")).toBeTruthy();
     expect(screen.getByText(t("records.filterArtists"))).toBeTruthy();
+    expect(screen.getByText(t("dimensions.added_year"))).toBeTruthy();
     expect(screen.queryByText(t("records.filterCountries"))).toBeNull();
     const recordsCallCount = () =>
       (globalThis.fetch as jest.Mock).mock.calls
         .map((call) => String(call[0]))
         .filter((url) => url.includes("/records")).length;
     const callsBeforeApply = recordsCallCount();
+    fireEvent.press(screen.getByRole("button", { name: "2026" }));
     fireEvent.press(screen.getByRole("button", { name: "Vinyl" }));
     fireEvent.press(
       screen.getByRole("button", { name: t("records.sortArtist") }),
@@ -166,6 +168,13 @@ describe("RecordsScreen", () => {
         String(call[0]),
       );
       expect(urls.some((url) => url.includes("q=Muse"))).toBe(true);
+      expect(
+        urls.some(
+          (url) =>
+            url.includes("added_from=2026-01-01T00%3A00%3A00.000Z") &&
+            url.includes("added_to=2026-12-31T23%3A59%3A59.999Z"),
+        ),
+      ).toBe(true);
       expect(urls.some((url) => url.includes("format=Vinyl"))).toBe(true);
       expect(urls.some((url) => url.includes("sort=artist"))).toBe(true);
       expect(urls.some((url) => url.includes("order=asc"))).toBe(true);
@@ -190,6 +199,7 @@ describe("RecordsScreen", () => {
     );
 
     expect(await screen.findByRole("button", { name: "Rock" })).toBeTruthy();
+    fireEvent.press(screen.getByRole("button", { name: "2026" }));
     fireEvent.press(screen.getByRole("button", { name: "Rock" }));
     fireEvent.press(screen.getByRole("button", { name: "Muse" }));
     fireEvent.press(screen.getByRole("button", { name: "Vinyl" }));
@@ -214,6 +224,13 @@ describe("RecordsScreen", () => {
         String(call[0]),
       );
       expect(urls.some((url) => url.includes("q=Muse"))).toBe(true);
+      expect(
+        urls.some(
+          (url) =>
+            url.includes("added_from=2026-01-01T00%3A00%3A00.000Z") &&
+            url.includes("added_to=2026-12-31T23%3A59%3A59.999Z"),
+        ),
+      ).toBe(true);
       expect(urls.some((url) => url.includes("genre=Rock"))).toBe(true);
       expect(urls.some((url) => url.includes("artist=Muse"))).toBe(true);
       expect(urls.some((url) => url.includes("format=Vinyl"))).toBe(false);
@@ -222,7 +239,7 @@ describe("RecordsScreen", () => {
     });
 
     fireEvent.press(
-      screen.getByRole("button", { name: `${t("records.filtersButton")} (3)` }),
+      screen.getByRole("button", { name: `${t("records.filtersButton")} (4)` }),
     );
     expect(
       await screen.findByRole("button", { name: t("records.clearFilters") }),
@@ -333,7 +350,9 @@ describe("RecordsScreen", () => {
 
     expect(await screen.findByText("Vinyl")).toBeTruthy();
     expect(getFilterCalls()).toHaveLength(1);
-    expect(getFilterCalls()[0]).toContain("dimensions=artist%2Cformat%2Cgenre");
+    expect(getFilterCalls()[0]).toContain(
+      "dimensions=artist%2Cformat%2Cgenre%2Cadded_year",
+    );
     const recordCallsBeforeClose = (globalThis.fetch as jest.Mock).mock.calls
       .map((call) => String(call[0]))
       .filter((url) => url.includes("/records")).length;

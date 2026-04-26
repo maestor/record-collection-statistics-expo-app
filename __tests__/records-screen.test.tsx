@@ -496,9 +496,9 @@ describe("RecordsScreen", () => {
       });
 
       await waitFor(() => {
-        expect(recordsCallCount()).toBe(callsAfterAutoSearch);
+        expect(dismissKeyboard).toHaveBeenCalledTimes(2);
       });
-      expect(dismissKeyboard).toHaveBeenCalledTimes(1);
+      expect(recordsCallCount()).toBe(callsAfterAutoSearch);
     } finally {
       jest.useRealTimers();
     }

@@ -160,9 +160,7 @@ export const RecordsScreen = () => {
     }
 
     const timeout = setTimeout(() => {
-      setPendingSearchQuery(
-        normalizedDraftQuery.length === 0 ? null : normalizedDraftQuery,
-      );
+      setPendingSearchQuery(normalizedDraftQuery);
       setQuery(normalizedDraftQuery);
     }, AUTO_SEARCH_DELAY_MS);
 

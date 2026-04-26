@@ -5,6 +5,7 @@ import { Image } from "expo-image";
 import { useRecordDetailQuery } from "@/api/queries";
 import { getErrorMessage } from "@/api/client";
 import { FieldRow } from "@/components/field-row";
+import { Panel } from "@/components/panel";
 import { Section } from "@/components/section";
 import { StatusMessage } from "@/components/status-message";
 import { useTranslation } from "@/localization/i18n";
@@ -80,37 +81,47 @@ export const RecordDetailScreen = ({ releaseId }: RecordDetailScreenProps) => {
       contentContainerStyle={screenStyles.content}
     >
       <View style={{ gap: spacing.lg }}>
-        <Image
-          accessibilityLabel={t("recordDetail.coverImage", {
-            title: record.title,
-          })}
-          contentFit="cover"
-          source={record.coverImage ? { uri: record.coverImage } : null}
-          style={{
-            aspectRatio: 1,
-            backgroundColor: colors.surfaceMuted,
-            borderRadius: radius.md,
-            width: "100%",
-          }}
-        />
-        <View style={{ gap: spacing.sm }}>
-          <Text
-            selectable
-            style={{ color: colors.text, fontSize: 28, fontWeight: "900" }}
-          >
-            {record.title}
-          </Text>
-          <Text
-            selectable
-            style={{ color: colors.textMuted, fontSize: 18, lineHeight: 25 }}
-          >
-            {record.artistsSort ?? t("common.unknownArtist")}
-          </Text>
-        </View>
+        <Panel
+          backgroundColor={colors.surface}
+          borderColor={colors.border}
+          style={{ gap: spacing.lg, padding: spacing.lg }}
+        >
+          <View style={{ gap: spacing.sm }}>
+            <Text
+              selectable
+              style={{ color: colors.text, fontSize: 22, fontWeight: "900" }}
+            >
+              {record.title}
+            </Text>
+            <Text
+              selectable
+              style={{ color: colors.textMuted, fontSize: 20, lineHeight: 20 }}
+            >
+              {record.artistsSort ?? t("common.unknownArtist")}
+            </Text>
+          </View>
+          <Image
+            accessibilityLabel={t("recordDetail.coverImage", {
+              title: record.title,
+            })}
+            contentFit="cover"
+            source={record.coverImage ? { uri: record.coverImage } : null}
+            style={{
+              aspectRatio: 1,
+              backgroundColor: colors.surfaceMuted,
+              borderRadius: radius.md,
+              width: "100%",
+            }}
+          />
+        </Panel>
       </View>
 
       <Section title={t("recordDetail.release")}>
-        <View style={{ gap: spacing.lg }}>
+        <Panel
+          backgroundColor={colors.surface}
+          borderColor={colors.border}
+          style={{ gap: spacing.lg, padding: spacing.lg }}
+        >
           <FieldRow
             label={t("recordDetail.releaseReleased")}
             value={formatDate(record.released)}
@@ -118,6 +129,14 @@ export const RecordDetailScreen = ({ releaseId }: RecordDetailScreenProps) => {
           <FieldRow
             label={t("recordDetail.releaseCountry")}
             value={record.country ?? t("common.unknown")}
+          />
+          <FieldRow
+            label={t("recordDetail.labels")}
+            value={formatLabels(
+              record.labels,
+              t("recordDetail.noCatalogNumber"),
+              t("common.unknown"),
+            )}
           />
           <FieldRow
             label={t("recordDetail.releaseFormats")}
@@ -131,56 +150,43 @@ export const RecordDetailScreen = ({ releaseId }: RecordDetailScreenProps) => {
             label={t("recordDetail.releaseStyles")}
             value={joinValues(record.styles)}
           />
-        </View>
-      </Section>
-
-      <Section title={t("recordDetail.collection")}>
-        <View style={{ gap: spacing.lg }}>
           <FieldRow
             label={t("recordDetail.collectionAddedOn")}
             value={formatDate(record.dateAdded)}
           />
-        </View>
-      </Section>
-
-      <Section title={t("recordDetail.labels")}>
-        <View style={{ gap: spacing.md }}>
-          {groupLabels(record.labels, t("recordDetail.noCatalogNumber")).map(
-            ([name, values], index) => (
-              <FieldRow
-                key={`${name}-${index}`}
-                label={name}
-                value={values.join("\n")}
-              />
-            ),
-          )}
-        </View>
+        </Panel>
       </Section>
 
       <Section title={t("recordDetail.trackList")}>
-        <View style={{ gap: spacing.md }}>
+        <Panel
+          backgroundColor={colors.surface}
+          borderColor={colors.border}
+          style={{ gap: spacing.sm, padding: spacing.lg }}
+        >
           {record.tracks.length === 0 ? (
             <Text selectable style={{ color: colors.textMuted }}>
               {t("recordDetail.tracksEmpty")}
             </Text>
           ) : (
             record.tracks.map((track, index) => (
-              <FieldRow
+              <Text
                 key={`${track.position ?? index}-${track.title}`}
-                label={track.position ?? String(index + 1)}
-                value={
-                  track.duration
-                    ? `${track.title} (${track.duration})`
-                    : track.title
-                }
-              />
+                selectable
+                style={{ color: colors.text, fontSize: 16, lineHeight: 22 }}
+              >
+                {formatTrack(track, index)}
+              </Text>
             ))
           )}
-        </View>
+        </Panel>
       </Section>
 
       <Section title={t("recordDetail.identifiers")}>
-        <View style={{ gap: spacing.md }}>
+        <Panel
+          backgroundColor={colors.surface}
+          borderColor={colors.border}
+          style={{ gap: spacing.sm, padding: spacing.lg }}
+        >
           {record.identifiers.length === 0 ? (
             <Text selectable style={{ color: colors.textMuted }}>
               {t("recordDetail.identifiersEmpty")}
@@ -196,7 +202,7 @@ export const RecordDetailScreen = ({ releaseId }: RecordDetailScreenProps) => {
               ),
             )
           )}
-        </View>
+        </Panel>
       </Section>
     </ScrollView>
   );
@@ -219,6 +225,43 @@ const formatIdentifierValue = (identifier: {
     ? `${identifier.value} · ${identifier.description}`
     : identifier.value;
 
+const formatLabels = (
+  labels: {
+    catno: string | null;
+    name: string;
+  }[],
+  emptyValue: string,
+  unknownValue: string,
+) =>
+  labels.length === 0
+    ? unknownValue
+    : labels.map((label) => formatLabelValue(label, emptyValue)).join("\n");
+
+const formatLabelValue = (
+  label: {
+    catno: string | null;
+    name: string;
+  },
+  emptyValue: string,
+) => `${label.name} · ${label.catno ?? emptyValue}`;
+
+const formatTrack = (
+  track: {
+    duration: string | null;
+    position: string | null;
+    title: string;
+  },
+  index: number,
+) => {
+  const parts = [track.position ?? String(index + 1), track.title];
+
+  if (track.duration) {
+    parts.push(track.duration);
+  }
+
+  return parts.join(" • ");
+};
+
 const groupIdentifiers = (
   identifiers: {
     description: string | null;
@@ -236,29 +279,6 @@ const groupIdentifiers = (
       values.push(formattedValue);
     } else {
       grouped.set(identifier.type, [formattedValue]);
-    }
-  }
-
-  return Array.from(grouped.entries());
-};
-
-const groupLabels = (
-  labels: {
-    catno: string | null;
-    name: string;
-  }[],
-  emptyValue: string,
-) => {
-  const grouped = new Map<string, string[]>();
-
-  for (const label of labels) {
-    const values = grouped.get(label.name);
-    const formattedValue = label.catno ?? emptyValue;
-
-    if (values) {
-      values.push(formattedValue);
-    } else {
-      grouped.set(label.name, [formattedValue]);
     }
   }
 

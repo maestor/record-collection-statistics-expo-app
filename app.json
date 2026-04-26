@@ -6,7 +6,6 @@
     "orientation": "portrait",
     "scheme": "recordcollection",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -15,7 +14,6 @@
     },
     "android": {
       "package": "dev.maestor.recordcollection",
-      "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon-foreground.png",
         "backgroundColor": "#075a98"
@@ -25,7 +23,15 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

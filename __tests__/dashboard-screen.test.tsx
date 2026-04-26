@@ -1,6 +1,7 @@
 import * as React from "react";
 import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 
+import * as apiQueries from "@/api/queries";
 import { DashboardScreen } from "@/features/dashboard/dashboard-screen";
 import { jsonResponse, renderWithProviders, t } from "../test/test-utils";
 
@@ -61,6 +62,22 @@ describe("DashboardScreen", () => {
     resolveDashboardResponse?.(jsonResponse(dashboardPayload));
 
     expect(await screen.findByRole("button", { name: t("dashboard.statisticsButton") })).toBeTruthy();
+  });
+
+  it("keeps the loading state when the query has not restored data yet", () => {
+    jest.spyOn(apiQueries, "useDashboardStatsQuery").mockReturnValue({
+      data: undefined,
+      error: null,
+      isError: false,
+      isFetching: false,
+      isLoading: false,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof apiQueries.useDashboardStatsQuery>);
+
+    renderWithProviders(<DashboardScreen />);
+
+    expect(screen.getByText(t("dashboard.loadingTitle"))).toBeTruthy();
+    expect(screen.getByText(t("dashboard.loadingMessage"))).toBeTruthy();
   });
 
   it("renders dashboard overview actions with the updated summary cards", async () => {

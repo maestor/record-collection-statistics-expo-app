@@ -1,5 +1,12 @@
 import * as React from "react";
-import { Modal, ScrollView, Text, TextInput, View } from "react-native";
+import {
+  Keyboard,
+  Modal,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
 import { useFiltersQuery, useRecordsQuery } from "@/api/queries";
 import type { RecordListParams } from "@/api/types";
@@ -105,6 +112,9 @@ export const RecordsScreen = () => {
   const { t } = useTranslation();
   const [draftQuery, setDraftQuery] = React.useState("");
   const [query, setQuery] = React.useState("");
+  const [submittedSearchQuery, setSubmittedSearchQuery] = React.useState<
+    string | null
+  >(null);
   const [filtersOpen, setFiltersOpen] = React.useState(false);
   const [sort, setSort] = React.useState<SortValue>("date_added");
   const [order, setOrder] = React.useState<OrderValue>("desc");
@@ -156,6 +166,22 @@ export const RecordsScreen = () => {
     return () => clearTimeout(timeout);
   }, [draftQuery, query]);
 
+  React.useEffect(() => {
+    if (
+      submittedSearchQuery === query &&
+      recordsQuery.isSuccess &&
+      !recordsQuery.isFetching
+    ) {
+      Keyboard.dismiss();
+      setSubmittedSearchQuery(null);
+    }
+  }, [
+    query,
+    recordsQuery.isFetching,
+    recordsQuery.isSuccess,
+    submittedSearchQuery,
+  ]);
+
   const openFilters = () => {
     setDraftSort(sort);
     setDraftOrder(order);
@@ -170,14 +196,21 @@ export const RecordsScreen = () => {
     }));
   };
 
+  const updateDraftQuery = (nextQuery: string) => {
+    setDraftQuery(nextQuery);
+    setSubmittedSearchQuery(null);
+  };
+
   const applySearch = (nextQuery: string) => {
     const normalizedQuery = normalizeSearchQuery(nextQuery);
+    setSubmittedSearchQuery(normalizedQuery);
     setQuery(normalizedQuery);
   };
 
   const clearFilters = () => {
     setDraftQuery("");
     setQuery("");
+    setSubmittedSearchQuery(null);
     setDraftSelectedFilters({});
     setSelectedFilters({});
     setDraftSort("date_added");
@@ -222,7 +255,7 @@ export const RecordsScreen = () => {
           <TextInput
             accessibilityLabel={t("records.searchLabel")}
             autoCapitalize="none"
-            onChangeText={setDraftQuery}
+            onChangeText={updateDraftQuery}
             onSubmitEditing={() => applySearch(draftQuery)}
             placeholder={t("records.searchPlaceholder")}
             placeholderTextColor={colors.textMuted}

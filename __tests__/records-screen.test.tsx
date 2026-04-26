@@ -1,6 +1,7 @@
 import * as React from "react";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
+import { Keyboard } from "react-native";
 
 import { RecordsScreen } from "@/features/records/records-screen";
 import { colors } from "@/theme/colors";
@@ -244,6 +245,61 @@ describe("RecordsScreen", () => {
           .accessibilityState,
       ).toEqual({ selected: true });
     });
+  });
+
+  it("dismisses the keyboard after a submitted search succeeds", async () => {
+    const dismissKeyboard = jest
+      .spyOn(Keyboard, "dismiss")
+      .mockImplementation(() => undefined);
+
+    renderWithProviders(<RecordsScreen />);
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+    expect(dismissKeyboard).not.toHaveBeenCalled();
+
+    const searchInput = screen.getByLabelText(t("records.searchLabel"));
+    fireEvent.changeText(searchInput, " Muse ");
+    fireEvent(searchInput, "submitEditing");
+
+    await waitFor(() => {
+      const urls = (globalThis.fetch as jest.Mock).mock.calls.map((call) =>
+        String(call[0]),
+      );
+
+      expect(urls.some((url) => url.includes("q=Muse"))).toBe(true);
+      expect(dismissKeyboard).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("keeps the keyboard open when a submitted search fails", async () => {
+    const dismissKeyboard = jest
+      .spyOn(Keyboard, "dismiss")
+      .mockImplementation(() => undefined);
+
+    globalThis.fetch = jest.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.includes("/filters")) {
+        return jsonResponse(filtersPayload);
+      }
+
+      if (url.includes("q=Muse")) {
+        return jsonResponse({ error: "Search failed" }, 503);
+      }
+
+      return jsonResponse(recordsPayload(1));
+    });
+
+    renderWithProviders(<RecordsScreen />);
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+
+    const searchInput = screen.getByLabelText(t("records.searchLabel"));
+    fireEvent.changeText(searchInput, "Muse");
+    fireEvent(searchInput, "submitEditing");
+
+    expect(await screen.findByRole("alert")).toBeTruthy();
+    expect(dismissKeyboard).not.toHaveBeenCalled();
   });
 
   it("does not render a manual search button and keeps the filters trigger full width", async () => {

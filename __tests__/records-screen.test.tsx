@@ -154,7 +154,7 @@ describe("RecordsScreen", () => {
 
     expect(recordsCallCount()).toBe(callsBeforeApply);
     fireEvent.press(
-      screen.getByRole("button", { name: t("records.applyFilters") }),
+      screen.getByRole("button", { name: t("records.closeFilters") }),
     );
 
     await waitFor(() => {
@@ -202,7 +202,7 @@ describe("RecordsScreen", () => {
 
     expect(recordCallsBeforeApply).toBeGreaterThan(0);
     fireEvent.press(
-      screen.getByRole("button", { name: t("records.applyFilters") }),
+      screen.getByRole("button", { name: t("records.closeFilters") }),
     );
 
     await waitFor(() => {
@@ -256,7 +256,7 @@ describe("RecordsScreen", () => {
     });
   });
 
-  it("loads filters only after opening the filter sheet, reuses the cached response, and discards unapplied drafts", async () => {
+  it("loads filters only after opening the filter sheet, reuses the cached response, and closes without refetch when nothing changed", async () => {
     renderWithProviders(<RecordsScreen />);
 
     expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
@@ -274,10 +274,9 @@ describe("RecordsScreen", () => {
 
     expect(await screen.findByText("Vinyl")).toBeTruthy();
     expect(getFilterCalls()).toHaveLength(1);
-    fireEvent.press(screen.getByRole("button", { name: "Vinyl" }));
-    fireEvent.press(
-      screen.getByRole("button", { name: t("records.sortArtist") }),
-    );
+    const recordCallsBeforeClose = (globalThis.fetch as jest.Mock).mock.calls
+      .map((call) => String(call[0]))
+      .filter((url) => url.includes("/records")).length;
 
     fireEvent.press(
       screen.getByRole("button", { name: t("records.closeFilters") }),
@@ -285,6 +284,11 @@ describe("RecordsScreen", () => {
     await waitFor(() => {
       expect(screen.queryByLabelText(t("records.filterPanelLabel"))).toBeNull();
     });
+    expect(
+      (globalThis.fetch as jest.Mock).mock.calls
+        .map((call) => String(call[0]))
+        .filter((url) => url.includes("/records")).length,
+    ).toBe(recordCallsBeforeClose);
 
     fireEvent.press(
       screen.getByRole("button", { name: t("records.filtersButton") }),
@@ -292,14 +296,43 @@ describe("RecordsScreen", () => {
 
     expect(await screen.findByText("Vinyl")).toBeTruthy();
     expect(getFilterCalls()).toHaveLength(1);
-    expect(
-      screen.getByRole("button", { name: "Vinyl" }).props.accessibilityState
-        .selected,
-    ).toBeUndefined();
-    expect(
-      screen.getByRole("button", { name: t("records.sortDateAdded") }).props
-        .accessibilityState,
-    ).toEqual({ selected: true });
+    expect(screen.getByRole("button", { name: "Vinyl" }).props.accessibilityState.selected).toBeUndefined();
+    expect(screen.getByRole("button", { name: t("records.sortDateAdded") }).props.accessibilityState).toEqual({
+      selected: true,
+    });
+  });
+
+  it("applies draft filter changes when closing the filter sheet", async () => {
+    renderWithProviders(<RecordsScreen />);
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+
+    fireEvent.press(
+      screen.getByRole("button", { name: t("records.filtersButton") }),
+    );
+
+    expect(await screen.findByText("Vinyl")).toBeTruthy();
+    const recordCallsBeforeClose = (globalThis.fetch as jest.Mock).mock.calls
+      .map((call) => String(call[0]))
+      .filter((url) => url.includes("/records")).length;
+
+    fireEvent.press(screen.getByRole("button", { name: "Vinyl" }));
+    fireEvent.press(
+      screen.getByRole("button", { name: t("records.sortArtist") }),
+    );
+    fireEvent.press(
+      screen.getByRole("button", { name: t("records.closeFilters") }),
+    );
+
+    await waitFor(() => {
+      const recordUrls = (globalThis.fetch as jest.Mock).mock.calls
+        .map((call) => String(call[0]))
+        .filter((url) => url.includes("/records"));
+
+      expect(recordUrls).toHaveLength(recordCallsBeforeClose + 1);
+      expect(recordUrls.some((url) => url.includes("format=Vinyl"))).toBe(true);
+      expect(recordUrls.some((url) => url.includes("sort=artist"))).toBe(true);
+    });
   });
 
   it("shows pressed styling for filter sheet buttons", async () => {

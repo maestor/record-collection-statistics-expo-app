@@ -27,6 +27,7 @@ type SortValue = "artist" | "date_added" | "release_year" | "title";
 type OrderValue = NonNullable<RecordListParams["order"]>;
 type FilterKey = "artist" | "format" | "genre";
 
+const filterKeys: FilterKey[] = ["artist", "format", "genre"];
 const sortOptions: SortValue[] = [
   "date_added",
   "release_year",
@@ -82,6 +83,23 @@ const buildParams = (
 };
 
 const normalizeSearchQuery = (value: string): string => value.trim();
+
+const haveDraftFiltersChanged = (
+  sort: SortValue,
+  draftSort: SortValue,
+  order: OrderValue,
+  draftOrder: OrderValue,
+  selectedFilters: Partial<Record<FilterKey, string>>,
+  draftSelectedFilters: Partial<Record<FilterKey, string>>,
+): boolean => {
+  if (sort !== draftSort || order !== draftOrder) {
+    return true;
+  }
+
+  return filterKeys.some(
+    (key) => selectedFilters[key] !== draftSelectedFilters[key],
+  );
+};
 
 export const RecordsScreen = () => {
   const { t } = useTranslation();
@@ -167,6 +185,24 @@ export const RecordsScreen = () => {
     setFiltersOpen(false);
   };
 
+  const closeFilters = () => {
+    if (
+      haveDraftFiltersChanged(
+        sort,
+        draftSort,
+        order,
+        draftOrder,
+        selectedFilters,
+        draftSelectedFilters,
+      )
+    ) {
+      applyFilters();
+      return;
+    }
+
+    setFiltersOpen(false);
+  };
+
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
@@ -225,9 +261,8 @@ export const RecordsScreen = () => {
       )}
 
       <FilterSheet
-        applyFilters={applyFilters}
         clearFilters={clearFilters}
-        closeFilters={() => setFiltersOpen(false)}
+        closeFilters={closeFilters}
         filters={filtersQuery.data?.data}
         draftOrder={draftOrder}
         draftSelectedFilters={draftSelectedFilters}
@@ -272,7 +307,6 @@ export const RecordsScreen = () => {
 };
 
 type FilterSheetProps = {
-  applyFilters: () => void;
   clearFilters: () => void;
   closeFilters: () => void;
   draftOrder: OrderValue;
@@ -291,7 +325,6 @@ type FilterSheetProps = {
 };
 
 const FilterSheet = ({
-  applyFilters,
   clearFilters,
   closeFilters,
   draftOrder,
@@ -375,14 +408,8 @@ const FilterSheet = ({
               marginHorizontal: -spacing.lg,
               marginBottom: -spacing.lg,
               padding: spacing.lg,
-              gap: spacing.md,
             }}
           >
-            <Button
-              label={t("records.applyFilters")}
-              onPress={applyFilters}
-              style={{ width: "100%" }}
-            />
             <Button
               label={t("records.clearFilters")}
               onPress={clearFilters}

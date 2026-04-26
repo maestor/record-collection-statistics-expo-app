@@ -118,6 +118,7 @@ export const translations = {
     },
     records: {
       clearFilters: "Tyhjennä suodattimet",
+      clearSearch: "Tyhjennä haku",
       confirmFilters: "Vahvista",
       closeFilters: "Sulje",
       emptyMessage: "Nykyisillä hauilla ja suodattimilla ei löytynyt levyjä.",

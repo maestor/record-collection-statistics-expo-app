@@ -1,6 +1,7 @@
 import * as React from "react";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
+import { Keyboard } from "react-native";
 
 import { RecordsScreen } from "@/features/records/records-screen";
 import { colors } from "@/theme/colors";
@@ -246,6 +247,61 @@ describe("RecordsScreen", () => {
     });
   });
 
+  it("dismisses the keyboard after a submitted search succeeds", async () => {
+    const dismissKeyboard = jest
+      .spyOn(Keyboard, "dismiss")
+      .mockImplementation(() => undefined);
+
+    renderWithProviders(<RecordsScreen />);
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+    expect(dismissKeyboard).not.toHaveBeenCalled();
+
+    const searchInput = screen.getByLabelText(t("records.searchLabel"));
+    fireEvent.changeText(searchInput, " Muse ");
+    fireEvent(searchInput, "submitEditing");
+
+    await waitFor(() => {
+      const urls = (globalThis.fetch as jest.Mock).mock.calls.map((call) =>
+        String(call[0]),
+      );
+
+      expect(urls.some((url) => url.includes("q=Muse"))).toBe(true);
+      expect(dismissKeyboard).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("keeps the keyboard open when a submitted search fails", async () => {
+    const dismissKeyboard = jest
+      .spyOn(Keyboard, "dismiss")
+      .mockImplementation(() => undefined);
+
+    globalThis.fetch = jest.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+
+      if (url.includes("/filters")) {
+        return jsonResponse(filtersPayload);
+      }
+
+      if (url.includes("q=Muse")) {
+        return jsonResponse({ error: "Search failed" }, 503);
+      }
+
+      return jsonResponse(recordsPayload(1));
+    });
+
+    renderWithProviders(<RecordsScreen />);
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+
+    const searchInput = screen.getByLabelText(t("records.searchLabel"));
+    fireEvent.changeText(searchInput, "Muse");
+    fireEvent(searchInput, "submitEditing");
+
+    expect(await screen.findByRole("alert")).toBeTruthy();
+    expect(dismissKeyboard).not.toHaveBeenCalled();
+  });
+
   it("does not render a manual search button and keeps the filters trigger full width", async () => {
     renderWithProviders(<RecordsScreen />);
 
@@ -385,6 +441,9 @@ describe("RecordsScreen", () => {
 
   it("starts search automatically after a short pause and clears it when input is emptied", async () => {
     jest.useFakeTimers();
+    const dismissKeyboard = jest
+      .spyOn(Keyboard, "dismiss")
+      .mockImplementation(() => undefined);
 
     try {
       renderWithProviders(<RecordsScreen />);
@@ -399,7 +458,14 @@ describe("RecordsScreen", () => {
 
       const initialRecordCalls = recordsCallCount();
 
+      expect(
+        screen.queryByRole("button", { name: t("records.clearSearch") }),
+      ).toBeNull();
+
       fireEvent.changeText(searchInput, "Mu");
+      expect(
+        screen.getByRole("button", { name: t("records.clearSearch") }),
+      ).toBeTruthy();
       act(() => {
         jest.advanceTimersByTime(500);
       });
@@ -407,6 +473,7 @@ describe("RecordsScreen", () => {
       await waitFor(() => {
         expect(recordsCallCount()).toBe(initialRecordCalls);
       });
+      expect(dismissKeyboard).not.toHaveBeenCalled();
 
       fireEvent.changeText(searchInput, "Muse");
       act(() => {
@@ -414,6 +481,7 @@ describe("RecordsScreen", () => {
       });
 
       expect(recordsCallCount()).toBe(initialRecordCalls);
+      expect(dismissKeyboard).not.toHaveBeenCalled();
 
       act(() => {
         jest.advanceTimersByTime(1);
@@ -424,18 +492,25 @@ describe("RecordsScreen", () => {
           String(call[0]),
         );
         expect(urls.some((url) => url.includes("q=Muse"))).toBe(true);
+        expect(dismissKeyboard).toHaveBeenCalledTimes(1);
       });
 
       const callsAfterAutoSearch = recordsCallCount();
 
-      fireEvent.changeText(searchInput, "");
-      act(() => {
-        jest.advanceTimersByTime(500);
-      });
+      fireEvent.press(
+        screen.getByRole("button", { name: t("records.clearSearch") }),
+      );
 
       await waitFor(() => {
-        expect(recordsCallCount()).toBe(callsAfterAutoSearch);
+        expect(screen.getByLabelText(t("records.searchLabel")).props.value).toBe(
+          "",
+        );
+        expect(
+          screen.queryByRole("button", { name: t("records.clearSearch") }),
+        ).toBeNull();
+        expect(dismissKeyboard).toHaveBeenCalledTimes(2);
       });
+      expect(recordsCallCount()).toBe(callsAfterAutoSearch);
     } finally {
       jest.useRealTimers();
     }

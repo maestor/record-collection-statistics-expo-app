@@ -4,7 +4,7 @@ import { Pressable, Text, View } from "react-native";
 import { useTranslation } from "@/localization/i18n";
 import { colors, radius } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
-import type { StatisticsView } from "./statistics-model";
+import type { StatisticsView } from "./statistics-helpers";
 
 type StatisticsViewSwitchProps = {
   onChange: (view: StatisticsView) => void;

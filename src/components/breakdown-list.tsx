@@ -35,7 +35,7 @@ export const BreakdownList = ({
           }}
           style={{ color: colors.primary, fontSize: 16, fontWeight: "700" }}
         >
-          {`${translate("breakdowns.viewFullPrefix")} ${title.toLowerCase()}`}
+          {`${translate("breakdowns.viewFullPrefix")}`}
         </Link>
       )}
       <View style={{ gap: spacing.sm }}>

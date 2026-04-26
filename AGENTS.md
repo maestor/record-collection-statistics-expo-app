@@ -9,6 +9,9 @@
 
 ## Implementation Expectations
 - Use Expo Router routes under `app/`; keep components, providers, API code, and utilities under `src/`.
+- Keep pure feature-specific helpers in feature-owned files under that feature, for example `src/features/records/records-helpers.ts` or `src/features/statistics/statistics-helpers.ts`, instead of leaving them inside screen or card components once they are reused or when multiple pure helpers accumulate.
+- Keep component-local subcomponents and rendering-only pieces in the component file. Do not move UI-only inner components into helper files just for consistency.
+- If a pure helper is shared across features, keep it in the feature it most naturally belongs to unless it has become truly app-wide domain logic.
 - Prefer `fetch`, `URLSearchParams`, React Query, and a small typed API wrapper over generated runtime SDKs.
 - Keep API keys out of logs, query keys, screenshots, and error messages.
 - Use Expo Go first. Add or use a development client only when native dependencies require it.

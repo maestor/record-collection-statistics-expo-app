@@ -9,6 +9,7 @@ import { colors, radius } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { cardFrameStyle } from "@/theme/styles";
 import { formatDate, formatYear } from "@/utils/format";
+import { formatReleaseFormat } from "./records-helpers";
 
 type RecordCardProps = {
   record: RecordListItem;
@@ -118,8 +119,3 @@ export const RecordCard = ({ record }: RecordCardProps) => {
     </Pressable>
   );
 };
-
-const formatReleaseFormat = (format: RecordListItem["formats"][number]) =>
-  [format.name, ...format.descriptions, format.freeText]
-    .filter(Boolean)
-    .join(", ");

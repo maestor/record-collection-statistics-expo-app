@@ -4,7 +4,7 @@ import { Modal } from "react-native";
 
 import * as apiQueries from "@/api/queries";
 import { StatisticsScreen } from "@/features/statistics/statistics-screen";
-import type { StatisticDimension } from "@/features/statistics/statistics-model";
+import type { StatisticDimension } from "@/features/statistics/statistics-helpers";
 import { colors } from "@/theme/colors";
 import {
   endPressablePressedState,
@@ -225,7 +225,6 @@ describe("StatisticsScreen", () => {
     let currentDimension: StatisticDimension = "artist";
 
     for (const { dimension, value } of statisticCases) {
-      const title = t(`dimensions.${dimension}`);
       selectDimension(currentDimension, dimension);
 
       expect(await screen.findByText(value)).toBeTruthy();
@@ -236,7 +235,7 @@ describe("StatisticsScreen", () => {
       ).toBeTruthy();
 
       const viewFullLink = screen.getByRole("link", {
-        name: `${t("breakdowns.viewFullPrefix")} ${title.toLowerCase()}`,
+        name: t("breakdowns.viewFullPrefix"),
       });
 
       expect(viewFullLink.props.href).toEqual({
@@ -403,7 +402,7 @@ describe("StatisticsScreen", () => {
 
     expect(
       await screen.findByRole("link", {
-        name: `${t("breakdowns.viewFullPrefix")} ${t("dimensions.format").toLowerCase()}`,
+        name: t("breakdowns.viewFullPrefix"),
       }),
     ).toBeTruthy();
     expect(

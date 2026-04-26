@@ -7,7 +7,7 @@ import { useTranslation } from "@/localization/i18n";
 import { colors, radius } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { sectionTitleStyle } from "@/theme/styles";
-import type { StatisticDimension } from "./statistics-model";
+import type { StatisticDimension } from "./statistics-helpers";
 
 type StatisticOption = {
   dimension: StatisticDimension;

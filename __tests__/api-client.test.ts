@@ -85,12 +85,12 @@ describe("api client", () => {
     await getFilters(
       { apiKey: "", baseUrl: "http://example.test" },
       10,
-      ["artist", "format", "genre"],
+      ["artist", "format", "genre", "added_year"],
     );
 
     const url = String((globalThis.fetch as jest.Mock).mock.calls[0][0]);
     expect(url).toContain("limit=10");
-    expect(url).toContain("dimensions=artist%2Cformat%2Cgenre");
+    expect(url).toContain("dimensions=artist%2Cformat%2Cgenre%2Cadded_year");
   });
 
   it("normalizes API errors", async () => {

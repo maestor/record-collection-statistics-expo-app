@@ -153,8 +153,11 @@ describe("RecordsScreen", () => {
     );
 
     expect(recordsCallCount()).toBe(callsBeforeApply);
+    expect(
+      screen.getByRole("button", { name: t("records.confirmFilters") }),
+    ).toHaveStyle({ backgroundColor: colors.primary });
     fireEvent.press(
-      screen.getByRole("button", { name: t("records.closeFilters") }),
+      screen.getByRole("button", { name: t("records.confirmFilters") }),
     );
 
     await waitFor(() => {
@@ -202,7 +205,7 @@ describe("RecordsScreen", () => {
 
     expect(recordCallsBeforeApply).toBeGreaterThan(0);
     fireEvent.press(
-      screen.getByRole("button", { name: t("records.closeFilters") }),
+      screen.getByRole("button", { name: t("records.confirmFilters") }),
     );
 
     await waitFor(() => {
@@ -321,7 +324,7 @@ describe("RecordsScreen", () => {
       screen.getByRole("button", { name: t("records.sortArtist") }),
     );
     fireEvent.press(
-      screen.getByRole("button", { name: t("records.closeFilters") }),
+      screen.getByRole("button", { name: t("records.confirmFilters") }),
     );
 
     await waitFor(() => {
@@ -355,6 +358,28 @@ describe("RecordsScreen", () => {
     await waitFor(() => {
       expect(closeButton).toHaveStyle({ opacity: 1 });
     });
+  });
+
+  it("changes the close button into a confirm action when draft filters differ", async () => {
+    renderWithProviders(<RecordsScreen />);
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+
+    fireEvent.press(
+      screen.getByRole("button", { name: t("records.filtersButton") }),
+    );
+    expect(await screen.findByText("Vinyl")).toBeTruthy();
+
+    const closeButton = screen.getByRole("button", {
+      name: t("records.closeFilters"),
+    });
+    expect(closeButton).toHaveStyle({ backgroundColor: colors.surfaceMuted });
+
+    fireEvent.press(screen.getByRole("button", { name: "Vinyl" }));
+
+    expect(
+      screen.getByRole("button", { name: t("records.confirmFilters") }),
+    ).toHaveStyle({ backgroundColor: colors.primary });
   });
 
   it("starts search automatically after a short pause and clears it when input is emptied", async () => {

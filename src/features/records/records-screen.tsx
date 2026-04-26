@@ -126,6 +126,14 @@ export const RecordsScreen = () => {
   const firstPage = recordsQuery.data?.pages[0];
   const activeFilterCount =
     Object.values(selectedFilters).filter(Boolean).length + (query ? 1 : 0);
+  const hasDraftFilterChanges = haveDraftFiltersChanged(
+    sort,
+    draftSort,
+    order,
+    draftOrder,
+    selectedFilters,
+    draftSelectedFilters,
+  );
 
   React.useEffect(() => {
     const normalizedDraftQuery = normalizeSearchQuery(draftQuery);
@@ -267,6 +275,7 @@ export const RecordsScreen = () => {
         draftOrder={draftOrder}
         draftSelectedFilters={draftSelectedFilters}
         draftSort={draftSort}
+        hasDraftFilterChanges={hasDraftFilterChanges}
         isLoading={filtersQuery.isLoading}
         isOpen={filtersOpen}
         setDraftFilter={setDraftFilter}
@@ -317,6 +326,7 @@ type FilterSheetProps = {
       ? Data
       : undefined
     : undefined;
+  hasDraftFilterChanges: boolean;
   isLoading: boolean;
   isOpen: boolean;
   setDraftFilter: (key: FilterKey, value: string) => void;
@@ -331,6 +341,7 @@ const FilterSheet = ({
   draftSelectedFilters,
   draftSort,
   filters,
+  hasDraftFilterChanges,
   isLoading,
   isOpen,
   setDraftFilter,
@@ -374,9 +385,13 @@ const FilterSheet = ({
               {t("records.filtersButton")}
             </Text>
             <Button
-              label={t("records.closeFilters")}
+              label={
+                hasDraftFilterChanges
+                  ? t("records.confirmFilters")
+                  : t("records.closeFilters")
+              }
               onPress={closeFilters}
-              variant="secondary"
+              variant={hasDraftFilterChanges ? "primary" : "secondary"}
             />
           </View>
           <View style={{ flex: 1, minHeight: 0 }}>

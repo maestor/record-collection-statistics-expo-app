@@ -12,6 +12,9 @@ export type DashboardResponse = JsonResponse<paths["/stats/dashboard"]["get"]["r
 export type DashboardStats = DashboardResponse["data"];
 export type FilterCatalogResponse = JsonResponse<paths["/filters"]["get"]["responses"]["200"]>;
 export type FilterCatalog = FilterCatalogResponse["data"];
+export type FilterDimension = NonNullable<
+  NonNullable<paths["/filters"]["get"]["parameters"]["query"]>["dimensions"]
+>[number];
 export type RecordsResponse = JsonResponse<paths["/records"]["get"]["responses"]["200"]>;
 export type RecordListParams = NonNullable<paths["/records"]["get"]["parameters"]["query"]>;
 export type RecordListItem = components["schemas"]["RecordListItem"];
@@ -24,4 +27,3 @@ export type BreakdownDimension =
   paths["/stats/breakdowns/{dimension}"]["get"]["parameters"]["path"]["dimension"];
 export type BreakdownItem = components["schemas"]["BreakdownItem"];
 export type ErrorResponse = components["schemas"]["ErrorResponse"];
-

@@ -1,5 +1,6 @@
 import {
   ANDROID_EMULATOR_API_BASE_URL,
+  getFilters,
   getHealth,
   listRecords,
 } from "@/api/client";
@@ -78,6 +79,18 @@ describe("api client", () => {
     expect(url).toContain("q=museum");
     expect(url).toContain("page_size=25");
     expect(url).not.toContain("apiKey");
+  });
+
+  it("serializes filter dimensions into the filters request", async () => {
+    await getFilters(
+      { apiKey: "", baseUrl: "http://example.test" },
+      10,
+      ["artist", "format", "genre"],
+    );
+
+    const url = String((globalThis.fetch as jest.Mock).mock.calls[0][0]);
+    expect(url).toContain("limit=10");
+    expect(url).toContain("dimensions=artist%2Cformat%2Cgenre");
   });
 
   it("normalizes API errors", async () => {
@@ -192,6 +205,70 @@ describe("api client", () => {
     await expect(
       getHealth({ apiKey: "", baseUrl: "http://example.test" }, controller.signal),
     ).rejects.toMatchObject({ name: "AbortError" });
+  });
+
+  it("reuses a cached payload when the API responds with 304", async () => {
+    globalThis.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse(
+          {
+            database: {
+              lastSuccessfulSyncAt: "2026-04-23T17:34:05.883Z",
+              releaseCount: 2,
+              totalItems: 2,
+            },
+            ok: true,
+          },
+          200,
+          { ETag: '"collection-123"' },
+        ),
+      )
+      .mockResolvedValueOnce(jsonResponse({}, 304));
+
+    const firstResponse = await getHealth({
+      apiKey: "",
+      baseUrl: "http://etag-cache.test",
+    });
+    const secondResponse = await getHealth({
+      apiKey: "",
+      baseUrl: "http://etag-cache.test",
+    });
+
+    expect(firstResponse).toEqual(secondResponse);
+    const secondHeaders = (globalThis.fetch as jest.Mock).mock.calls[1][1]
+      .headers as Headers;
+    expect(secondHeaders.get("If-None-Match")).toBe('"collection-123"');
+  });
+
+  it("retries without If-None-Match if a 304 arrives without a cached payload", async () => {
+    globalThis.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({}, 304))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          database: {
+            lastSuccessfulSyncAt: "2026-04-23T17:34:05.883Z",
+            releaseCount: 2,
+            totalItems: 2,
+          },
+          ok: true,
+        }),
+      );
+
+    const response = await getHealth({
+      apiKey: "",
+      baseUrl: "http://etag-retry.test",
+    });
+
+    expect(response.ok).toBe(true);
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+    const firstHeaders = (globalThis.fetch as jest.Mock).mock.calls[0][1]
+      .headers as Headers;
+    const secondHeaders = (globalThis.fetch as jest.Mock).mock.calls[1][1]
+      .headers as Headers;
+    expect(firstHeaders.get("If-None-Match")).toBeNull();
+    expect(secondHeaders.get("If-None-Match")).toBeNull();
   });
 
   it("explains loopback network failures for Android", async () => {

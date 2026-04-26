@@ -277,6 +277,7 @@ describe("RecordsScreen", () => {
 
     expect(await screen.findByText("Vinyl")).toBeTruthy();
     expect(getFilterCalls()).toHaveLength(1);
+    expect(getFilterCalls()[0]).toContain("dimensions=artist%2Cformat%2Cgenre");
     const recordCallsBeforeClose = (globalThis.fetch as jest.Mock).mock.calls
       .map((call) => String(call[0]))
       .filter((url) => url.includes("/records")).length;

@@ -739,6 +739,8 @@ export interface operations {
         parameters: {
             query?: {
                 limit?: number;
+                /** @description Optional comma-separated subset of breakdown dimensions to populate. Omitted dimensions return empty arrays so the response shape stays stable. */
+                dimensions?: ("artist" | "label" | "format" | "genre" | "style" | "country" | "release_year" | "added_year")[];
             };
             header?: never;
             path?: never;
@@ -756,6 +758,7 @@ export interface operations {
                         data: components["schemas"]["FilterCatalog"];
                         meta: {
                             limit: number;
+                            dimensions?: ("artist" | "label" | "format" | "genre" | "style" | "country" | "release_year" | "added_year")[];
                         };
                     };
                 };

@@ -22,8 +22,13 @@ export const renderWithProviders = (ui: React.ReactElement) => {
   );
 };
 
-export const jsonResponse = (body: unknown, status = 200): Response => {
+export const jsonResponse = (
+  body: unknown,
+  status = 200,
+  headers?: Record<string, string>,
+): Response => {
   return {
+    headers: new Headers(headers),
     json: jest.fn(async () => body),
     ok: status >= 200 && status < 300,
     status,

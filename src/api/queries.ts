@@ -11,6 +11,7 @@ import {
 } from "./client";
 import type {
   BreakdownDimension,
+  FilterDimension,
   RecordListParams,
   RecordsResponse,
 } from "./types";
@@ -25,6 +26,7 @@ const FILTERS_STALE_TIME = DAY_MS;
 const RECORDS_STALE_TIME = 15 * MINUTE_MS;
 const DETAIL_STALE_TIME = DAY_MS;
 const BREAKDOWN_STALE_TIME = DAY_MS;
+const recordFilterDimensions: FilterDimension[] = ["artist", "format", "genre"];
 
 const apiConfig = getApiConfig();
 
@@ -63,8 +65,9 @@ export const useFiltersQuery = (limit: number, enabled: boolean) => {
 
   return useQuery({
     enabled: enabled && queryBaseEnabled,
-    queryFn: ({ signal }) => getFilters(config, limit, signal),
-    queryKey: ["filters", ...queryScope, limit],
+    queryFn: ({ signal }) =>
+      getFilters(config, limit, recordFilterDimensions, signal),
+    queryKey: ["filters", ...queryScope, limit, recordFilterDimensions],
     staleTime: FILTERS_STALE_TIME,
   });
 };

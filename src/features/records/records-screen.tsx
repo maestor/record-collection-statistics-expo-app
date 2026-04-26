@@ -112,7 +112,7 @@ export const RecordsScreen = () => {
   const { t } = useTranslation();
   const [draftQuery, setDraftQuery] = React.useState("");
   const [query, setQuery] = React.useState("");
-  const [submittedSearchQuery, setSubmittedSearchQuery] = React.useState<
+  const [pendingSearchQuery, setPendingSearchQuery] = React.useState<
     string | null
   >(null);
   const [filtersOpen, setFiltersOpen] = React.useState(false);
@@ -160,6 +160,9 @@ export const RecordsScreen = () => {
     }
 
     const timeout = setTimeout(() => {
+      setPendingSearchQuery(
+        normalizedDraftQuery.length === 0 ? null : normalizedDraftQuery,
+      );
       setQuery(normalizedDraftQuery);
     }, AUTO_SEARCH_DELAY_MS);
 
@@ -168,19 +171,14 @@ export const RecordsScreen = () => {
 
   React.useEffect(() => {
     if (
-      submittedSearchQuery === query &&
+      pendingSearchQuery === query &&
       recordsQuery.isSuccess &&
       !recordsQuery.isFetching
     ) {
       Keyboard.dismiss();
-      setSubmittedSearchQuery(null);
+      setPendingSearchQuery(null);
     }
-  }, [
-    query,
-    recordsQuery.isFetching,
-    recordsQuery.isSuccess,
-    submittedSearchQuery,
-  ]);
+  }, [pendingSearchQuery, query, recordsQuery.isFetching, recordsQuery.isSuccess]);
 
   const openFilters = () => {
     setDraftSort(sort);
@@ -198,19 +196,19 @@ export const RecordsScreen = () => {
 
   const updateDraftQuery = (nextQuery: string) => {
     setDraftQuery(nextQuery);
-    setSubmittedSearchQuery(null);
+    setPendingSearchQuery(null);
   };
 
   const applySearch = (nextQuery: string) => {
     const normalizedQuery = normalizeSearchQuery(nextQuery);
-    setSubmittedSearchQuery(normalizedQuery);
+    setPendingSearchQuery(normalizedQuery);
     setQuery(normalizedQuery);
   };
 
   const clearFilters = () => {
     setDraftQuery("");
     setQuery("");
-    setSubmittedSearchQuery(null);
+    setPendingSearchQuery(null);
     setDraftSelectedFilters({});
     setSelectedFilters({});
     setDraftSort("date_added");

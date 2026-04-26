@@ -441,6 +441,9 @@ describe("RecordsScreen", () => {
 
   it("starts search automatically after a short pause and clears it when input is emptied", async () => {
     jest.useFakeTimers();
+    const dismissKeyboard = jest
+      .spyOn(Keyboard, "dismiss")
+      .mockImplementation(() => undefined);
 
     try {
       renderWithProviders(<RecordsScreen />);
@@ -463,6 +466,7 @@ describe("RecordsScreen", () => {
       await waitFor(() => {
         expect(recordsCallCount()).toBe(initialRecordCalls);
       });
+      expect(dismissKeyboard).not.toHaveBeenCalled();
 
       fireEvent.changeText(searchInput, "Muse");
       act(() => {
@@ -470,6 +474,7 @@ describe("RecordsScreen", () => {
       });
 
       expect(recordsCallCount()).toBe(initialRecordCalls);
+      expect(dismissKeyboard).not.toHaveBeenCalled();
 
       act(() => {
         jest.advanceTimersByTime(1);
@@ -480,6 +485,7 @@ describe("RecordsScreen", () => {
           String(call[0]),
         );
         expect(urls.some((url) => url.includes("q=Muse"))).toBe(true);
+        expect(dismissKeyboard).toHaveBeenCalledTimes(1);
       });
 
       const callsAfterAutoSearch = recordsCallCount();
@@ -492,6 +498,7 @@ describe("RecordsScreen", () => {
       await waitFor(() => {
         expect(recordsCallCount()).toBe(callsAfterAutoSearch);
       });
+      expect(dismissKeyboard).toHaveBeenCalledTimes(1);
     } finally {
       jest.useRealTimers();
     }

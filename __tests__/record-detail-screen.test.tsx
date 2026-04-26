@@ -103,24 +103,26 @@ describe("RecordDetailScreen", () => {
     expect(screen.getByText(t("recordDetail.loadingMessage"))).toBeTruthy();
   });
 
-  it("renders record metadata, tracks, and community stats", async () => {
+  it("renders record metadata in card sections with compact tracks", async () => {
     renderWithProviders(<RecordDetailScreen releaseId={37098591} />);
 
     expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
     expect(screen.getByText("Muse")).toBeTruthy();
+    expect(screen.getByText(t("recordDetail.labels"))).toBeTruthy();
+    expect(
+      screen.getByText(
+        "Warner Records · 5026854087467\nWarner Records · 9362499549\nMushroom Pillow · Ei kataloginumeroa",
+      ),
+    ).toBeTruthy();
     expect(screen.getByText("Vinyl, 12\", EP, Limited edition")).toBeTruthy();
     expect(screen.getAllByText("18.4.2026")).toHaveLength(2);
     expect(screen.getByText(t("recordDetail.collectionAddedOn"))).toBeTruthy();
-    expect(screen.queryByText("Vuosi")).toBeNull();
-    expect(screen.queryByText("Kappaleita")).toBeNull();
-    expect(screen.queryByText("Yhteisö")).toBeNull();
+    expect(screen.queryByText(t("recordDetail.collection"))).toBeNull();
+    expect(screen.queryAllByText(t("recordDetail.labels"))).toHaveLength(1);
     expect(screen.getAllByText("Barcode")).toHaveLength(1);
     expect(screen.getByText("5026854087467 · Text\n5026854087468")).toBeTruthy();
     expect(screen.getByText("LC01234")).toBeTruthy();
-    expect(screen.getAllByText("Warner Records")).toHaveLength(1);
-    expect(screen.getByText("5026854087467\n9362499549")).toBeTruthy();
-    expect(screen.getByText(t("recordDetail.noCatalogNumber"))).toBeTruthy();
-    expect(screen.getByText("Sober")).toBeTruthy();
+    expect(screen.getByText("A2 • Sober")).toBeTruthy();
   });
 
   it("renders empty and fallback detail values", async () => {
@@ -147,10 +149,9 @@ describe("RecordDetailScreen", () => {
     expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
     expect(screen.getByText(t("common.unknownArtist"))).toBeTruthy();
     expect(screen.getAllByText(t("common.unknown")).length).toBeGreaterThanOrEqual(4);
+    expect(screen.getByText("Unknown Label · Ei kataloginumeroa")).toBeTruthy();
     expect(screen.getByText(t("recordDetail.tracksEmpty"))).toBeTruthy();
     expect(screen.getByText(t("recordDetail.identifiersEmpty"))).toBeTruthy();
-    expect(screen.getByText("Unknown Label")).toBeTruthy();
-    expect(screen.getByText(t("recordDetail.noCatalogNumber"))).toBeTruthy();
   });
 
   it("renders track durations when the API provides them", async () => {
@@ -165,7 +166,7 @@ describe("RecordDetailScreen", () => {
 
     renderWithProviders(<RecordDetailScreen releaseId={37098591} />);
 
-    expect(await screen.findByText("Muscle Museum (3:12)")).toBeTruthy();
+    expect(await screen.findByText("A1 • Muscle Museum • 3:12")).toBeTruthy();
   });
 
   it("falls back to the track index when the position is missing", async () => {
@@ -180,8 +181,7 @@ describe("RecordDetailScreen", () => {
 
     renderWithProviders(<RecordDetailScreen releaseId={37098591} />);
 
-    expect(await screen.findByText("1")).toBeTruthy();
-    expect(screen.getByText("Hidden Track")).toBeTruthy();
+    expect(await screen.findByText("1 • Hidden Track")).toBeTruthy();
   });
 
   it("renders invalid release id state", async () => {

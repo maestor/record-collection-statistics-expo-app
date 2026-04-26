@@ -98,7 +98,7 @@ export const RecordsScreen = () => {
     [order, query, selectedFilters, sort],
   );
   const recordsQuery = useRecordsQuery(params);
-  const filtersQuery = useFiltersQuery(10);
+  const filtersQuery = useFiltersQuery(10, filtersOpen);
   const records = recordsQuery.data?.pages.flatMap((page) => page.data) ?? [];
   const firstPage = recordsQuery.data?.pages[0];
   const activeFilterCount =

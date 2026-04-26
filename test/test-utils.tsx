@@ -15,7 +15,11 @@ export const renderWithProviders = (ui: React.ReactElement) => {
     },
   });
 
-  return render(<AppProviders client={queryClient}>{ui}</AppProviders>);
+  return render(
+    <AppProviders client={queryClient} persistQueryClient={false}>
+      {ui}
+    </AppProviders>,
+  );
 };
 
 export const jsonResponse = (body: unknown, status = 200): Response => {

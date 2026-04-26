@@ -96,24 +96,35 @@ describe("api client", () => {
     );
   });
 
-  it("handles abort errors when DOMException is unavailable", async () => {
+  it("handles timeout abort errors when DOMException is unavailable", async () => {
     const originalDomException = globalThis.DOMException;
+    jest.useFakeTimers();
     Object.defineProperty(globalThis, "DOMException", {
       configurable: true,
       value: undefined,
     });
-    globalThis.fetch = jest.fn(async () => {
-      throw { name: "AbortError" };
-    });
-
-    await expect(getHealth({ apiKey: "", baseUrl: "http://example.test" })).rejects.toThrow(
-      "Request timed out",
+    globalThis.fetch = jest.fn(
+      (_input: RequestInfo | URL, init?: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () => {
+            reject({ name: "AbortError" });
+          });
+        }),
     );
 
-    Object.defineProperty(globalThis, "DOMException", {
-      configurable: true,
-      value: originalDomException,
-    });
+    try {
+      const request = getHealth({ apiKey: "", baseUrl: "http://example.test" });
+
+      jest.advanceTimersByTime(10_000);
+
+      await expect(request).rejects.toThrow("Request timed out");
+    } finally {
+      Object.defineProperty(globalThis, "DOMException", {
+        configurable: true,
+        value: originalDomException,
+      });
+      jest.useRealTimers();
+    }
   });
 
   it("times out requests that do not complete", async () => {
@@ -132,6 +143,55 @@ describe("api client", () => {
     jest.advanceTimersByTime(10_000);
 
     await expect(request).rejects.toThrow("Request timed out");
+  });
+
+  it("cancels requests when an external signal aborts", async () => {
+    globalThis.fetch = jest.fn(
+      (_input: RequestInfo | URL, init?: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () => {
+            reject({ name: "AbortError" });
+          });
+        }),
+    );
+    const controller = new AbortController();
+    const request = getHealth(
+      { apiKey: "", baseUrl: "http://example.test" },
+      controller.signal,
+    );
+
+    controller.abort();
+
+    await expect(request).rejects.toMatchObject({ name: "AbortError" });
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      "http://example.test/health",
+      expect.objectContaining({
+        signal: expect.any(AbortSignal),
+      }),
+    );
+  });
+
+  it("aborts immediately when the external signal is already aborted", async () => {
+    globalThis.fetch = jest.fn(
+      (_input: RequestInfo | URL, init?: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          if (init?.signal?.aborted) {
+            reject({ name: "AbortError" });
+            return;
+          }
+
+          init?.signal?.addEventListener("abort", () => {
+            reject({ name: "AbortError" });
+          });
+        }),
+    );
+    const controller = new AbortController();
+
+    controller.abort();
+
+    await expect(
+      getHealth({ apiKey: "", baseUrl: "http://example.test" }, controller.signal),
+    ).rejects.toMatchObject({ name: "AbortError" });
   });
 
   it("explains loopback network failures for Android", async () => {

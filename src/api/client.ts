@@ -36,6 +36,9 @@ export type ApiConfig = {
 };
 
 type QueryParams = Record<string, number | string>;
+type RequestOptions = {
+  signal?: AbortSignal | undefined;
+};
 
 export class ApiError extends Error {
   constructor(
@@ -113,13 +116,39 @@ const readError = async (response: Response): Promise<string> => {
   }
 };
 
+const connectAbortSignal = (
+  signal: AbortSignal | undefined,
+  controller: AbortController,
+): (() => void) => {
+  if (!signal) {
+    return () => undefined;
+  }
+
+  const abortRequest = () => controller.abort();
+
+  if (signal.aborted) {
+    abortRequest();
+    return () => undefined;
+  }
+
+  signal.addEventListener("abort", abortRequest);
+
+  return () => signal.removeEventListener("abort", abortRequest);
+};
+
 const requestJson = async <T>(
   config: ApiConfig,
   path: string,
-  params?: QueryParams,
+  params: QueryParams | undefined,
+  options: RequestOptions,
 ): Promise<T> => {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10_000);
+  let didTimeout = false;
+  const disconnectAbortSignal = connectAbortSignal(options.signal, controller);
+  const timeout = setTimeout(() => {
+    didTimeout = true;
+    controller.abort();
+  }, 10_000);
 
   try {
     const response = await fetch(buildUrl(config, path, params), {
@@ -138,44 +167,62 @@ const requestJson = async <T>(
     }
 
     if (hasErrorName(error, "AbortError")) {
-      throw new ApiError("Request timed out", 0);
+      if (didTimeout) {
+        throw new ApiError("Request timed out", 0);
+      }
+
+      throw error;
     }
 
     throw new ApiError(getNetworkErrorMessage(config), 0);
   } finally {
     clearTimeout(timeout);
+    disconnectAbortSignal();
   }
 };
 
-export const getHealth = (config: ApiConfig): Promise<Health> =>
-  requestJson<Health>(config, "/health");
+export const getHealth = (
+  config: ApiConfig,
+  signal?: AbortSignal,
+): Promise<Health> => requestJson<Health>(config, "/health", undefined, { signal });
 
 export const getDashboardStats = (
   config: ApiConfig,
   limit: number,
+  signal?: AbortSignal,
 ): Promise<DashboardResponse> =>
-  requestJson<DashboardResponse>(config, "/stats/dashboard", { limit });
+  requestJson<DashboardResponse>(config, "/stats/dashboard", { limit }, { signal });
 
 export const getFilters = (
   config: ApiConfig,
   limit: number,
+  signal?: AbortSignal,
 ): Promise<FilterCatalogResponse> =>
-  requestJson<FilterCatalogResponse>(config, "/filters", { limit });
+  requestJson<FilterCatalogResponse>(config, "/filters", { limit }, { signal });
 
 export const listRecords = (
   config: ApiConfig,
   params: RecordListParams,
+  signal?: AbortSignal,
 ): Promise<RecordsResponse> =>
-  requestJson<RecordsResponse>(config, "/records", params as QueryParams);
+  requestJson<RecordsResponse>(config, "/records", params as QueryParams, {
+    signal,
+  });
 
 export const getRecordDetail = (
   config: ApiConfig,
   releaseId: number,
+  signal?: AbortSignal,
 ): Promise<RecordDetailResponse> =>
-  requestJson<RecordDetailResponse>(config, `/records/${releaseId}`);
+  requestJson<RecordDetailResponse>(config, `/records/${releaseId}`, undefined, {
+    signal,
+  });
 
 export const getBreakdown = (
   config: ApiConfig,
   dimension: BreakdownDimension,
+  signal?: AbortSignal,
 ): Promise<BreakdownResponse> =>
-  requestJson<BreakdownResponse>(config, `/stats/breakdowns/${dimension}`);
+  requestJson<BreakdownResponse>(config, `/stats/breakdowns/${dimension}`, undefined, {
+    signal,
+  });

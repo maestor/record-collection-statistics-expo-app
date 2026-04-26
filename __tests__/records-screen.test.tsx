@@ -175,6 +175,7 @@ describe("RecordsScreen", () => {
       screen.getByRole("button", { name: `${t("records.filtersButton")} (1)` }),
     );
 
+    expect(await screen.findByRole("button", { name: "Rock" })).toBeTruthy();
     fireEvent.press(screen.getByRole("button", { name: "Rock" }));
     fireEvent.press(screen.getByRole("button", { name: "Muse" }));
     fireEvent.press(screen.getByRole("button", { name: "Vinyl" }));
@@ -232,6 +233,40 @@ describe("RecordsScreen", () => {
     expect(screen.getByRole("button", { name: t("records.filtersButton") })).toHaveStyle({
       width: "100%",
     });
+  });
+
+  it("loads filters only after opening the filter sheet and reuses the cached response", async () => {
+    renderWithProviders(<RecordsScreen />);
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+
+    const getFilterCalls = () =>
+      (globalThis.fetch as jest.Mock).mock.calls
+        .map((call) => String(call[0]))
+        .filter((url) => url.includes("/filters"));
+
+    expect(getFilterCalls()).toHaveLength(0);
+
+    fireEvent.press(
+      screen.getByRole("button", { name: t("records.filtersButton") }),
+    );
+
+    expect(await screen.findByText("Vinyl")).toBeTruthy();
+    expect(getFilterCalls()).toHaveLength(1);
+
+    fireEvent.press(
+      screen.getByRole("button", { name: t("records.closeFilters") }),
+    );
+    await waitFor(() => {
+      expect(screen.queryByLabelText(t("records.filterPanelLabel"))).toBeNull();
+    });
+
+    fireEvent.press(
+      screen.getByRole("button", { name: t("records.filtersButton") }),
+    );
+
+    expect(await screen.findByText("Vinyl")).toBeTruthy();
+    expect(getFilterCalls()).toHaveLength(1);
   });
 
   it("shows pressed styling for filter sheet buttons", async () => {
@@ -307,14 +342,7 @@ describe("RecordsScreen", () => {
       });
 
       await waitFor(() => {
-        expect(recordsCallCount()).toBe(callsAfterAutoSearch + 1);
-        const latestRecordUrl = (globalThis.fetch as jest.Mock).mock.calls
-          .map((call) => String(call[0]))
-          .filter((url) => url.includes("/records"))
-          .at(-1);
-
-        expect(latestRecordUrl).toContain("sort=date_added");
-        expect(latestRecordUrl).not.toContain("q=");
+        expect(recordsCallCount()).toBe(callsAfterAutoSearch);
       });
     } finally {
       jest.useRealTimers();

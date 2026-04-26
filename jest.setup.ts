@@ -8,6 +8,9 @@ notifyManager.setNotifyFunction((callback: () => void) => {
 });
 
 afterEach(() => {
+  const AsyncStorage = require("@react-native-async-storage/async-storage").default;
+
+  void AsyncStorage.clear();
   cleanup();
 });
 
@@ -94,6 +97,26 @@ jest.mock("react-native-gifted-charts", () => {
     BarChart: createChart("MockBarChart"),
     LineChart: createChart("MockLineChart"),
     PieChart: createChart("MockPieChart"),
+  };
+});
+
+jest.mock("@react-native-async-storage/async-storage", () => {
+  const storage = new Map<string, string>();
+
+  return {
+    __esModule: true,
+    default: {
+      clear: jest.fn(async () => {
+        storage.clear();
+      }),
+      getItem: jest.fn(async (key: string) => storage.get(key) ?? null),
+      removeItem: jest.fn(async (key: string) => {
+        storage.delete(key);
+      }),
+      setItem: jest.fn(async (key: string, value: string) => {
+        storage.set(key, value);
+      }),
+    },
   };
 });
 

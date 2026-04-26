@@ -1,5 +1,6 @@
 import * as React from "react";
-import { screen } from "@testing-library/react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { screen, waitFor } from "@testing-library/react-native";
 import { Stack, Tabs, useLocalSearchParams } from "expo-router";
 
 import RootLayout from "../app/_layout";
@@ -179,8 +180,12 @@ describe("Expo Router routes", () => {
     });
   });
 
-  it("registers root stack screens with the app providers", () => {
+  it("registers root stack screens with the app providers", async () => {
     renderWithProviders(<RootLayout />);
+
+    await waitFor(() => {
+      expect(AsyncStorage.getItem).toHaveBeenCalled();
+    });
 
     expect(Stack.Screen).toHaveBeenCalledWith(
       expect.objectContaining({

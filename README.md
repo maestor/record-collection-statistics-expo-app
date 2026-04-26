@@ -30,6 +30,7 @@ Use `npm run check:api-types` when the local API is running to confirm committed
 
 ## Docs
 - [Development](docs/development.md)
+- [Versioning](docs/versioning.md)
 - [Testing](docs/testing.md)
 - [Android debug](docs/android-debug.md)
 - [Accessibility](docs/accessibility.md)

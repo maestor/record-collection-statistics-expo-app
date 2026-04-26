@@ -20,6 +20,8 @@ Check whether committed types are stale:
 npm run check:api-types
 ```
 
+Detailed agent workflow for contract-sync tasks lives in `.agents/skills/api-contract-sync/SKILL.md`.
+
 ## Start The App
 
 Use Expo Go first:
@@ -70,11 +72,7 @@ The read API key is embedded in the app bundle. Treat it as a client-visible gat
 
 ## Versioning
 
-The app now versions from `1.0.0`.
-
-- Use `npm run version:auto` after a commit that follows the supported semantic prefixes documented in [Versioning](versioning.md).
-- Use `npm run version:bump -- feature` or `npm run version:bump -- fix` when you want the script to calculate the next version without reading the latest commit message.
-- Use `npm run version:set -- <x.y.z>` only when you want to make an explicit version decision such as a major release.
+Use the scripts documented in [Versioning](versioning.md). Detailed agent workflow lives in `.agents/skills/versioning/SKILL.md`.
 
 ## Cached API Data
 

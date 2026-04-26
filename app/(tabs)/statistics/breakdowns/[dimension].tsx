@@ -1,10 +1,8 @@
 import * as React from "react";
 import { useLocalSearchParams } from "expo-router";
 
-import {
-  BreakdownScreen,
-  isBreakdownDimension,
-} from "@/features/dashboard/breakdown-screen";
+import { BreakdownScreen } from "@/features/dashboard/breakdown-screen";
+import { isBreakdownDimension } from "@/features/dashboard/dashboard-helpers";
 import { StatusMessage } from "@/components/status-message";
 import { translate } from "@/localization/i18n";
 import { spacing } from "@/theme/spacing";

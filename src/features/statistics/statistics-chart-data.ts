@@ -1,6 +1,6 @@
 import { colors } from "@/theme/colors";
 import type { BreakdownItem } from "@/api/types";
-import type { StatisticDimension } from "./statistics-model";
+import type { StatisticDimension } from "./statistics-helpers";
 
 type CategoricalStatisticDimension = Exclude<StatisticDimension, "added_year">;
 

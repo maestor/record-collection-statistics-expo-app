@@ -20,7 +20,10 @@ import { colors, radius } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { surfaceCardStyle } from "@/theme/styles";
 import { formatCount } from "@/utils/format";
-import type { StatisticDimension } from "./statistics-model";
+import {
+  getStatisticRemainderCategory,
+  type StatisticDimension,
+} from "./statistics-helpers";
 import {
   buildCategoricalChartData,
   buildYearChartItems,
@@ -37,23 +40,6 @@ type ChartLegendItem = {
   percentage: number;
   releaseCount: number;
   value: string;
-};
-
-const getRemainderCategory = (
-  dimension: StatisticDimension,
-  t: ReturnType<typeof useTranslation>["t"],
-): string => {
-  const remainderCategoryByDimension: Record<StatisticDimension, string> = {
-    added_year: "",
-    artist: t("statistics.otherSummaryArtist"),
-    country: "",
-    format: "",
-    genre: "",
-    label: t("statistics.otherSummaryLabel"),
-    style: t("statistics.otherSummaryStyle"),
-  };
-
-  return remainderCategoryByDimension[dimension];
 };
 
 const percentageFormatter = new Intl.NumberFormat("fi-FI", {
@@ -179,7 +165,7 @@ export const StatisticsGraphPanel = ({
     text: item.value,
     value: item.releaseCount,
   }));
-  const remainderCategory = getRemainderCategory(dimension, t);
+  const remainderCategory = getStatisticRemainderCategory(dimension);
 
   return (
     <StatisticsGraphSection

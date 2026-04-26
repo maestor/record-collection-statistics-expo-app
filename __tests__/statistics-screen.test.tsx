@@ -4,7 +4,7 @@ import { Modal } from "react-native";
 
 import * as apiQueries from "@/api/queries";
 import { StatisticsScreen } from "@/features/statistics/statistics-screen";
-import type { StatisticDimension } from "@/features/statistics/statistics-model";
+import type { StatisticDimension } from "@/features/statistics/statistics-helpers";
 import { colors } from "@/theme/colors";
 import {
   endPressablePressedState,

@@ -23,6 +23,22 @@ const statisticDimensions = [
 export const getStatisticTitle = (dimension: StatisticDimension): string =>
   translate(`dimensions.${dimension}` as const);
 
+export const getStatisticRemainderCategory = (
+  dimension: StatisticDimension,
+): string => {
+  const remainderCategoryByDimension: Record<StatisticDimension, string> = {
+    added_year: "",
+    artist: translate("statistics.otherSummaryArtist"),
+    country: "",
+    format: "",
+    genre: "",
+    label: translate("statistics.otherSummaryLabel"),
+    style: translate("statistics.otherSummaryStyle"),
+  };
+
+  return remainderCategoryByDimension[dimension];
+};
+
 export const buildStatisticOptions = (
   dashboard: DashboardStats,
 ): readonly StatisticOption[] => {

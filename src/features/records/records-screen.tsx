@@ -10,7 +10,6 @@ import {
 } from "react-native";
 
 import { useFiltersQuery, useRecordsQuery } from "@/api/queries";
-import type { RecordListParams } from "@/api/types";
 import { getErrorMessage } from "@/api/client";
 import { Button } from "@/components/button";
 import { Chip } from "@/components/chip";
@@ -18,7 +17,7 @@ import { Panel } from "@/components/panel";
 import { SelectionTrigger } from "@/components/selection-trigger";
 import { Section } from "@/components/section";
 import { StatusMessage } from "@/components/status-message";
-import { useTranslation, translate } from "@/localization/i18n";
+import { useTranslation } from "@/localization/i18n";
 import { colors } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import {
@@ -27,87 +26,23 @@ import {
   sectionTitleStyle,
   wrapRowStyle,
 } from "@/theme/styles";
-import { assertNever } from "@/utils/assert-never";
 import { formatCount } from "@/utils/format";
 import { RecordCard } from "./record-card";
+import {
+  buildRecordListParams,
+  haveDraftFiltersChanged,
+  labelForSort,
+  normalizeSearchQuery,
+  orderOptions,
+  sortOptions,
+  type FilterKey,
+  type OrderValue,
+  type SelectedRecordFilters,
+  type SortValue,
+} from "./records-helpers";
 
-type SortValue = "artist" | "date_added" | "release_year" | "title";
-type OrderValue = NonNullable<RecordListParams["order"]>;
-type FilterKey = "artist" | "format" | "genre";
-
-const filterKeys: FilterKey[] = ["artist", "format", "genre"];
-const sortOptions: SortValue[] = [
-  "date_added",
-  "release_year",
-  "artist",
-  "title",
-];
-const orderOptions: OrderValue[] = ["desc", "asc"];
 const AUTO_SEARCH_DELAY_MS = 500;
 const AUTO_SEARCH_MIN_LENGTH = 3;
-
-const labelForSort = (sort: SortValue): string => {
-  switch (sort) {
-    case "date_added":
-      return translate("records.sortDateAdded");
-    case "release_year":
-      return translate("records.sortReleaseYear");
-    case "artist":
-      return translate("records.sortArtist");
-    case "title":
-      return translate("records.sortTitle");
-    /* istanbul ignore next -- exhaustive type guard for impossible union values */
-    default:
-      return assertNever(sort);
-  }
-};
-
-const buildParams = (
-  query: string,
-  sort: SortValue,
-  order: OrderValue,
-  selectedFilters: Partial<Record<FilterKey, string>>,
-): Omit<RecordListParams, "page"> => {
-  const params: Omit<RecordListParams, "page"> = {
-    order,
-    page_size: 25,
-    sort,
-  };
-  const trimmedQuery = query.trim();
-
-  if (trimmedQuery) {
-    params.q = trimmedQuery;
-  }
-
-  for (const key of Object.keys(selectedFilters) as FilterKey[]) {
-    const value = selectedFilters[key];
-
-    if (value) {
-      params[key] = value;
-    }
-  }
-
-  return params;
-};
-
-const normalizeSearchQuery = (value: string): string => value.trim();
-
-const haveDraftFiltersChanged = (
-  sort: SortValue,
-  draftSort: SortValue,
-  order: OrderValue,
-  draftOrder: OrderValue,
-  selectedFilters: Partial<Record<FilterKey, string>>,
-  draftSelectedFilters: Partial<Record<FilterKey, string>>,
-): boolean => {
-  if (sort !== draftSort || order !== draftOrder) {
-    return true;
-  }
-
-  return filterKeys.some(
-    (key) => selectedFilters[key] !== draftSelectedFilters[key],
-  );
-};
 
 export const RecordsScreen = () => {
   const { t } = useTranslation();
@@ -119,16 +54,14 @@ export const RecordsScreen = () => {
   const [filtersOpen, setFiltersOpen] = React.useState(false);
   const [sort, setSort] = React.useState<SortValue>("date_added");
   const [order, setOrder] = React.useState<OrderValue>("desc");
-  const [selectedFilters, setSelectedFilters] = React.useState<
-    Partial<Record<FilterKey, string>>
-  >({});
+  const [selectedFilters, setSelectedFilters] =
+    React.useState<SelectedRecordFilters>({});
   const [draftSort, setDraftSort] = React.useState<SortValue>("date_added");
   const [draftOrder, setDraftOrder] = React.useState<OrderValue>("desc");
-  const [draftSelectedFilters, setDraftSelectedFilters] = React.useState<
-    Partial<Record<FilterKey, string>>
-  >({});
+  const [draftSelectedFilters, setDraftSelectedFilters] =
+    React.useState<SelectedRecordFilters>({});
   const params = React.useMemo(
-    () => buildParams(query, sort, order, selectedFilters),
+    () => buildRecordListParams(query, sort, order, selectedFilters),
     [order, query, selectedFilters, sort],
   );
   const recordsQuery = useRecordsQuery(params);
@@ -393,7 +326,7 @@ type FilterSheetProps = {
   clearFilters: () => void;
   closeFilters: () => void;
   draftOrder: OrderValue;
-  draftSelectedFilters: Partial<Record<FilterKey, string>>;
+  draftSelectedFilters: SelectedRecordFilters;
   draftSort: SortValue;
   filters: ReturnType<typeof useFiltersQuery>["data"] extends infer Result
     ? Result extends { data: infer Data }
@@ -516,7 +449,7 @@ type FilterPanelProps = {
   filters: FilterSheetProps["filters"];
   isLoading: boolean;
   order: OrderValue;
-  selectedFilters: Partial<Record<FilterKey, string>>;
+  selectedFilters: SelectedRecordFilters;
   setFilter: (key: FilterKey, value: string) => void;
   setOrder: (order: OrderValue) => void;
   setSort: (sort: SortValue) => void;

@@ -11,7 +11,7 @@ import {
   buildStatisticOptions,
   type StatisticDimension,
   type StatisticsView,
-} from "./statistics-model";
+} from "./statistics-helpers";
 import { StatisticsDimensionSelector } from "./statistics-dimension-selector";
 import { StatisticsGraphPanel } from "./statistics-graph-panel";
 import { StatisticsViewSwitch } from "./statistics-view-switch";

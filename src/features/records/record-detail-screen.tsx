@@ -13,6 +13,12 @@ import { colors, radius } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { screenStyles } from "@/theme/styles";
 import { formatDate, joinValues } from "@/utils/format";
+import {
+  formatLabels,
+  formatReleaseFormat,
+  formatTrack,
+  groupIdentifiers,
+} from "./records-helpers";
 
 type RecordDetailScreenProps = {
   releaseId: number;
@@ -206,81 +212,4 @@ export const RecordDetailScreen = ({ releaseId }: RecordDetailScreenProps) => {
       </Section>
     </ScrollView>
   );
-};
-
-const formatReleaseFormat = (format: {
-  descriptions: string[];
-  freeText: string | null;
-  name: string;
-}) =>
-  [format.name, ...format.descriptions, format.freeText]
-    .filter(Boolean)
-    .join(", ");
-
-const formatIdentifierValue = (identifier: {
-  description: string | null;
-  value: string;
-}) =>
-  identifier.description
-    ? `${identifier.value} · ${identifier.description}`
-    : identifier.value;
-
-const formatLabels = (
-  labels: {
-    catno: string | null;
-    name: string;
-  }[],
-  emptyValue: string,
-  unknownValue: string,
-) =>
-  labels.length === 0
-    ? unknownValue
-    : labels.map((label) => formatLabelValue(label, emptyValue)).join("\n");
-
-const formatLabelValue = (
-  label: {
-    catno: string | null;
-    name: string;
-  },
-  emptyValue: string,
-) => `${label.name} · ${label.catno ?? emptyValue}`;
-
-const formatTrack = (
-  track: {
-    duration: string | null;
-    position: string | null;
-    title: string;
-  },
-  index: number,
-) => {
-  const parts = [track.position ?? String(index + 1), track.title];
-
-  if (track.duration) {
-    parts.push(track.duration);
-  }
-
-  return parts.join(" • ");
-};
-
-const groupIdentifiers = (
-  identifiers: {
-    description: string | null;
-    type: string;
-    value: string;
-  }[],
-) => {
-  const grouped = new Map<string, string[]>();
-
-  for (const identifier of identifiers) {
-    const values = grouped.get(identifier.type);
-    const formattedValue = formatIdentifierValue(identifier);
-
-    if (values) {
-      values.push(formattedValue);
-    } else {
-      grouped.set(identifier.type, [formattedValue]);
-    }
-  }
-
-  return Array.from(grouped.entries());
 };

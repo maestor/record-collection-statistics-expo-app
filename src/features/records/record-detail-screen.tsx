@@ -59,7 +59,19 @@ export const RecordDetailScreen = ({ releaseId }: RecordDetailScreenProps) => {
     );
   }
 
-  const record = query.data!.data;
+  if (!query.data) {
+    return (
+      <ScrollView contentContainerStyle={screenStyles.paddedContent}>
+        <StatusMessage
+          message={t("recordDetail.loadingMessage")}
+          title={t("recordDetail.loadingTitle")}
+          tone="loading"
+        />
+      </ScrollView>
+    );
+  }
+
+  const record = query.data.data;
 
   return (
     <ScrollView

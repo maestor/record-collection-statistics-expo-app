@@ -2,6 +2,7 @@ import type {
   BreakdownDimension,
   BreakdownResponse,
   DashboardResponse,
+  FilterDimension,
   FilterCatalogResponse,
   Health,
   RecordDetailResponse,
@@ -35,7 +36,16 @@ export type ApiConfig = {
   baseUrl: string;
 };
 
-type QueryParams = Record<string, number | string>;
+type QueryParamValue = number | string | string[];
+type QueryParams = Record<string, QueryParamValue>;
+type RequestOptions = {
+  signal?: AbortSignal | undefined;
+  useEtagCache?: boolean;
+};
+type CachedResponseEntry<T> = {
+  etag: string;
+  payload: T;
+};
 
 export class ApiError extends Error {
   constructor(
@@ -59,6 +69,8 @@ export const getApiConfig = (): ApiConfig => {
 
 export const getErrorMessage = (error: Error): string => error.message;
 
+const responseCache = new Map<string, CachedResponseEntry<unknown>>();
+
 const hasErrorName = (error: unknown, name: string): boolean => {
   return (
     typeof error === "object" &&
@@ -79,6 +91,17 @@ const getHeaders = (config: ApiConfig): Headers => {
   return headers;
 };
 
+const getCachedResponse = <T>(cacheKey: string): CachedResponseEntry<T> | undefined =>
+  responseCache.get(cacheKey) as CachedResponseEntry<T> | undefined;
+
+const setCachedResponse = <T>(
+  cacheKey: string,
+  etag: string,
+  payload: T,
+): void => {
+  responseCache.set(cacheKey, { etag, payload });
+};
+
 const buildUrl = (
   config: ApiConfig,
   path: string,
@@ -87,7 +110,10 @@ const buildUrl = (
   const url = new URL(`${normalizeBaseUrl(config.baseUrl)}${path}`);
 
   for (const [key, value] of Object.entries(params)) {
-    url.searchParams.set(key, String(value));
+    url.searchParams.set(
+      key,
+      Array.isArray(value) ? value.join(",") : String(value),
+    );
   }
 
   return url.toString();
@@ -113,69 +139,144 @@ const readError = async (response: Response): Promise<string> => {
   }
 };
 
+const connectAbortSignal = (
+  signal: AbortSignal | undefined,
+  controller: AbortController,
+): (() => void) => {
+  if (!signal) {
+    return () => undefined;
+  }
+
+  const abortRequest = () => controller.abort();
+
+  if (signal.aborted) {
+    abortRequest();
+    return () => undefined;
+  }
+
+  signal.addEventListener("abort", abortRequest);
+
+  return () => signal.removeEventListener("abort", abortRequest);
+};
+
 const requestJson = async <T>(
   config: ApiConfig,
   path: string,
-  params?: QueryParams,
+  params: QueryParams | undefined,
+  options: RequestOptions,
 ): Promise<T> => {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10_000);
+  let didTimeout = false;
+  const disconnectAbortSignal = connectAbortSignal(options.signal, controller);
+  const useEtagCache = options.useEtagCache ?? true;
+  const timeout = setTimeout(() => {
+    didTimeout = true;
+    controller.abort();
+  }, 10_000);
 
   try {
-    const response = await fetch(buildUrl(config, path, params), {
-      headers: getHeaders(config),
+    const requestUrl = buildUrl(config, path, params);
+    const headers = getHeaders(config);
+    const cachedResponse = getCachedResponse<T>(requestUrl);
+
+    if (useEtagCache && cachedResponse) {
+      headers.set("If-None-Match", cachedResponse.etag);
+    }
+
+    const response = await fetch(requestUrl, {
+      headers,
       signal: controller.signal,
     });
+
+    if (response.status === 304) {
+      if (cachedResponse) {
+        return cachedResponse.payload;
+      }
+
+      responseCache.delete(requestUrl);
+      return requestJson(config, path, params, {
+        ...options,
+        useEtagCache: false,
+      });
+    }
 
     if (!response.ok) {
       throw new ApiError(await readError(response), response.status);
     }
 
-    return (await response.json()) as T;
+    const payload = (await response.json()) as T;
+    const etag = response.headers.get("ETag");
+
+    if (etag) {
+      setCachedResponse(requestUrl, etag, payload);
+    } else {
+      responseCache.delete(requestUrl);
+    }
+
+    return payload;
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
     }
 
     if (hasErrorName(error, "AbortError")) {
-      throw new ApiError("Request timed out", 0);
+      if (didTimeout) {
+        throw new ApiError("Request timed out", 0);
+      }
+
+      throw error;
     }
 
     throw new ApiError(getNetworkErrorMessage(config), 0);
   } finally {
     clearTimeout(timeout);
+    disconnectAbortSignal();
   }
 };
 
-export const getHealth = (config: ApiConfig): Promise<Health> =>
-  requestJson<Health>(config, "/health");
+export const getHealth = (
+  config: ApiConfig,
+  signal?: AbortSignal,
+): Promise<Health> => requestJson<Health>(config, "/health", undefined, { signal });
 
 export const getDashboardStats = (
   config: ApiConfig,
   limit: number,
+  signal?: AbortSignal,
 ): Promise<DashboardResponse> =>
-  requestJson<DashboardResponse>(config, "/stats/dashboard", { limit });
+  requestJson<DashboardResponse>(config, "/stats/dashboard", { limit }, { signal });
 
 export const getFilters = (
   config: ApiConfig,
   limit: number,
+  dimensions: FilterDimension[],
+  signal?: AbortSignal,
 ): Promise<FilterCatalogResponse> =>
-  requestJson<FilterCatalogResponse>(config, "/filters", { limit });
+  requestJson<FilterCatalogResponse>(config, "/filters", { dimensions, limit }, { signal });
 
 export const listRecords = (
   config: ApiConfig,
   params: RecordListParams,
+  signal?: AbortSignal,
 ): Promise<RecordsResponse> =>
-  requestJson<RecordsResponse>(config, "/records", params as QueryParams);
+  requestJson<RecordsResponse>(config, "/records", params as QueryParams, {
+    signal,
+  });
 
 export const getRecordDetail = (
   config: ApiConfig,
   releaseId: number,
+  signal?: AbortSignal,
 ): Promise<RecordDetailResponse> =>
-  requestJson<RecordDetailResponse>(config, `/records/${releaseId}`);
+  requestJson<RecordDetailResponse>(config, `/records/${releaseId}`, undefined, {
+    signal,
+  });
 
 export const getBreakdown = (
   config: ApiConfig,
   dimension: BreakdownDimension,
+  signal?: AbortSignal,
 ): Promise<BreakdownResponse> =>
-  requestJson<BreakdownResponse>(config, `/stats/breakdowns/${dimension}`);
+  requestJson<BreakdownResponse>(config, `/stats/breakdowns/${dimension}`, undefined, {
+    signal,
+  });

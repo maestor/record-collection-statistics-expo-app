@@ -1,6 +1,7 @@
 import * as React from "react";
 import { fireEvent, screen } from "@testing-library/react-native";
 
+import * as apiQueries from "@/api/queries";
 import { RecordDetailScreen } from "@/features/records/record-detail-screen";
 import { jsonResponse, renderWithProviders, t } from "../test/test-utils";
 
@@ -85,6 +86,21 @@ describe("RecordDetailScreen", () => {
     resolveRecordResponse?.(jsonResponse({ data: recordDetail }));
 
     expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+  });
+
+  it("keeps the loading state when detail data has not restored yet", () => {
+    jest.spyOn(apiQueries, "useRecordDetailQuery").mockReturnValue({
+      data: undefined,
+      error: null,
+      isError: false,
+      isLoading: false,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof apiQueries.useRecordDetailQuery>);
+
+    renderWithProviders(<RecordDetailScreen releaseId={37098591} />);
+
+    expect(screen.getByText(t("recordDetail.loadingTitle"))).toBeTruthy();
+    expect(screen.getByText(t("recordDetail.loadingMessage"))).toBeTruthy();
   });
 
   it("renders record metadata, tracks, and community stats", async () => {

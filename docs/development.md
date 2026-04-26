@@ -68,6 +68,14 @@ For a physical Android device, the API must be reachable from the phone over the
 
 The read API key is embedded in the app bundle. Treat it as a client-visible gate key, not a private server secret.
 
+## Cached API Data
+
+The app keeps TanStack Query data in local storage for up to 24 hours so repeated launches do not immediately reread stable API endpoints.
+
+- Dashboard, breakdowns, record details, and filter catalogs reuse cached data until their query-specific stale windows expire.
+- The records screen loads filter values only when the filter sheet is opened.
+- Pull-to-refresh and retry actions still force a fresh request when the user asks for one.
+
 ## Verification
 
 Before verification, review the task diff for unused implementation:

@@ -2,6 +2,7 @@ import * as React from "react";
 import { fireEvent, screen, waitFor, within } from "@testing-library/react-native";
 import { Modal } from "react-native";
 
+import * as apiQueries from "@/api/queries";
 import { StatisticsScreen } from "@/features/statistics/statistics-screen";
 import type { StatisticDimension } from "@/features/statistics/statistics-model";
 import { colors } from "@/theme/colors";
@@ -181,6 +182,21 @@ describe("StatisticsScreen", () => {
         name: getCurrentDimensionLabel("artist"),
       }),
     ).toBeTruthy();
+  });
+
+  it("keeps the loading state when dashboard data has not restored yet", () => {
+    jest.spyOn(apiQueries, "useDashboardStatsQuery").mockReturnValue({
+      data: undefined,
+      error: null,
+      isError: false,
+      isLoading: false,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof apiQueries.useDashboardStatsQuery>);
+
+    renderWithProviders(<StatisticsScreen />);
+
+    expect(screen.getByText(t("dashboard.loadingTitle"))).toBeTruthy();
+    expect(screen.getByText(t("dashboard.loadingMessage"))).toBeTruthy();
   });
 
   it("defaults to list mode and supports every statistic action", async () => {
@@ -558,6 +574,32 @@ describe("StatisticsScreen", () => {
         }),
       ),
     ).toBeTruthy();
+  });
+
+  it("keeps the chart loading state when breakdown data has not restored yet", async () => {
+    jest.spyOn(apiQueries, "useDashboardStatsQuery").mockReturnValue({
+      data: dashboardPayload,
+      error: null,
+      isError: false,
+      isLoading: false,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof apiQueries.useDashboardStatsQuery>);
+    jest.spyOn(apiQueries, "useBreakdownQuery").mockReturnValue({
+      data: undefined,
+      error: null,
+      isError: false,
+      isLoading: false,
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof apiQueries.useBreakdownQuery>);
+
+    renderWithProviders(<StatisticsScreen />);
+
+    expect(await screen.findByText("Klamydia")).toBeTruthy();
+
+    fireEvent.press(screen.getByRole("button", { name: t("statistics.viewCharts") }));
+
+    expect(screen.getByText(t("statistics.graphLoadingTitle"))).toBeTruthy();
+    expect(screen.getByText(t("statistics.graphLoadingMessage"))).toBeTruthy();
   });
 
   it("renders an empty chart state when the selected breakdown has no values", async () => {

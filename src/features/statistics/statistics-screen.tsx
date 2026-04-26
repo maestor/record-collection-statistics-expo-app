@@ -50,7 +50,19 @@ export const StatisticsScreen = () => {
     );
   }
 
-  const dashboard = dashboardQuery.data!.data;
+  if (!dashboardQuery.data) {
+    return (
+      <ScrollView contentContainerStyle={screenStyles.paddedContent}>
+        <StatusMessage
+          message={t("dashboard.loadingMessage")}
+          title={t("dashboard.loadingTitle")}
+          tone="loading"
+        />
+      </ScrollView>
+    );
+  }
+
+  const dashboard = dashboardQuery.data.data;
   const statisticOptions = buildStatisticOptions(dashboard);
   const activeStatistic = statisticOptions.find(
     (option) => option.dimension === selectedStatistic,

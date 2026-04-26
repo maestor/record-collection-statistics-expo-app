@@ -92,7 +92,17 @@ export const StatisticsGraphPanel = ({
     );
   }
 
-  const rawItems = query.data!.data;
+  if (!query.data) {
+    return (
+      <StatusMessage
+        message={t("statistics.graphLoadingMessage")}
+        title={t("statistics.graphLoadingTitle")}
+        tone="loading"
+      />
+    );
+  }
+
+  const rawItems = query.data.data;
 
   if (rawItems.length === 0) {
     return (

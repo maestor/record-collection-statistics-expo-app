@@ -2,6 +2,7 @@ import * as React from "react";
 import {
   Keyboard,
   Modal,
+  Pressable,
   ScrollView,
   Text,
   TextInput,
@@ -203,6 +204,12 @@ export const RecordsScreen = () => {
     setQuery(normalizedQuery);
   };
 
+  const clearSearch = () => {
+    setDraftQuery("");
+    setPendingSearchQuery("");
+    setQuery("");
+  };
+
   const clearFilters = () => {
     setDraftQuery("");
     setQuery("");
@@ -248,27 +255,65 @@ export const RecordsScreen = () => {
     >
       <Section title={t("records.searchTitle")}>
         <View style={{ gap: spacing.md }}>
-          <TextInput
-            accessibilityLabel={t("records.searchLabel")}
-            autoCapitalize="none"
-            onChangeText={updateDraftQuery}
-            onSubmitEditing={() => applySearch(draftQuery)}
-            placeholder={t("records.searchPlaceholder")}
-            placeholderTextColor={colors.textMuted}
-            returnKeyType="search"
+          <View
             style={[
               cardFrameStyle,
               {
+                alignItems: "center",
                 backgroundColor: colors.surface,
                 borderColor: colors.border,
-                color: colors.text,
-                fontSize: 16,
+                flexDirection: "row",
                 minHeight: 52,
-                paddingHorizontal: spacing.md,
+                paddingLeft: spacing.md,
+                paddingRight:
+                  draftQuery.length > 0 ? spacing.sm : spacing.md,
               },
             ]}
-            value={draftQuery}
-          />
+          >
+            <TextInput
+              accessibilityLabel={t("records.searchLabel")}
+              autoCapitalize="none"
+              onChangeText={updateDraftQuery}
+              onSubmitEditing={() => applySearch(draftQuery)}
+              placeholder={t("records.searchPlaceholder")}
+              placeholderTextColor={colors.textMuted}
+              returnKeyType="search"
+              style={{
+                color: colors.text,
+                flex: 1,
+                fontSize: 16,
+                minHeight: 52,
+                padding: 0,
+                paddingRight: spacing.sm,
+              }}
+              value={draftQuery}
+            />
+            {draftQuery.length > 0 && (
+              <Pressable
+                accessibilityLabel={t("records.clearSearch")}
+                accessibilityRole="button"
+                hitSlop={spacing.sm}
+                onPress={clearSearch}
+                style={{
+                  alignItems: "center",
+                  borderRadius: 18,
+                  height: 36,
+                  justifyContent: "center",
+                  width: 36,
+                }}
+              >
+                <Text
+                  style={{
+                    color: colors.textMuted,
+                    fontSize: 28,
+                    lineHeight: 30,
+                  }}
+                >
+                  ×
+                </Text>
+              </Pressable>
+            )}
+          </View>
           <SelectionTrigger
             accessibilityLabel={`${t("records.filtersButton")}${activeFilterCount ? ` (${activeFilterCount})` : ""}`}
             actionLabel={t("records.selectFilters")}

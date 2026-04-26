@@ -458,7 +458,14 @@ describe("RecordsScreen", () => {
 
       const initialRecordCalls = recordsCallCount();
 
+      expect(
+        screen.queryByRole("button", { name: t("records.clearSearch") }),
+      ).toBeNull();
+
       fireEvent.changeText(searchInput, "Mu");
+      expect(
+        screen.getByRole("button", { name: t("records.clearSearch") }),
+      ).toBeTruthy();
       act(() => {
         jest.advanceTimersByTime(500);
       });
@@ -490,12 +497,17 @@ describe("RecordsScreen", () => {
 
       const callsAfterAutoSearch = recordsCallCount();
 
-      fireEvent.changeText(searchInput, "");
-      act(() => {
-        jest.advanceTimersByTime(500);
-      });
+      fireEvent.press(
+        screen.getByRole("button", { name: t("records.clearSearch") }),
+      );
 
       await waitFor(() => {
+        expect(screen.getByLabelText(t("records.searchLabel")).props.value).toBe(
+          "",
+        );
+        expect(
+          screen.queryByRole("button", { name: t("records.clearSearch") }),
+        ).toBeNull();
         expect(dismissKeyboard).toHaveBeenCalledTimes(2);
       });
       expect(recordsCallCount()).toBe(callsAfterAutoSearch);

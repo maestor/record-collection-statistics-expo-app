@@ -117,6 +117,7 @@ export const translations = {
       tracksEmpty: "Kappaleita ei ole saatavilla.",
     },
     records: {
+      applyFilters: "Näytä tulokset",
       clearFilters: "Tyhjennä suodattimet",
       closeFilters: "Sulje",
       emptyMessage: "Nykyisillä hauilla ja suodattimilla ei löytynyt levyjä.",

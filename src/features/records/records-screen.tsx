@@ -93,6 +93,11 @@ export const RecordsScreen = () => {
   const [selectedFilters, setSelectedFilters] = React.useState<
     Partial<Record<FilterKey, string>>
   >({});
+  const [draftSort, setDraftSort] = React.useState<SortValue>("date_added");
+  const [draftOrder, setDraftOrder] = React.useState<OrderValue>("desc");
+  const [draftSelectedFilters, setDraftSelectedFilters] = React.useState<
+    Partial<Record<FilterKey, string>>
+  >({});
   const params = React.useMemo(
     () => buildParams(query, sort, order, selectedFilters),
     [order, query, selectedFilters, sort],
@@ -125,8 +130,15 @@ export const RecordsScreen = () => {
     return () => clearTimeout(timeout);
   }, [draftQuery, query]);
 
-  const setFilter = (key: FilterKey, value: string) => {
-    setSelectedFilters((current) => ({
+  const openFilters = () => {
+    setDraftSort(sort);
+    setDraftOrder(order);
+    setDraftSelectedFilters(selectedFilters);
+    setFiltersOpen(true);
+  };
+
+  const setDraftFilter = (key: FilterKey, value: string) => {
+    setDraftSelectedFilters((current) => ({
       ...current,
       [key]: current[key] === value ? undefined : value,
     }));
@@ -140,9 +152,19 @@ export const RecordsScreen = () => {
   const clearFilters = () => {
     setDraftQuery("");
     setQuery("");
+    setDraftSelectedFilters({});
     setSelectedFilters({});
+    setDraftSort("date_added");
     setSort("date_added");
+    setDraftOrder("desc");
     setOrder("desc");
+  };
+
+  const applyFilters = () => {
+    setSelectedFilters(draftSelectedFilters);
+    setSort(draftSort);
+    setOrder(draftOrder);
+    setFiltersOpen(false);
   };
 
   return (
@@ -178,7 +200,7 @@ export const RecordsScreen = () => {
             accessibilityLabel={`${t("records.filtersButton")}${activeFilterCount ? ` (${activeFilterCount})` : ""}`}
             actionLabel={t("records.selectFilters")}
             label={`${t("records.filtersButton")}${activeFilterCount ? ` (${activeFilterCount})` : ""}`}
-            onPress={() => setFiltersOpen(true)}
+            onPress={openFilters}
             style={{ width: "100%" }}
           />
         </View>
@@ -203,17 +225,18 @@ export const RecordsScreen = () => {
       )}
 
       <FilterSheet
+        applyFilters={applyFilters}
         clearFilters={clearFilters}
         closeFilters={() => setFiltersOpen(false)}
         filters={filtersQuery.data?.data}
+        draftOrder={draftOrder}
+        draftSelectedFilters={draftSelectedFilters}
+        draftSort={draftSort}
         isLoading={filtersQuery.isLoading}
         isOpen={filtersOpen}
-        order={order}
-        selectedFilters={selectedFilters}
-        setFilter={setFilter}
-        setOrder={setOrder}
-        setSort={setSort}
-        sort={sort}
+        setDraftFilter={setDraftFilter}
+        setDraftOrder={setDraftOrder}
+        setDraftSort={setDraftSort}
       />
 
       {firstPage && (
@@ -249,8 +272,12 @@ export const RecordsScreen = () => {
 };
 
 type FilterSheetProps = {
+  applyFilters: () => void;
   clearFilters: () => void;
   closeFilters: () => void;
+  draftOrder: OrderValue;
+  draftSelectedFilters: Partial<Record<FilterKey, string>>;
+  draftSort: SortValue;
   filters: ReturnType<typeof useFiltersQuery>["data"] extends infer Result
     ? Result extends { data: infer Data }
       ? Data
@@ -258,26 +285,24 @@ type FilterSheetProps = {
     : undefined;
   isLoading: boolean;
   isOpen: boolean;
-  order: OrderValue;
-  selectedFilters: Partial<Record<FilterKey, string>>;
-  setFilter: (key: FilterKey, value: string) => void;
-  setOrder: (order: OrderValue) => void;
-  setSort: (sort: SortValue) => void;
-  sort: SortValue;
+  setDraftFilter: (key: FilterKey, value: string) => void;
+  setDraftOrder: (order: OrderValue) => void;
+  setDraftSort: (sort: SortValue) => void;
 };
 
 const FilterSheet = ({
+  applyFilters,
   clearFilters,
   closeFilters,
+  draftOrder,
+  draftSelectedFilters,
+  draftSort,
   filters,
   isLoading,
   isOpen,
-  order,
-  selectedFilters,
-  setFilter,
-  setOrder,
-  setSort,
-  sort,
+  setDraftFilter,
+  setDraftOrder,
+  setDraftSort,
 }: FilterSheetProps) => {
   const { t } = useTranslation();
 
@@ -334,12 +359,12 @@ const FilterSheet = ({
               <FilterPanel
                 filters={filters}
                 isLoading={isLoading}
-                order={order}
-                selectedFilters={selectedFilters}
-                setFilter={setFilter}
-                setOrder={setOrder}
-                setSort={setSort}
-                sort={sort}
+                order={draftOrder}
+                selectedFilters={draftSelectedFilters}
+                setFilter={setDraftFilter}
+                setOrder={setDraftOrder}
+                setSort={setDraftSort}
+                sort={draftSort}
               />
             </ScrollView>
           </View>
@@ -350,8 +375,14 @@ const FilterSheet = ({
               marginHorizontal: -spacing.lg,
               marginBottom: -spacing.lg,
               padding: spacing.lg,
+              gap: spacing.md,
             }}
           >
+            <Button
+              label={t("records.applyFilters")}
+              onPress={applyFilters}
+              style={{ width: "100%" }}
+            />
             <Button
               label={t("records.clearFilters")}
               onPress={clearFilters}
@@ -365,10 +396,16 @@ const FilterSheet = ({
   );
 };
 
-type FilterPanelProps = Omit<
-  FilterSheetProps,
-  "clearFilters" | "closeFilters" | "isOpen"
->;
+type FilterPanelProps = {
+  filters: FilterSheetProps["filters"];
+  isLoading: boolean;
+  order: OrderValue;
+  selectedFilters: Partial<Record<FilterKey, string>>;
+  setFilter: (key: FilterKey, value: string) => void;
+  setOrder: (order: OrderValue) => void;
+  setSort: (sort: SortValue) => void;
+  sort: SortValue;
+};
 
 const FilterPanel = ({
   filters,

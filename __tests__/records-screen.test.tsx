@@ -139,12 +139,22 @@ describe("RecordsScreen", () => {
     expect(await screen.findByText("Vinyl")).toBeTruthy();
     expect(screen.getByText(t("records.filterArtists"))).toBeTruthy();
     expect(screen.queryByText(t("records.filterCountries"))).toBeNull();
+    const recordsCallCount = () =>
+      (globalThis.fetch as jest.Mock).mock.calls
+        .map((call) => String(call[0]))
+        .filter((url) => url.includes("/records")).length;
+    const callsBeforeApply = recordsCallCount();
     fireEvent.press(screen.getByRole("button", { name: "Vinyl" }));
     fireEvent.press(
       screen.getByRole("button", { name: t("records.sortArtist") }),
     );
     fireEvent.press(
       screen.getByRole("button", { name: t("records.orderAscending") }),
+    );
+
+    expect(recordsCallCount()).toBe(callsBeforeApply);
+    fireEvent.press(
+      screen.getByRole("button", { name: t("records.applyFilters") }),
     );
 
     await waitFor(() => {
@@ -186,6 +196,14 @@ describe("RecordsScreen", () => {
     fireEvent.press(
       screen.getByRole("button", { name: t("records.orderAscending") }),
     );
+    const recordCallsBeforeApply = (globalThis.fetch as jest.Mock).mock.calls
+      .map((call) => String(call[0]))
+      .filter((url) => url.includes("/records")).length;
+
+    expect(recordCallsBeforeApply).toBeGreaterThan(0);
+    fireEvent.press(
+      screen.getByRole("button", { name: t("records.applyFilters") }),
+    );
 
     await waitFor(() => {
       const urls = (globalThis.fetch as jest.Mock).mock.calls.map((call) =>
@@ -194,31 +212,34 @@ describe("RecordsScreen", () => {
       expect(urls.some((url) => url.includes("q=Muse"))).toBe(true);
       expect(urls.some((url) => url.includes("genre=Rock"))).toBe(true);
       expect(urls.some((url) => url.includes("artist=Muse"))).toBe(true);
-      expect(urls.some((url) => url.includes("format=Vinyl"))).toBe(true);
+      expect(urls.some((url) => url.includes("format=Vinyl"))).toBe(false);
       expect(urls.some((url) => url.includes("sort=artist"))).toBe(true);
       expect(urls.some((url) => url.includes("order=asc"))).toBe(true);
     });
 
     fireEvent.press(
+      screen.getByRole("button", { name: `${t("records.filtersButton")} (3)` }),
+    );
+    expect(
+      await screen.findByRole("button", { name: t("records.clearFilters") }),
+    ).toBeTruthy();
+    fireEvent.press(
       screen.getByRole("button", { name: t("records.clearFilters") }),
     );
 
     await waitFor(() => {
-      const urls = (globalThis.fetch as jest.Mock).mock.calls.map((call) =>
-        String(call[0]),
-      );
+      expect(screen.getByLabelText(t("records.searchLabel")).props.value).toBe("");
       expect(
-        urls.some(
-          (url) =>
-            url.includes("/records?") &&
-            url.includes("sort=date_added") &&
-            url.includes("order=desc") &&
-            !url.includes("q=") &&
-            !url.includes("artist=") &&
-            !url.includes("genre=") &&
-            !url.includes("format="),
-        ),
-      ).toBe(true);
+        screen.getByRole("button", { name: t("records.filtersButton") }),
+      ).toBeTruthy();
+      expect(
+        screen.getByRole("button", { name: t("records.sortDateAdded") }).props
+          .accessibilityState,
+      ).toEqual({ selected: true });
+      expect(
+        screen.getByRole("button", { name: t("records.orderDescending") }).props
+          .accessibilityState,
+      ).toEqual({ selected: true });
     });
   });
 
@@ -235,7 +256,7 @@ describe("RecordsScreen", () => {
     });
   });
 
-  it("loads filters only after opening the filter sheet and reuses the cached response", async () => {
+  it("loads filters only after opening the filter sheet, reuses the cached response, and discards unapplied drafts", async () => {
     renderWithProviders(<RecordsScreen />);
 
     expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
@@ -253,6 +274,10 @@ describe("RecordsScreen", () => {
 
     expect(await screen.findByText("Vinyl")).toBeTruthy();
     expect(getFilterCalls()).toHaveLength(1);
+    fireEvent.press(screen.getByRole("button", { name: "Vinyl" }));
+    fireEvent.press(
+      screen.getByRole("button", { name: t("records.sortArtist") }),
+    );
 
     fireEvent.press(
       screen.getByRole("button", { name: t("records.closeFilters") }),
@@ -267,6 +292,14 @@ describe("RecordsScreen", () => {
 
     expect(await screen.findByText("Vinyl")).toBeTruthy();
     expect(getFilterCalls()).toHaveLength(1);
+    expect(
+      screen.getByRole("button", { name: "Vinyl" }).props.accessibilityState
+        .selected,
+    ).toBeUndefined();
+    expect(
+      screen.getByRole("button", { name: t("records.sortDateAdded") }).props
+        .accessibilityState,
+    ).toEqual({ selected: true });
   });
 
   it("shows pressed styling for filter sheet buttons", async () => {

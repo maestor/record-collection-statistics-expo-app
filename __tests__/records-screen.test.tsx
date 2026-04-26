@@ -101,8 +101,8 @@ describe("RecordsScreen", () => {
   it("searches, filters, sorts, and loads another page", async () => {
     renderWithProviders(<RecordsScreen />);
 
-    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
-    expect(screen.getByText("Vinyl, EP, Limited edition")).toBeTruthy();
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
+    expect(screen.getByText("Vinyl, EP, Limited edition")).toBeOnTheScreen();
     const recordLink = screen.getByRole("link", {
       name: "Muscle Museum EP - Muse",
     });
@@ -137,10 +137,10 @@ describe("RecordsScreen", () => {
       screen.getByRole("button", { name: `${t("records.filtersButton")} (1)` }),
     );
 
-    expect(await screen.findByText("Vinyl")).toBeTruthy();
-    expect(screen.getByText(t("records.filterArtists"))).toBeTruthy();
-    expect(screen.getByText(t("dimensions.added_year"))).toBeTruthy();
-    expect(screen.queryByText(t("records.filterCountries"))).toBeNull();
+    expect(await screen.findByText("Vinyl")).toBeOnTheScreen();
+    expect(screen.getByText(t("records.filterArtists"))).toBeOnTheScreen();
+    expect(screen.getByText(t("dimensions.added_year"))).toBeOnTheScreen();
+    expect(screen.queryByText(t("records.filterCountries"))).not.toBeOnTheScreen();
     const recordsCallCount = () =>
       (globalThis.fetch as jest.Mock).mock.calls
         .map((call) => String(call[0]))
@@ -183,13 +183,13 @@ describe("RecordsScreen", () => {
     fireEvent.press(
       screen.getByRole("button", { name: t("records.loadMore") }),
     );
-    expect(await screen.findByText("Aikuiselämää")).toBeTruthy();
+    expect(await screen.findByText("Aikuiselämää")).toBeOnTheScreen();
   });
 
   it("supports keyboard search submit, filter toggles, and clearing filters", async () => {
     renderWithProviders(<RecordsScreen />);
 
-    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
 
     const searchInput = screen.getByLabelText(t("records.searchLabel"));
     fireEvent.changeText(searchInput, " Muse ");
@@ -198,7 +198,7 @@ describe("RecordsScreen", () => {
       screen.getByRole("button", { name: `${t("records.filtersButton")} (1)` }),
     );
 
-    expect(await screen.findByRole("button", { name: "Rock" })).toBeTruthy();
+    expect(await screen.findByRole("button", { name: "Rock" })).toBeOnTheScreen();
     fireEvent.press(screen.getByRole("button", { name: "2026" }));
     fireEvent.press(screen.getByRole("button", { name: "Rock" }));
     fireEvent.press(screen.getByRole("button", { name: "Muse" }));
@@ -243,7 +243,7 @@ describe("RecordsScreen", () => {
     );
     expect(
       await screen.findByRole("button", { name: t("records.clearFilters") }),
-    ).toBeTruthy();
+    ).toBeOnTheScreen();
     fireEvent.press(
       screen.getByRole("button", { name: t("records.clearFilters") }),
     );
@@ -252,7 +252,7 @@ describe("RecordsScreen", () => {
       expect(screen.getByLabelText(t("records.searchLabel")).props.value).toBe("");
       expect(
         screen.getByRole("button", { name: t("records.filtersButton") }),
-      ).toBeTruthy();
+      ).toBeOnTheScreen();
       expect(
         screen.getByRole("button", { name: t("records.sortDateAdded") }).props
           .accessibilityState,
@@ -271,7 +271,7 @@ describe("RecordsScreen", () => {
 
     renderWithProviders(<RecordsScreen />);
 
-    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
     expect(dismissKeyboard).not.toHaveBeenCalled();
 
     const searchInput = screen.getByLabelText(t("records.searchLabel"));
@@ -309,24 +309,24 @@ describe("RecordsScreen", () => {
 
     renderWithProviders(<RecordsScreen />);
 
-    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
 
     const searchInput = screen.getByLabelText(t("records.searchLabel"));
     fireEvent.changeText(searchInput, "Muse");
     fireEvent(searchInput, "submitEditing");
 
-    expect(await screen.findByRole("alert")).toBeTruthy();
+    expect(await screen.findByRole("alert")).toBeOnTheScreen();
     expect(dismissKeyboard).not.toHaveBeenCalled();
   });
 
   it("does not render a manual search button and keeps the filters trigger full width", async () => {
     renderWithProviders(<RecordsScreen />);
 
-    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
 
     expect(
       screen.queryByRole("button", { name: /hae/i }),
-    ).toBeNull();
+    ).not.toBeOnTheScreen();
     expect(screen.getByRole("button", { name: t("records.filtersButton") })).toHaveStyle({
       width: "100%",
     });
@@ -335,7 +335,7 @@ describe("RecordsScreen", () => {
   it("loads filters only after opening the filter sheet, reuses the cached response, and closes without refetch when nothing changed", async () => {
     renderWithProviders(<RecordsScreen />);
 
-    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
 
     const getFilterCalls = () =>
       (globalThis.fetch as jest.Mock).mock.calls
@@ -348,7 +348,7 @@ describe("RecordsScreen", () => {
       screen.getByRole("button", { name: t("records.filtersButton") }),
     );
 
-    expect(await screen.findByText("Vinyl")).toBeTruthy();
+    expect(await screen.findByText("Vinyl")).toBeOnTheScreen();
     expect(getFilterCalls()).toHaveLength(1);
     expect(getFilterCalls()[0]).toContain(
       "dimensions=artist%2Cformat%2Cgenre%2Cadded_year",
@@ -361,7 +361,7 @@ describe("RecordsScreen", () => {
       screen.getByRole("button", { name: t("records.closeFilters") }),
     );
     await waitFor(() => {
-      expect(screen.queryByLabelText(t("records.filterPanelLabel"))).toBeNull();
+      expect(screen.queryByLabelText(t("records.filterPanelLabel"))).not.toBeOnTheScreen();
     });
     expect(
       (globalThis.fetch as jest.Mock).mock.calls
@@ -373,7 +373,7 @@ describe("RecordsScreen", () => {
       screen.getByRole("button", { name: t("records.filtersButton") }),
     );
 
-    expect(await screen.findByText("Vinyl")).toBeTruthy();
+    expect(await screen.findByText("Vinyl")).toBeOnTheScreen();
     expect(getFilterCalls()).toHaveLength(1);
     expect(screen.getByRole("button", { name: "Vinyl" }).props.accessibilityState.selected).toBeUndefined();
     expect(screen.getByRole("button", { name: t("records.sortDateAdded") }).props.accessibilityState).toEqual({
@@ -384,13 +384,13 @@ describe("RecordsScreen", () => {
   it("applies draft filter changes when closing the filter sheet", async () => {
     renderWithProviders(<RecordsScreen />);
 
-    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
 
     fireEvent.press(
       screen.getByRole("button", { name: t("records.filtersButton") }),
     );
 
-    expect(await screen.findByText("Vinyl")).toBeTruthy();
+    expect(await screen.findByText("Vinyl")).toBeOnTheScreen();
     const recordCallsBeforeClose = (globalThis.fetch as jest.Mock).mock.calls
       .map((call) => String(call[0]))
       .filter((url) => url.includes("/records")).length;
@@ -417,7 +417,7 @@ describe("RecordsScreen", () => {
   it("shows pressed styling for filter sheet buttons", async () => {
     renderWithProviders(<RecordsScreen />);
 
-    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
 
     fireEvent.press(
       screen.getByRole("button", { name: t("records.filtersButton") }),
@@ -439,12 +439,12 @@ describe("RecordsScreen", () => {
   it("changes the close button into a confirm action when draft filters differ", async () => {
     renderWithProviders(<RecordsScreen />);
 
-    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
 
     fireEvent.press(
       screen.getByRole("button", { name: t("records.filtersButton") }),
     );
-    expect(await screen.findByText("Vinyl")).toBeTruthy();
+    expect(await screen.findByText("Vinyl")).toBeOnTheScreen();
 
     const closeButton = screen.getByRole("button", {
       name: t("records.closeFilters"),
@@ -467,7 +467,7 @@ describe("RecordsScreen", () => {
     try {
       renderWithProviders(<RecordsScreen />);
 
-      expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+      expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
 
       const searchInput = screen.getByLabelText(t("records.searchLabel"));
       const recordsCallCount = () =>
@@ -479,12 +479,12 @@ describe("RecordsScreen", () => {
 
       expect(
         screen.queryByRole("button", { name: t("records.clearSearch") }),
-      ).toBeNull();
+      ).not.toBeOnTheScreen();
 
       fireEvent.changeText(searchInput, "Mu");
       expect(
         screen.getByRole("button", { name: t("records.clearSearch") }),
-      ).toBeTruthy();
+      ).toBeOnTheScreen();
       act(() => {
         jest.advanceTimersByTime(500);
       });
@@ -526,7 +526,7 @@ describe("RecordsScreen", () => {
         );
         expect(
           screen.queryByRole("button", { name: t("records.clearSearch") }),
-        ).toBeNull();
+        ).not.toBeOnTheScreen();
         expect(dismissKeyboard).toHaveBeenCalledTimes(2);
       });
       expect(recordsCallCount()).toBe(callsAfterAutoSearch);
@@ -549,7 +549,7 @@ describe("RecordsScreen", () => {
     });
 
     renderWithProviders(<RecordsScreen />);
-    expect(await screen.findByText(t("records.emptyMessage"))).toBeTruthy();
+    expect(await screen.findByText(t("records.emptyMessage"))).toBeOnTheScreen();
   });
 
   it("renders record cards with fallback metadata from the API response", async () => {
@@ -583,10 +583,10 @@ describe("RecordsScreen", () => {
       await screen.findByRole("link", {
         name: "Untitled Release - Tuntematon artisti",
       }),
-    ).toBeTruthy();
-    expect(screen.getByText("Tuntematon artisti")).toBeTruthy();
-    expect(screen.getByText("Tuntematon · Tuntematon maa")).toBeTruthy();
-    expect(screen.getByText("Lisätty Tuntematon")).toBeTruthy();
+    ).toBeOnTheScreen();
+    expect(screen.getByText("Tuntematon artisti")).toBeOnTheScreen();
+    expect(screen.getByText("Tuntematon · Tuntematon maa")).toBeOnTheScreen();
+    expect(screen.getByText("Lisätty Tuntematon")).toBeOnTheScreen();
   });
 
   it("keeps the load more button busy and disabled while the next page is loading", async () => {
@@ -610,7 +610,7 @@ describe("RecordsScreen", () => {
 
     renderWithProviders(<RecordsScreen />);
 
-    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
     const loadMoreButton = screen.getByRole("button", {
       name: t("records.loadMore"),
     });
@@ -628,7 +628,7 @@ describe("RecordsScreen", () => {
     });
     resolveNextPageResponse?.(jsonResponse(recordsPayload(2)));
 
-    expect(await screen.findByText("Aikuiselämää")).toBeTruthy();
+    expect(await screen.findByText("Aikuiselämää")).toBeOnTheScreen();
   });
 
   it("shows a filter loading message while filter options are loading", async () => {
@@ -648,22 +648,22 @@ describe("RecordsScreen", () => {
 
     renderWithProviders(<RecordsScreen />);
 
-    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
     fireEvent.press(
       screen.getByRole("button", { name: t("records.filtersButton") }),
     );
-    expect(screen.getByLabelText(t("records.filterPanelLabel"))).toBeTruthy();
+    expect(screen.getByLabelText(t("records.filterPanelLabel"))).toBeOnTheScreen();
 
-    expect(screen.getByText(t("records.loadingFilters"))).toBeTruthy();
+    expect(screen.getByText(t("records.loadingFilters"))).toBeOnTheScreen();
 
     resolveFiltersResponse?.(jsonResponse(filtersPayload));
 
-    expect(await screen.findByText("Vinyl")).toBeTruthy();
+    expect(await screen.findByText("Vinyl")).toBeOnTheScreen();
     fireEvent.press(
       screen.getByRole("button", { name: t("records.closeFilters") }),
     );
     await waitFor(() => {
-      expect(screen.queryByLabelText(t("records.filterPanelLabel"))).toBeNull();
+      expect(screen.queryByLabelText(t("records.filterPanelLabel"))).not.toBeOnTheScreen();
     });
   });
 
@@ -684,12 +684,12 @@ describe("RecordsScreen", () => {
 
     renderWithProviders(<RecordsScreen />);
 
-    expect(screen.getByText(t("records.loadingTitle"))).toBeTruthy();
-    expect(screen.getByText(t("records.loadingMessage"))).toBeTruthy();
+    expect(screen.getByText(t("records.loadingTitle"))).toBeOnTheScreen();
+    expect(screen.getByText(t("records.loadingMessage"))).toBeOnTheScreen();
 
     resolveRecordsResponse?.(jsonResponse(recordsPayload(1)));
 
-    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
   });
 
   it("shows an error state and retries record loading", async () => {
@@ -705,8 +705,8 @@ describe("RecordsScreen", () => {
 
     renderWithProviders(<RecordsScreen />);
 
-    expect(await screen.findByRole("alert")).toBeTruthy();
-    expect(screen.getByText("Records failed")).toBeTruthy();
+    expect(await screen.findByRole("alert")).toBeOnTheScreen();
+    expect(screen.getByText("Records failed")).toBeOnTheScreen();
 
     fireEvent.press(screen.getByRole("button", { name: t("common.tryAgain") }));
 

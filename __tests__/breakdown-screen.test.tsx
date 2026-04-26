@@ -33,21 +33,21 @@ describe("BreakdownScreen", () => {
 
     renderWithProviders(<BreakdownScreen dimension="genre" />);
 
-    expect(screen.getByText(t("breakdowns.loadingTitle"))).toBeTruthy();
-    expect(screen.getByText(t("breakdowns.loadingMessage"))).toBeTruthy();
-    expect(screen.queryByText("Rock")).toBeNull();
+    expect(screen.getByText(t("breakdowns.loadingTitle"))).toBeOnTheScreen();
+    expect(screen.getByText(t("breakdowns.loadingMessage"))).toBeOnTheScreen();
+    expect(screen.queryByText("Rock")).not.toBeOnTheScreen();
 
     resolveBreakdownResponse?.(jsonResponse(rockBreakdownPayload));
 
-    expect(await screen.findByText("Rock")).toBeTruthy();
+    expect(await screen.findByText("Rock")).toBeOnTheScreen();
   });
 
   it("renders the requested breakdown values", async () => {
     renderWithProviders(<BreakdownScreen dimension="genre" />);
 
-    expect(await screen.findByText(t("dimensions.genre"))).toBeTruthy();
-    expect(screen.getByText("Rock")).toBeTruthy();
-    expect(screen.getByText("Pop Rock")).toBeTruthy();
+    expect(await screen.findByText(t("dimensions.genre"))).toBeOnTheScreen();
+    expect(screen.getByText("Rock")).toBeOnTheScreen();
+    expect(screen.getByText("Pop Rock")).toBeOnTheScreen();
     expect((globalThis.fetch as jest.Mock).mock.calls[0]?.[0]).toContain("/stats/breakdowns/genre");
   });
 
@@ -56,8 +56,8 @@ describe("BreakdownScreen", () => {
 
     renderWithProviders(<BreakdownScreen dimension="genre" />);
 
-    expect(await screen.findByText(t("dimensions.genre"))).toBeTruthy();
-    expect(screen.getByText(t("common.noValuesYet"))).toBeTruthy();
+    expect(await screen.findByText(t("dimensions.genre"))).toBeOnTheScreen();
+    expect(screen.getByText(t("common.noValuesYet"))).toBeOnTheScreen();
   });
 
   it("renders API errors with retry", async () => {
@@ -65,8 +65,8 @@ describe("BreakdownScreen", () => {
 
     renderWithProviders(<BreakdownScreen dimension="genre" />);
 
-    expect(await screen.findByRole("alert")).toBeTruthy();
-    expect(screen.getByText("No breakdown data")).toBeTruthy();
+    expect(await screen.findByRole("alert")).toBeOnTheScreen();
+    expect(screen.getByText("No breakdown data")).toBeOnTheScreen();
 
     fireEvent.press(screen.getByRole("button", { name: t("common.tryAgain") }));
 

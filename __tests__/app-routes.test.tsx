@@ -213,14 +213,18 @@ describe("Expo Router routes", () => {
     expect(recordsTab?.options.headerShown).toBe(false);
     expect(statisticsTab?.options.headerShown).toBe(false);
 
-    expect(dashboardTab?.options.tabBarIcon({ color: "red", focused: true, size: 20 })).toBeTruthy();
-    expect(dashboardTab?.options.tabBarIcon({ color: "red", focused: false, size: 20 })).toBeTruthy();
-    expect(recordsTab?.options.tabBarIcon({ color: "red", focused: true, size: 20 })).toBeTruthy();
-    expect(recordsTab?.options.tabBarIcon({ color: "red", focused: false, size: 20 })).toBeTruthy();
-    expect(statisticsTab?.options.tabBarIcon({ color: "red", focused: true, size: 20 })).toBeTruthy();
-    expect(statisticsTab?.options.tabBarIcon({ color: "red", focused: false, size: 20 })).toBeTruthy();
-    expect(infoTab?.options.tabBarIcon({ color: "red", focused: true, size: 20 })).toBeTruthy();
-    expect(infoTab?.options.tabBarIcon({ color: "red", focused: false, size: 20 })).toBeTruthy();
+    const tabBarIcons = [
+      dashboardTab?.options.tabBarIcon({ color: "red", focused: true, size: 20 }),
+      dashboardTab?.options.tabBarIcon({ color: "red", focused: false, size: 20 }),
+      recordsTab?.options.tabBarIcon({ color: "red", focused: true, size: 20 }),
+      recordsTab?.options.tabBarIcon({ color: "red", focused: false, size: 20 }),
+      statisticsTab?.options.tabBarIcon({ color: "red", focused: true, size: 20 }),
+      statisticsTab?.options.tabBarIcon({ color: "red", focused: false, size: 20 }),
+      infoTab?.options.tabBarIcon({ color: "red", focused: true, size: 20 }),
+      infoTab?.options.tabBarIcon({ color: "red", focused: false, size: 20 }),
+    ];
+
+    expect(tabBarIcons.every((icon) => React.isValidElement(icon))).toBe(true);
   });
 
   it("registers the dashboard stack screens inside the dashboard tab", () => {
@@ -275,7 +279,7 @@ describe("Expo Router routes", () => {
 
   it("renders the tab routes through their actual route components", async () => {
     const dashboardView = renderWithProviders(<DashboardRoute />);
-    expect(await screen.findByText(t("dashboard.overviewTitle"))).toBeTruthy();
+    expect(await screen.findByText(t("dashboard.overviewTitle"))).toBeOnTheScreen();
     dashboardView.unmount();
 
     const statisticsView = renderWithProviders(<StatisticsRoute />);
@@ -285,7 +289,7 @@ describe("Expo Router routes", () => {
           title: t("dimensions.artist"),
         }),
       }),
-    ).toBeTruthy();
+    ).toBeOnTheScreen();
     expect(
       screen.getByRole("button", { name: t("statistics.viewList") }).props
         .accessibilityState.selected,
@@ -293,11 +297,11 @@ describe("Expo Router routes", () => {
     statisticsView.unmount();
 
     const recordsView = renderWithProviders(<RecordsRoute />);
-    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
     recordsView.unmount();
 
     renderWithProviders(<InfoRoute />);
-    expect(await screen.findByText(t("dashboard.healthStatusHealthy"))).toBeTruthy();
+    expect(await screen.findByText(t("dashboard.healthStatusHealthy"))).toBeOnTheScreen();
   });
 
   it("parses the record detail route id before loading the record", async () => {
@@ -305,7 +309,7 @@ describe("Expo Router routes", () => {
 
     renderWithProviders(<RecordDetailRoute />);
 
-    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
     expect((globalThis.fetch as jest.Mock).mock.calls.some((call) => String(call[0]).includes("/records/37098591"))).toBe(
       true,
     );
@@ -316,22 +320,22 @@ describe("Expo Router routes", () => {
 
     renderWithProviders(<RecordDetailRoute />);
 
-    expect(await screen.findByRole("alert")).toBeTruthy();
-    expect(screen.getByText(t("recordDetail.invalidMessage"))).toBeTruthy();
+    expect(await screen.findByRole("alert")).toBeOnTheScreen();
+    expect(screen.getByText(t("recordDetail.invalidMessage"))).toBeOnTheScreen();
   });
 
   it("renders supported and unsupported breakdown route params", async () => {
     (useLocalSearchParams as jest.Mock).mockReturnValue({ dimension: "genre" });
     const supportedView = renderWithProviders(<BreakdownRoute />);
 
-    expect(await screen.findByText(t("dimensions.genre"))).toBeTruthy();
-    expect(screen.getByText("Rock")).toBeTruthy();
+    expect(await screen.findByText(t("dimensions.genre"))).toBeOnTheScreen();
+    expect(screen.getByText("Rock")).toBeOnTheScreen();
     supportedView.unmount();
 
     (useLocalSearchParams as jest.Mock).mockReturnValue({ dimension: "unsupported" });
     renderWithProviders(<BreakdownRoute />);
 
-    expect(await screen.findByRole("alert")).toBeTruthy();
-    expect(screen.getByText(t("breakdowns.unsupportedMessage"))).toBeTruthy();
+    expect(await screen.findByRole("alert")).toBeOnTheScreen();
+    expect(screen.getByText(t("breakdowns.unsupportedMessage"))).toBeOnTheScreen();
   });
 });

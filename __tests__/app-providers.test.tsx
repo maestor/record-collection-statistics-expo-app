@@ -28,7 +28,7 @@ describe("AppProviders", () => {
       </AppProviders>,
     );
 
-    expect(screen.getByText("ready")).toBeTruthy();
+    expect(screen.getByText("ready")).toBeOnTheScreen();
     await waitFor(() => {
       expect(AsyncStorage.getItem).toHaveBeenCalled();
     });

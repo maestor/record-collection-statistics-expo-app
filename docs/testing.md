@@ -7,6 +7,7 @@ Tests use `jest-expo` and `@testing-library/react-native`.
 - Mock `fetch` directly for API behavior.
 - Avoid snapshot tests unless a small stable snapshot adds clear value.
 - Prefer accessible queries such as `getByRole`, `getByLabelText`, and visible text.
+- Prefer semantic React Native Testing Library matchers such as `toBeOnTheScreen`, `not.toBeOnTheScreen`, and `toHaveTextContent` for rendered UI assertions. Use generic `toBeTruthy` or `toBeNull` only when the assertion is about a non-UI value rather than rendered output.
 - Prefer shared translation and formatting helpers in tests instead of hardcoded UI copy so locale text changes do not break assertions.
 - Treat test warnings as failures to fix, not as acceptable noise. This includes React `act(...)` warnings, unexpected `console.error` output, and library warnings triggered by unfinished async work in a test.
 - Keep generated OpenAPI types out of coverage.

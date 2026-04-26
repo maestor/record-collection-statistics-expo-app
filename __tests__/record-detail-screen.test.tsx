@@ -80,12 +80,12 @@ describe("RecordDetailScreen", () => {
 
     renderWithProviders(<RecordDetailScreen releaseId={37098591} />);
 
-    expect(screen.getByText(t("recordDetail.loadingTitle"))).toBeTruthy();
-    expect(screen.getByText(t("recordDetail.loadingMessage"))).toBeTruthy();
+    expect(screen.getByText(t("recordDetail.loadingTitle"))).toBeOnTheScreen();
+    expect(screen.getByText(t("recordDetail.loadingMessage"))).toBeOnTheScreen();
 
     resolveRecordResponse?.(jsonResponse({ data: recordDetail }));
 
-    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
   });
 
   it("keeps the loading state when detail data has not restored yet", () => {
@@ -99,33 +99,33 @@ describe("RecordDetailScreen", () => {
 
     renderWithProviders(<RecordDetailScreen releaseId={37098591} />);
 
-    expect(screen.getByText(t("recordDetail.loadingTitle"))).toBeTruthy();
-    expect(screen.getByText(t("recordDetail.loadingMessage"))).toBeTruthy();
+    expect(screen.getByText(t("recordDetail.loadingTitle"))).toBeOnTheScreen();
+    expect(screen.getByText(t("recordDetail.loadingMessage"))).toBeOnTheScreen();
   });
 
   it("renders record metadata in card sections with compact tracks", async () => {
     renderWithProviders(<RecordDetailScreen releaseId={37098591} />);
 
-    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
-    expect(screen.getByText("Muse")).toBeTruthy();
-    expect(screen.getByText(t("recordDetail.labels"))).toBeTruthy();
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
+    expect(screen.getByText("Muse")).toBeOnTheScreen();
+    expect(screen.getByText(t("recordDetail.labels"))).toBeOnTheScreen();
     expect(
       screen.getByText(
         "Warner Records · 5026854087467\nWarner Records · 9362499549\nMushroom Pillow · Ei kataloginumeroa",
       ),
-    ).toBeTruthy();
-    expect(screen.getByText("Vinyl, 12\", EP, Limited edition")).toBeTruthy();
+    ).toBeOnTheScreen();
+    expect(screen.getByText("Vinyl, 12\", EP, Limited edition")).toBeOnTheScreen();
     expect(screen.getAllByText("18.4.2026")).toHaveLength(2);
-    expect(screen.getByText(t("recordDetail.collectionAddedOn"))).toBeTruthy();
-    expect(screen.queryByText(t("recordDetail.collection"))).toBeNull();
+    expect(screen.getByText(t("recordDetail.collectionAddedOn"))).toBeOnTheScreen();
+    expect(screen.queryByText(t("recordDetail.collection"))).not.toBeOnTheScreen();
     expect(screen.queryAllByText(t("recordDetail.labels"))).toHaveLength(1);
     expect(screen.getAllByText("Barcode")).toHaveLength(1);
-    expect(screen.getByText("5026854087467 · Text\n5026854087468")).toBeTruthy();
-    expect(screen.getByText("LC01234")).toBeTruthy();
-    expect(screen.getByText("A2 • Sober")).toBeTruthy();
+    expect(screen.getByText("5026854087467 · Text\n5026854087468")).toBeOnTheScreen();
+    expect(screen.getByText("LC01234")).toBeOnTheScreen();
+    expect(screen.getByText("A2 • Sober")).toBeOnTheScreen();
   });
 
-  it("renders empty and fallback detail values", async () => {
+  it("renders fallback detail values without empty track or identifier sections", async () => {
     globalThis.fetch = jest.fn(async () =>
       jsonResponse({
         data: {
@@ -146,12 +146,12 @@ describe("RecordDetailScreen", () => {
 
     renderWithProviders(<RecordDetailScreen releaseId={37098591} />);
 
-    expect(await screen.findByText("Muscle Museum EP")).toBeTruthy();
-    expect(screen.getByText(t("common.unknownArtist"))).toBeTruthy();
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
+    expect(screen.getByText(t("common.unknownArtist"))).toBeOnTheScreen();
     expect(screen.getAllByText(t("common.unknown")).length).toBeGreaterThanOrEqual(4);
-    expect(screen.getByText("Unknown Label · Ei kataloginumeroa")).toBeTruthy();
-    expect(screen.getByText(t("recordDetail.tracksEmpty"))).toBeTruthy();
-    expect(screen.getByText(t("recordDetail.identifiersEmpty"))).toBeTruthy();
+    expect(screen.getByText("Unknown Label · Ei kataloginumeroa")).toBeOnTheScreen();
+    expect(screen.queryByText(t("recordDetail.trackList"))).not.toBeOnTheScreen();
+    expect(screen.queryByText(t("recordDetail.identifiers"))).not.toBeOnTheScreen();
   });
 
   it("renders track durations when the API provides them", async () => {
@@ -166,7 +166,7 @@ describe("RecordDetailScreen", () => {
 
     renderWithProviders(<RecordDetailScreen releaseId={37098591} />);
 
-    expect(await screen.findByText("A1 • Muscle Museum • 3:12")).toBeTruthy();
+    expect(await screen.findByText("A1 • Muscle Museum • 3:12")).toBeOnTheScreen();
   });
 
   it("falls back to the track index when the position is missing", async () => {
@@ -181,21 +181,21 @@ describe("RecordDetailScreen", () => {
 
     renderWithProviders(<RecordDetailScreen releaseId={37098591} />);
 
-    expect(await screen.findByText("1 • Hidden Track")).toBeTruthy();
+    expect(await screen.findByText("1 • Hidden Track")).toBeOnTheScreen();
   });
 
   it("renders invalid release id state", async () => {
     renderWithProviders(<RecordDetailScreen releaseId={Number.NaN} />);
 
-    expect(await screen.findByRole("alert")).toBeTruthy();
-    expect(screen.getByText(t("recordDetail.invalidMessage"))).toBeTruthy();
+    expect(await screen.findByRole("alert")).toBeOnTheScreen();
+    expect(screen.getByText(t("recordDetail.invalidMessage"))).toBeOnTheScreen();
   });
 
   it("renders API errors with retry", async () => {
     globalThis.fetch = jest.fn(async () => jsonResponse({ error: "Release not found" }, 404));
     renderWithProviders(<RecordDetailScreen releaseId={404} />);
 
-    expect(await screen.findByText("Release not found")).toBeTruthy();
+    expect(await screen.findByText("Release not found")).toBeOnTheScreen();
     fireEvent.press(screen.getByRole("button", { name: t("common.tryAgain") }));
     expect(globalThis.fetch).toHaveBeenCalled();
   });

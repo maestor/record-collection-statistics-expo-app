@@ -29,6 +29,7 @@
 - Run `npm run generate:api-types` after backend OpenAPI changes.
 - Run `npm run check:api-types` when the local API is available and API compatibility matters.
 - Test user-visible behavior with Testing Library. Prefer interactions and assertions over snapshots.
+- Prefer semantic React Native Testing Library matchers for rendered UI assertions, for example `toBeOnTheScreen`, `not.toBeOnTheScreen`, and `toHaveTextContent`, instead of generic `toBeTruthy` or `toBeNull` when asserting presence, absence, or content.
 - Cover loading, success, empty, error, and accessibility states for user-facing screens.
 - Include Expo Router routes and layouts under `app/` in coverage. Test route params, unsupported route fallbacks, provider/layout wiring, and navigation registration at the route level; keep detailed screen behavior tests in `src/` feature tests.
 - Definition of Done: every new line of behavior added during a task must be covered by user-behavior tests in the same task. If complete behavior coverage is not practical, stop and raise that as a separate decision before merging or moving on.

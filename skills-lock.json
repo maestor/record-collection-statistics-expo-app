@@ -11,6 +11,16 @@
       "sourceType": "github",
       "computedHash": "409d466e43888f62987ceaf5c8be34aa76a49328528ebe290bab866f6d07e958"
     },
+    "accessibility-first-ui": {
+      "source": "maestor/agent-skills",
+      "sourceType": "github",
+      "computedHash": "cf5c890a9509da7faad48ed3dd0471150befbc6c87ba9647be8b05464f0dce12"
+    },
+    "api-contract-sync": {
+      "source": "maestor/agent-skills",
+      "sourceType": "github",
+      "computedHash": "5a84737d3a58e6f43228303570f7997ee1a644e75f4aaf592d0bf33a70d220ca"
+    },
     "building-native-ui": {
       "source": "expo/skills",
       "sourceType": "github",
@@ -50,6 +60,16 @@
       "source": "expo/skills",
       "sourceType": "github",
       "computedHash": "d39e806942fe880347f161056729b588a3cb0f1796270eebf52633fe11cfdce1"
+    },
+    "intelligence-testing": {
+      "source": "maestor/agent-skills",
+      "sourceType": "github",
+      "computedHash": "a82c5d9827487b84c319e624d5c30632c8e1e1d3129248400a418d229eb49d3d"
+    },
+    "local-first-verification": {
+      "source": "maestor/agent-skills",
+      "sourceType": "github",
+      "computedHash": "faf7380a5e2c35402ff699534a1d84948ec3c230b71e79d8a5472105aa3afa12"
     },
     "native-data-fetching": {
       "source": "expo/skills",

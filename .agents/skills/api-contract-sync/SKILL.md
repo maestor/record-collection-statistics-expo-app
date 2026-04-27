@@ -1,42 +1,139 @@
 ---
 name: api-contract-sync
-description: Sync the Expo app with backend OpenAPI contract changes. Use when the backend schema changed, when the user says there is a new API available for the frontend, when generated API types may be stale, when `npm run generate:api-types` or `npm run check:api-types` should be run, or when app code/tests/docs need updates to match a new API contract.
-version: 1.0.0
-license: MIT
+description: Use when backend and frontend or mobile clients share an API contract that must stay in sync. Helps treat the contract as a source of truth, update schemas or OpenAPI before consumer code drifts, regenerate typed clients safely, coordinate breaking and additive changes, and verify that runtime responses, generated types, and consuming code still agree.
 ---
 
 # API Contract Sync
 
-Use this skill when the backend OpenAPI contract changed or when the app looks out of sync with generated API types.
+## Overview
 
-## Contract Files
+Use this skill when API changes affect more than one codebase or layer.
 
-- Generated contract file: `src/api/generated/record-collection-api.ts`
-- Runtime client: `src/api/client.ts`
-- Query hooks: `src/api/queries.ts`
-- Local schema URL expected by the generator: `http://127.0.0.1:3003/openapi.json`
+The goal is to keep:
 
-## Commands
+- the contract source of truth
+- generated types or clients
+- backend behavior
+- frontend or mobile consumers
 
-- `npm run generate:api-types`
-- `npm run check:api-types`
+in sync at the same time.
+
+This skill is especially useful for TypeScript stacks that use OpenAPI, JSON Schema, Zod-derived schemas, generated types, or shared DTO packages.
+
+## Core Rules
+
+- Identify the contract source of truth first.
+- Change the source of truth before changing consumers that depend on it.
+- Do not hand-edit generated artifacts.
+- Prefer additive contract changes when possible.
+- Treat breaking changes as deliberate decisions, not incidental refactors.
+- Update all affected consumers in the same task when practical.
+- Verify runtime behavior, not just generated TypeScript.
+- Remove stale fields, params, and client assumptions once the new contract is in place.
+
+## Token Discipline
+
+- Keep reporting short by default.
+- Report only:
+  - source of truth changed
+  - consumers updated
+  - generation or validation performed
+  - remaining compatibility risk
+- Expand only when the contract change is breaking, cross-repo, or operationally risky.
 
 ## Workflow
 
-1. Decide whether the task is a real contract change or only an app-side bug.
-2. If the task implies a new backend capability for the frontend, check whether the local OpenAPI endpoint is available at `http://127.0.0.1:3003/openapi.json`.
-3. If the endpoint is unavailable, try to start the backend only when the startup command is already known from the current repo or task context. Otherwise, ask the user to start the API.
-4. If the backend schema changed, run `npm run generate:api-types`.
-5. Review the generated diff before editing app code.
-6. Update only the app code that actually depends on the changed contract.
-7. If a local API is available and compatibility matters, run `npm run check:api-types`.
-8. Run `npm run verify` after meaningful app-code changes.
+### 1. Find the source of truth
 
-## Guardrails
+Determine which artifact defines the contract:
 
-- Treat generated OpenAPI types as the contract source of truth. Do not hand-edit generated files.
-- Keep changes narrow to the current backend behavior. Do not add speculative fallback branches for hypothetical future schema states.
-- Keep API keys out of logs, screenshots, query keys, and test output.
-- If `generate:api-types` or `check:api-types` cannot run because the local API is unavailable, say so explicitly.
-- Update user-behavior tests in the same task when contract changes affect rendered behavior.
-- Update docs when setup, public behavior, or contract-driven workflows changed.
+- OpenAPI document
+- schema definitions
+- shared DTO package
+- route-level contract builders
+
+If the repo has both generated files and handwritten types, prefer the upstream source and treat generated output as disposable.
+
+### 2. Map the consumers
+
+Identify all consumers that depend on the contract:
+
+- web frontend
+- mobile app
+- other backend services
+- tests, fixtures, mocks, or fake servers
+- generated types or SDKs
+
+Read [references/contract-change-checklist.md](./references/contract-change-checklist.md) when the change is cross-repo or potentially breaking.
+
+### 3. Change the contract at the source
+
+Update the source-of-truth contract first.
+
+Typical changes:
+
+- add or remove fields
+- change nullability or optionality
+- change enum values
+- add or remove query or path params
+- split or rename endpoints
+- tighten validation rules
+
+Prefer the smallest contract change that solves the actual product need.
+
+### 4. Regenerate and reconcile consumers
+
+After the source changes:
+
+- regenerate typed clients or types
+- update consuming code
+- fix mocks, fixtures, and tests that model the contract
+- remove outdated assumptions and compatibility shims that are no longer needed
+
+Do not keep drift alive by patching consumer-side handwritten types to imitate the new contract temporarily.
+
+### 5. Verify both compile-time and runtime agreement
+
+Check both:
+
+- compile-time agreement: generated types, app builds, typecheck
+- runtime agreement: real route responses, integration tests, behavior tests, or schema validation
+
+Type generation passing is not enough if the actual response shape is still wrong.
+
+### 6. Handle breaking changes explicitly
+
+When a change is breaking:
+
+- name it clearly
+- update all in-repo consumers in the same batch when possible
+- document migration assumptions briefly if external consumers may exist
+- avoid silent partial compatibility unless the project truly needs a migration window
+
+### 7. Close drift immediately
+
+Before finishing:
+
+- remove dead fields and deprecated consumer logic that no longer matches the contract
+- update fixtures and mocks to the real shape
+- make sure future generation checks will catch drift again
+
+## Anti-Patterns
+
+- Editing generated files directly
+- Changing frontend types without updating the backend contract
+- Shipping a contract change without updating fixtures or mocks
+- Treating typecheck success as proof of runtime correctness
+- Keeping compatibility branches "just in case" without a real migration plan
+- Letting additive and breaking changes blend together without calling out the risk
+
+## Expected Behavior When This Skill Is Used
+
+When applying this skill to a task:
+
+1. Identify the contract source of truth.
+2. Change the contract there first.
+3. Regenerate or refresh dependent artifacts.
+4. Update all affected consumers.
+5. Verify both runtime and type-level agreement.
+6. Report any remaining compatibility risk briefly.

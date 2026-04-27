@@ -1,4 +1,5 @@
 import type { TextStyle, ViewStyle } from "react-native";
+import type { EdgeInsets } from "react-native-safe-area-context";
 
 import { colors, radius } from "./colors";
 import { spacing } from "./spacing";
@@ -15,6 +16,13 @@ export const screenStyles = {
     backgroundColor: colors.background,
   },
 } satisfies Record<string, ViewStyle>;
+
+export const getSafeAreaPaddingStyle = (insets: EdgeInsets): ViewStyle => ({
+  paddingBottom: insets.bottom,
+  paddingLeft: insets.left,
+  paddingRight: insets.right,
+  paddingTop: insets.top,
+});
 
 export const cardFrameStyle = {
   borderCurve: "continuous",

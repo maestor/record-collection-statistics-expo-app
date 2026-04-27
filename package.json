@@ -6,9 +6,10 @@
   "scripts": {
     "env:pull:development": "npx eas-cli@latest env:pull --environment development --non-interactive",
     "start": "npm run env:pull:development && expo start",
+    "ios": "npm run env:pull:development && expo start --ios",
     "android": "npm run env:pull:development && expo start --android",
     "android:dev-client": "npm run env:pull:development && expo start --dev-client --android",
-    "preview-app": "npx eas-cli@latest build -p android --profile preview",
+    "preview-app": "npx eas-cli@latest build -p android --profile preview --wait --non-interactive",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "jest --coverage --watchman=false --runInBand",

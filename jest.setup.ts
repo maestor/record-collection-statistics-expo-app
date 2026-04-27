@@ -60,6 +60,21 @@ jest.mock("react-native-gesture-handler", () => {
   };
 });
 
+jest.mock("react-native-safe-area-context", () => {
+  const React = require("react");
+
+  return {
+    SafeAreaProvider: ({ children }: React.PropsWithChildren) =>
+      React.createElement(React.Fragment, null, children),
+    useSafeAreaInsets: jest.fn(() => ({
+      bottom: 13,
+      left: 0,
+      right: 0,
+      top: 11,
+    })),
+  };
+});
+
 jest.mock("react-native-gifted-charts", () => {
   const React = require("react");
   const { View } = require("react-native");

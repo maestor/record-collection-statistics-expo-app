@@ -1,7 +1,7 @@
 import * as React from "react";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { useRouter } from "expo-router";
-import { Keyboard } from "react-native";
+import { Keyboard, Modal, StyleSheet } from "react-native";
 
 import { RecordsScreen } from "@/features/records/records-screen";
 import { colors } from "@/theme/colors";
@@ -99,7 +99,7 @@ describe("RecordsScreen", () => {
   });
 
   it("searches, filters, sorts, and loads another page", async () => {
-    renderWithProviders(<RecordsScreen />);
+    const view = renderWithProviders(<RecordsScreen />);
 
     expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
     expect(screen.getByText("Vinyl, EP, Limited edition")).toBeOnTheScreen();
@@ -141,6 +141,26 @@ describe("RecordsScreen", () => {
     expect(screen.getByText(t("records.filterArtists"))).toBeOnTheScreen();
     expect(screen.getByText(t("dimensions.added_year"))).toBeOnTheScreen();
     expect(screen.queryByText(t("records.filterCountries"))).not.toBeOnTheScreen();
+    const filterPanel = screen.getByLabelText(t("records.filterPanelLabel"));
+    const filterPanelStyle = StyleSheet.flatten(filterPanel.props.style);
+    const filterPanelOverlayStyle = StyleSheet.flatten(
+      screen.getByTestId("records-filter-sheet-overlay").props.style,
+    );
+    const filterSheetModal = view.UNSAFE_getByType(Modal);
+
+    expect(filterPanelStyle).toMatchObject({
+      flex: 1,
+      maxHeight: "100%",
+    });
+    expect(filterPanelStyle.height).toBeUndefined();
+    expect(filterPanelOverlayStyle).toMatchObject({
+      paddingBottom: 13,
+      paddingLeft: 0,
+      paddingRight: 0,
+      paddingTop: 11,
+    });
+    expect(filterSheetModal.props.navigationBarTranslucent).toBe(true);
+    expect(filterSheetModal.props.statusBarTranslucent).toBe(true);
     const recordsCallCount = () =>
       (globalThis.fetch as jest.Mock).mock.calls
         .map((call) => String(call[0]))

@@ -2,11 +2,16 @@ import {
   ANDROID_EMULATOR_API_BASE_URL,
   getFilters,
   getHealth,
+  getLocalApiBaseUrl,
+  IOS_SIMULATOR_API_BASE_URL,
   listRecords,
 } from "@/api/client";
+import { Platform } from "react-native";
 import { jsonResponse } from "../test/test-utils";
 
 describe("api client", () => {
+  const originalPlatformOs = Platform.OS;
+
   beforeEach(() => {
     jest.useRealTimers();
     globalThis.fetch = jest.fn(async () =>
@@ -19,6 +24,31 @@ describe("api client", () => {
         ok: true,
       }),
     );
+  });
+
+  afterAll(() => {
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: originalPlatformOs,
+    });
+  });
+
+  it("uses the Android emulator loopback by default on Android", () => {
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: "android",
+    });
+
+    expect(getLocalApiBaseUrl()).toBe(ANDROID_EMULATOR_API_BASE_URL);
+  });
+
+  it("uses localhost loopback by default on iOS", () => {
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: "ios",
+    });
+
+    expect(getLocalApiBaseUrl()).toBe(IOS_SIMULATOR_API_BASE_URL);
   });
 
   it("sends an API key only when configured", async () => {
@@ -271,13 +301,15 @@ describe("api client", () => {
     expect(secondHeaders.get("If-None-Match")).toBeNull();
   });
 
-  it("explains loopback network failures for Android", async () => {
+  it("explains loopback network failures for local simulator and device setups", async () => {
     globalThis.fetch = jest.fn(async () => {
       throw new TypeError("Network request failed");
     });
 
     await expect(
       getHealth({ apiKey: "", baseUrl: "http://127.0.0.1:3003" }),
-    ).rejects.toThrow(`Use ${ANDROID_EMULATOR_API_BASE_URL} for the emulator`);
+    ).rejects.toThrow(
+      `Use ${ANDROID_EMULATOR_API_BASE_URL} for the Android emulator, ${IOS_SIMULATOR_API_BASE_URL} for the iOS simulator`,
+    );
   });
 });

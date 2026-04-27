@@ -41,7 +41,9 @@ export const StatisticsDimensionSelector = ({
       />
       <Modal
         animationType="fade"
+        navigationBarTranslucent
         onRequestClose={() => setIsOpen(false)}
+        statusBarTranslucent
         transparent
         visible={isOpen}
       >

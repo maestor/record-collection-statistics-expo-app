@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { LocalizationProvider } from "@/localization/i18n";
 
@@ -55,8 +56,10 @@ export const AppProviders = ({
   );
 
   return (
-    <LocalizationProvider>
-      {queryProvider}
-    </LocalizationProvider>
+    <SafeAreaProvider>
+      <LocalizationProvider>
+        {queryProvider}
+      </LocalizationProvider>
+    </SafeAreaProvider>
   );
 };

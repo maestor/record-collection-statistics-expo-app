@@ -1,13 +1,6 @@
 import * as React from "react";
-import {
-  Keyboard,
-  Modal,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Keyboard, Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useFiltersQuery, useRecordsQuery } from "@/api/queries";
 import { getErrorMessage } from "@/api/client";
@@ -22,6 +15,7 @@ import { colors } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import {
   cardFrameStyle,
+  getSafeAreaPaddingStyle,
   screenStyles,
   sectionTitleStyle,
   wrapRowStyle,
@@ -48,18 +42,14 @@ export const RecordsScreen = () => {
   const { t } = useTranslation();
   const [draftQuery, setDraftQuery] = React.useState("");
   const [query, setQuery] = React.useState("");
-  const [pendingSearchQuery, setPendingSearchQuery] = React.useState<
-    string | null
-  >(null);
+  const [pendingSearchQuery, setPendingSearchQuery] = React.useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = React.useState(false);
   const [sort, setSort] = React.useState<SortValue>("date_added");
   const [order, setOrder] = React.useState<OrderValue>("desc");
-  const [selectedFilters, setSelectedFilters] =
-    React.useState<SelectedRecordFilters>({});
+  const [selectedFilters, setSelectedFilters] = React.useState<SelectedRecordFilters>({});
   const [draftSort, setDraftSort] = React.useState<SortValue>("date_added");
   const [draftOrder, setDraftOrder] = React.useState<OrderValue>("desc");
-  const [draftSelectedFilters, setDraftSelectedFilters] =
-    React.useState<SelectedRecordFilters>({});
+  const [draftSelectedFilters, setDraftSelectedFilters] = React.useState<SelectedRecordFilters>({});
   const params = React.useMemo(
     () => buildRecordListParams(query, sort, order, selectedFilters),
     [order, query, selectedFilters, sort],
@@ -68,8 +58,7 @@ export const RecordsScreen = () => {
   const filtersQuery = useFiltersQuery(10, filtersOpen);
   const records = recordsQuery.data?.pages.flatMap((page) => page.data) ?? [];
   const firstPage = recordsQuery.data?.pages[0];
-  const activeFilterCount =
-    Object.values(selectedFilters).filter(Boolean).length + (query ? 1 : 0);
+  const activeFilterCount = Object.values(selectedFilters).filter(Boolean).length + (query ? 1 : 0);
   const hasDraftFilterChanges = haveDraftFiltersChanged(
     sort,
     draftSort,
@@ -86,10 +75,7 @@ export const RecordsScreen = () => {
       return;
     }
 
-    if (
-      normalizedDraftQuery.length !== 0 &&
-      normalizedDraftQuery.length < AUTO_SEARCH_MIN_LENGTH
-    ) {
+    if (normalizedDraftQuery.length !== 0 && normalizedDraftQuery.length < AUTO_SEARCH_MIN_LENGTH) {
       return;
     }
 
@@ -102,11 +88,7 @@ export const RecordsScreen = () => {
   }, [draftQuery, query]);
 
   React.useEffect(() => {
-    if (
-      pendingSearchQuery === query &&
-      recordsQuery.isSuccess &&
-      !recordsQuery.isFetching
-    ) {
+    if (pendingSearchQuery === query && recordsQuery.isSuccess && !recordsQuery.isFetching) {
       Keyboard.dismiss();
       setPendingSearchQuery(null);
     }
@@ -198,8 +180,7 @@ export const RecordsScreen = () => {
                 flexDirection: "row",
                 minHeight: 52,
                 paddingLeft: spacing.md,
-                paddingRight:
-                  draftQuery.length > 0 ? spacing.sm : spacing.md,
+                paddingRight: draftQuery.length > 0 ? spacing.sm : spacing.md,
               },
             ]}
           >
@@ -298,14 +279,9 @@ export const RecordsScreen = () => {
         >
           <View style={{ gap: spacing.md }}>
             {records.length === 0 ? (
-              <StatusMessage
-                message={t("records.emptyMessage")}
-                title={t("records.emptyTitle")}
-              />
+              <StatusMessage message={t("records.emptyMessage")} title={t("records.emptyTitle")} />
             ) : (
-              records.map((record) => (
-                <RecordCard key={record.releaseId} record={record} />
-              ))
+              records.map((record) => <RecordCard key={record.releaseId} record={record} />)
             )}
           </View>
           {recordsQuery.hasNextPage && (
@@ -356,29 +332,34 @@ const FilterSheet = ({
   setDraftSort,
 }: FilterSheetProps) => {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
 
   return (
     <Modal
       animationType="fade"
+      navigationBarTranslucent
       onRequestClose={closeFilters}
+      statusBarTranslucent
       transparent
       visible={isOpen}
     >
       <View
-        style={{
-          backgroundColor: "rgba(3, 31, 52, 0.72)",
-          flex: 1,
-          justifyContent: "center",
-          padding: spacing.lg,
-          paddingVertical: spacing.xl,
-        }}
+        testID="records-filter-sheet-overlay"
+        style={[
+          {
+            backgroundColor: "rgba(3, 31, 52, 0.72)",
+            flex: 1,
+            justifyContent: "center",
+          },
+          getSafeAreaPaddingStyle(insets),
+        ]}
       >
         <Panel
           accessibilityLabel={t("records.filterPanelLabel")}
           backgroundColor={colors.surface}
           borderColor={colors.border}
           cornerRadius="lg"
-          style={{ height: "100%", padding: spacing.lg }}
+          style={{ flex: 1, maxHeight: "100%", padding: spacing.lg }}
         >
           <View
             style={{
@@ -388,14 +369,10 @@ const FilterSheet = ({
               justifyContent: "space-between",
             }}
           >
-            <Text style={[sectionTitleStyle, { flex: 1 }]}>
-              {t("records.filtersButton")}
-            </Text>
+            <Text style={[sectionTitleStyle, { flex: 1 }]}>{t("records.filtersButton")}</Text>
             <Button
               label={
-                hasDraftFilterChanges
-                  ? t("records.confirmFilters")
-                  : t("records.closeFilters")
+                hasDraftFilterChanges ? t("records.confirmFilters") : t("records.closeFilters")
               }
               onPress={closeFilters}
               variant={hasDraftFilterChanges ? "primary" : "secondary"}
@@ -482,10 +459,7 @@ const FilterPanel = ({
       <ChipGroup
         label={t("records.order")}
         options={orderOptions.map((value) => ({
-          label:
-            value === "desc"
-              ? t("records.orderDescending")
-              : t("records.orderAscending"),
+          label: value === "desc" ? t("records.orderDescending") : t("records.orderAscending"),
           value,
         }))}
         selected={order}

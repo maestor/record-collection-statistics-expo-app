@@ -250,7 +250,7 @@ describe("StatisticsScreen", () => {
   });
 
   it("opens and closes the statistic selector from the active one-line trigger", async () => {
-    renderWithProviders(<StatisticsScreen />);
+    const view = renderWithProviders(<StatisticsScreen />);
 
     expect(await screen.findByText("Klamydia")).toBeOnTheScreen();
 
@@ -267,6 +267,8 @@ describe("StatisticsScreen", () => {
         .props.accessibilityState,
     ).toEqual({ selected: true });
     expect(screen.getByText(t("statistics.selectedDimension"))).toBeOnTheScreen();
+    expect(view.UNSAFE_getByType(Modal).props.navigationBarTranslucent).toBe(true);
+    expect(view.UNSAFE_getByType(Modal).props.statusBarTranslucent).toBe(true);
 
     fireEvent.press(
       screen.getByRole("button", { name: t("statistics.closeSelector") }),

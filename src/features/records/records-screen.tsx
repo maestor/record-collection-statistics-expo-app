@@ -359,7 +359,7 @@ const FilterSheet = ({
           backgroundColor={colors.surface}
           borderColor={colors.border}
           cornerRadius="lg"
-          style={{ flex: 1, maxHeight: "100%", padding: spacing.lg }}
+          style={{ flex: 1, maxHeight: "100%", padding: spacing.lg, marginHorizontal: spacing.lg }}
         >
           <View
             style={{

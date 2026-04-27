@@ -30,6 +30,12 @@ Use Expo Go first:
 npm start
 ```
 
+Open the iOS simulator in Expo Go:
+
+```bash
+npm run ios
+```
+
 App branding assets live in `assets/`:
 
 - `icon.png`: primary app icon for Expo/iOS and the base Android launcher icon.
@@ -49,7 +55,7 @@ Create an installable Android preview build when you want to run the app on your
 npm run preview-app
 ```
 
-This uses the `preview` EAS profile to create an internal-distribution Android APK. When the build finishes, Expo provides an install link and QR code you can open on your phone.
+This uses the `preview` EAS profile to create an internal-distribution Android APK. The command waits for the build to finish but skips the local emulator-install prompt. Expo still provides an install link and QR code you can open on your phone.
 
 The app reads API connection values from Expo config:
 
@@ -64,9 +70,9 @@ npx eas-cli@latest env:pull --environment development
 
 Set `API_KEY` with `sensitive` or `plain text` visibility in Expo. Do not use `secret` visibility for values the app must embed, because secret variables are intended for EAS jobs and are not available to client-side app code.
 
-If `API_URL` is not set, the app uses the Android emulator default `http://10.0.2.2:3003`. Physical Android devices should set `API_URL` to the Vercel API or a local-network URL such as `http://<computer-lan-ip>:3003`.
+If `API_URL` is not set, the app uses `http://10.0.2.2:3003` on the Android emulator and `http://127.0.0.1:3003` on the iOS simulator. Physical devices should set `API_URL` to the Vercel API or a local-network URL such as `http://<computer-lan-ip>:3003`.
 
-For a physical Android device, the API must be reachable from the phone over the local network. If the backend only listens on `127.0.0.1`, restart it so it also listens on the LAN interface.
+For a physical device, the API must be reachable from the phone over the local network. If the backend only listens on `127.0.0.1`, restart it so it also listens on the LAN interface.
 
 The read API key is embedded in the app bundle. Treat it as a client-visible gate key, not a private server secret.
 

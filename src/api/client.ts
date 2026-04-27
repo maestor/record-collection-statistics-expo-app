@@ -10,8 +10,10 @@ import type {
   RecordsResponse,
 } from "./types";
 import Constants from "expo-constants";
+import { Platform } from "react-native";
 
 export const ANDROID_EMULATOR_API_BASE_URL = "http://10.0.2.2:3003";
+export const IOS_SIMULATOR_API_BASE_URL = "http://127.0.0.1:3003";
 
 type AppExtra = {
   recordCollectionApiKey?: string;
@@ -20,10 +22,15 @@ type AppExtra = {
 
 const appExtra = Constants.expoConfig!.extra as AppExtra;
 
+export const getLocalApiBaseUrl = (): string =>
+  Platform.OS === "android"
+    ? ANDROID_EMULATOR_API_BASE_URL
+    : IOS_SIMULATOR_API_BASE_URL;
+
 const getDefaultApiBaseUrl = (): string =>
   process.env.EXPO_PUBLIC_API_URL?.trim() ||
   appExtra.recordCollectionApiUrl?.trim() ||
-  ANDROID_EMULATOR_API_BASE_URL;
+  getLocalApiBaseUrl();
 
 export const DEFAULT_API_BASE_URL = getDefaultApiBaseUrl();
 export const DEFAULT_API_KEY =
@@ -122,7 +129,7 @@ const buildUrl = (
 const getNetworkErrorMessage = (config: ApiConfig): string => {
   const baseUrl = normalizeBaseUrl(config.baseUrl);
 
-  return `Network request failed for ${baseUrl}. On Android, localhost points to the device. Use ${ANDROID_EMULATOR_API_BASE_URL} for the emulator, or http://<computer-lan-ip>:3003 for a physical phone.`;
+  return `Network request failed for ${baseUrl}. Use ${ANDROID_EMULATOR_API_BASE_URL} for the Android emulator, ${IOS_SIMULATOR_API_BASE_URL} for the iOS simulator, or http://<computer-lan-ip>:3003 for a physical phone.`;
 };
 
 const readError = async (response: Response): Promise<string> => {

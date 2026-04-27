@@ -14,15 +14,17 @@ React Native and Expo app for browsing a personal Discogs-backed record collecti
 ## Requirements
 - Node.js and npm.
 - Expo Go for the fastest local development loop.
+- Xcode and iOS Simulator when you want to run `npm run ios`.
 - Record Collection Statistics API running locally for live data and API type generation.
 
-Set `API_URL` and `API_KEY` in the Expo project environments for EAS builds and updates. Use `sensitive` or `plain text` visibility for the key so app config can embed it. Without `API_URL`, the app falls back to the Android emulator API URL `http://10.0.2.2:3003`.
+Set `API_URL` and `API_KEY` in the Expo project environments for EAS builds and updates. Use `sensitive` or `plain text` visibility for the key so app config can embed it. Without `API_URL`, the app falls back to `http://10.0.2.2:3003` on the Android emulator and `http://127.0.0.1:3003` on the iOS simulator.
 
 ## Commands
 ```bash
 npm install
 npm run generate:api-types
 npm start
+npm run ios
 npm run verify
 ```
 

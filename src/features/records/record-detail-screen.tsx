@@ -8,7 +8,7 @@ import {
   useRandomRecordDetailQuery,
   useRecordDetailQuery,
 } from "@/api/queries";
-import type { RecordDetailResponse } from "@/api/types";
+import type { RandomRecordParams, RecordDetailResponse } from "@/api/types";
 import { FieldRow } from "@/components/field-row";
 import { Panel } from "@/components/panel";
 import { Section } from "@/components/section";
@@ -235,8 +235,12 @@ export const RecordDetailScreen = ({ releaseId }: RecordDetailScreenProps) => {
   );
 };
 
-export const RandomRecordDetailScreen = () => {
-  const query = useRandomRecordDetailQuery();
+type RandomRecordDetailScreenProps = {
+  params?: RandomRecordParams;
+};
+
+export const RandomRecordDetailScreen = ({ params }: RandomRecordDetailScreenProps) => {
+  const query = useRandomRecordDetailQuery(params);
   const refresh = React.useCallback(() => {
     void query.refetch();
   }, [query]);

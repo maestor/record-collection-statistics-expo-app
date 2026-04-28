@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Keyboard, Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Link } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useFiltersQuery, useRecordsQuery } from "@/api/queries";
@@ -24,6 +25,7 @@ import { formatCount } from "@/utils/format";
 import { RecordCard } from "./record-card";
 import {
   buildRecordListParams,
+  buildRandomRecordParams,
   haveDraftFiltersChanged,
   labelForSort,
   normalizeSearchQuery,
@@ -54,6 +56,7 @@ export const RecordsScreen = () => {
     () => buildRecordListParams(query, sort, order, selectedFilters),
     [order, query, selectedFilters, sort],
   );
+  const randomRecordParams = React.useMemo(() => buildRandomRecordParams(params), [params]);
   const recordsQuery = useRecordsQuery(params);
   const filtersQuery = useFiltersQuery(10, filtersOpen);
   const records = recordsQuery.data?.pages.flatMap((page) => page.data) ?? [];
@@ -235,6 +238,16 @@ export const RecordsScreen = () => {
             onPress={openFilters}
             style={{ width: "100%" }}
           />
+          <Link
+            href={{ pathname: "/random-record", params: randomRecordParams }}
+            asChild
+          >
+            <Button
+              accessibilityLabel={t("records.randomRecordButton")}
+              label={t("records.randomRecordButton")}
+              variant="secondary"
+            />
+          </Link>
         </View>
       </Section>
 

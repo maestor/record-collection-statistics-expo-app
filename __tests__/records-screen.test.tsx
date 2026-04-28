@@ -200,6 +200,18 @@ describe("RecordsScreen", () => {
       expect(urls.some((url) => url.includes("order=asc"))).toBe(true);
     });
 
+    expect(
+      screen.getByRole("button", { name: t("records.randomRecordButton") }).props.href,
+    ).toEqual({
+      params: {
+        added_from: "2026-01-01T00:00:00.000Z",
+        added_to: "2026-12-31T23:59:59.999Z",
+        format: "Vinyl",
+        q: "Muse",
+      },
+      pathname: "/random-record",
+    });
+
     fireEvent.press(
       screen.getByRole("button", { name: t("records.loadMore") }),
     );
@@ -256,6 +268,19 @@ describe("RecordsScreen", () => {
       expect(urls.some((url) => url.includes("format=Vinyl"))).toBe(false);
       expect(urls.some((url) => url.includes("sort=artist"))).toBe(true);
       expect(urls.some((url) => url.includes("order=asc"))).toBe(true);
+    });
+
+    expect(
+      screen.getByRole("button", { name: t("records.randomRecordButton") }).props.href,
+    ).toEqual({
+      params: {
+        added_from: "2026-01-01T00:00:00.000Z",
+        added_to: "2026-12-31T23:59:59.999Z",
+        artist: "Muse",
+        genre: "Rock",
+        q: "Muse",
+      },
+      pathname: "/random-record",
     });
 
     fireEvent.press(

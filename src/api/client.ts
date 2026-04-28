@@ -7,6 +7,7 @@ import type {
   Health,
   RecordDetailResponse,
   RecordListParams,
+  RandomRecordParams,
   RecordsResponse,
 } from "./types";
 import Constants from "expo-constants";
@@ -281,9 +282,10 @@ export const getRecordDetail = (
 
 export const getRandomRecord = (
   config: ApiConfig,
+  params: RandomRecordParams = {},
   signal?: AbortSignal,
 ): Promise<RecordDetailResponse> =>
-  requestJson<RecordDetailResponse>(config, "/records/random", undefined, {
+  requestJson<RecordDetailResponse>(config, "/records/random", params as QueryParams, {
     signal,
   });
 

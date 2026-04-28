@@ -126,9 +126,21 @@ describe("api client", () => {
 
   it("requests a random record detail from the dedicated endpoint", async () => {
     await getRandomRecord({ apiKey: "", baseUrl: "http://example.test" });
+    await getRandomRecord(
+      { apiKey: "", baseUrl: "http://example.test" },
+      { format: "Vinyl", q: "Muse" },
+    );
 
-    expect(globalThis.fetch).toHaveBeenCalledWith(
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      1,
       "http://example.test/records/random",
+      expect.objectContaining({
+        headers: expect.any(Headers),
+      }),
+    );
+    expect(globalThis.fetch).toHaveBeenNthCalledWith(
+      2,
+      "http://example.test/records/random?format=Vinyl&q=Muse",
       expect.objectContaining({
         headers: expect.any(Headers),
       }),

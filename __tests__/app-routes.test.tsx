@@ -324,12 +324,24 @@ describe("Expo Router routes", () => {
   });
 
   it("renders the random record route through the shared detail screen", async () => {
+    (useLocalSearchParams as jest.Mock).mockReturnValue({
+      added_from: "2026-01-01T00:00:00.000Z",
+      added_to: "2026-12-31T23:59:59.999Z",
+      format: "Vinyl",
+      q: "Muse",
+    });
+
     renderWithProviders(<RandomRecordRoute />);
 
     expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
-    expect((globalThis.fetch as jest.Mock).mock.calls.some((call) => String(call[0]).includes("/records/random"))).toBe(
-      true,
-    );
+    const randomUrl = (globalThis.fetch as jest.Mock).mock.calls
+      .map((call) => String(call[0]))
+      .find((url) => url.includes("/records/random"));
+
+    expect(randomUrl).toContain("q=Muse");
+    expect(randomUrl).toContain("format=Vinyl");
+    expect(randomUrl).toContain("added_from=2026-01-01T00%3A00%3A00.000Z");
+    expect(randomUrl).toContain("added_to=2026-12-31T23%3A59%3A59.999Z");
   });
 
   it("renders the record detail invalid id state from route params", async () => {

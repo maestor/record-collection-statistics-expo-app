@@ -7,6 +7,7 @@ import {
   getHealth,
   getApiConfig,
   getRecordDetail,
+  getRandomRecord,
   listRecords,
 } from "./client";
 import type {
@@ -109,6 +110,19 @@ export const useRecordDetailQuery = (releaseId: number) => {
     queryFn: ({ signal }) => getRecordDetail(config, releaseId, signal),
     queryKey: ["record-detail", ...queryScope, releaseId],
     staleTime: DETAIL_STALE_TIME,
+  });
+};
+
+export const useRandomRecordDetailQuery = () => {
+  const { config, enabled, queryScope } = useApiQueryBase();
+
+  return useQuery({
+    gcTime: 0,
+    enabled,
+    queryFn: ({ signal }) => getRandomRecord(config, signal),
+    queryKey: ["random-record-detail", ...queryScope],
+    refetchOnMount: "always",
+    staleTime: 0,
   });
 };
 

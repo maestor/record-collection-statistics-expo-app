@@ -3,6 +3,7 @@ import { fireEvent, screen, waitFor } from "@testing-library/react-native";
 
 import * as apiQueries from "@/api/queries";
 import { DashboardScreen } from "@/features/dashboard/dashboard-screen";
+import { colors } from "@/theme/colors";
 import { jsonResponse, renderWithProviders, t } from "../test/test-utils";
 
 const dashboardPayload = {
@@ -57,11 +58,15 @@ describe("DashboardScreen", () => {
 
     expect(screen.getByText(t("dashboard.loadingTitle"))).toBeOnTheScreen();
     expect(screen.getByText(t("dashboard.loadingMessage"))).toBeOnTheScreen();
-    expect(screen.queryByRole("button", { name: t("dashboard.statisticsButton") })).not.toBeOnTheScreen();
+    expect(
+      screen.queryByRole("button", { name: t("dashboard.statisticsButton") }),
+    ).not.toBeOnTheScreen();
 
     resolveDashboardResponse?.(jsonResponse(dashboardPayload));
 
-    expect(await screen.findByRole("button", { name: t("dashboard.statisticsButton") })).toBeOnTheScreen();
+    expect(
+      await screen.findByRole("button", { name: t("dashboard.statisticsButton") }),
+    ).toBeOnTheScreen();
   });
 
   it("keeps the loading state when the query has not restored data yet", () => {
@@ -83,7 +88,9 @@ describe("DashboardScreen", () => {
   it("renders dashboard overview actions with the updated summary cards", async () => {
     renderWithProviders(<DashboardScreen />);
 
-    expect(await screen.findByRole("button", { name: t("dashboard.statisticsButton") })).toBeOnTheScreen();
+    expect(
+      await screen.findByRole("button", { name: t("dashboard.statisticsButton") }),
+    ).toBeOnTheScreen();
     expect(screen.getByText("2 345")).toBeOnTheScreen();
     expect(screen.getByText("59 €")).toBeOnTheScreen();
     expect(screen.getByText("405")).toBeOnTheScreen();
@@ -95,49 +102,68 @@ describe("DashboardScreen", () => {
 
     const statisticsButton = screen.getByRole("button", { name: t("dashboard.statisticsButton") });
     expect(statisticsButton.props.href).toBe("/statistics");
+    expect(statisticsButton).toHaveStyle({
+      backgroundColor: colors.surfaceMuted,
+      borderColor: colors.border,
+    });
 
     const browseButton = screen.getByRole("button", { name: t("dashboard.browseRecords") });
     expect(browseButton.props.href).toBe("/records");
+    expect(browseButton).toHaveStyle({
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
+    });
 
-    expect((globalThis.fetch as jest.Mock).mock.calls[0]?.[0]).toContain("/stats/dashboard?limit=8");
+    const randomRecordButton = screen.getByRole("button", {
+      name: t("dashboard.randomRecordButton"),
+    });
+    expect(randomRecordButton.props.href).toBe("/random-record");
+    expect(randomRecordButton).toHaveStyle({
+      backgroundColor: colors.surfaceMuted,
+      borderColor: colors.border,
+    });
+
+    expect((globalThis.fetch as jest.Mock).mock.calls[0]?.[0]).toContain(
+      "/stats/dashboard?limit=8",
+    );
   });
 
   it("omits top breakdown rows when statistic sources are empty", async () => {
-    globalThis.fetch = jest.fn(
-      async () =>
-        jsonResponse({
-          ...dashboardPayload,
-          data: {
-            ...dashboardPayload.data,
-            formats: [],
-            topArtists: [],
-          },
-        }),
+    globalThis.fetch = jest.fn(async () =>
+      jsonResponse({
+        ...dashboardPayload,
+        data: {
+          ...dashboardPayload.data,
+          formats: [],
+          topArtists: [],
+        },
+      }),
     );
 
     renderWithProviders(<DashboardScreen />);
 
-    expect(await screen.findByRole("button", { name: t("dashboard.statisticsButton") })).toBeOnTheScreen();
+    expect(
+      await screen.findByRole("button", { name: t("dashboard.statisticsButton") }),
+    ).toBeOnTheScreen();
     expect(screen.queryByText("Eniten artistilta: Klamydia")).not.toBeOnTheScreen();
     expect(screen.queryByText("Eniten formaattia: CD")).not.toBeOnTheScreen();
   });
 
   it("renders an unknown median value when collection value data is missing", async () => {
-    globalThis.fetch = jest.fn(
-      async () =>
-        jsonResponse({
-          ...dashboardPayload,
-          data: {
-            ...dashboardPayload.data,
-            summary: {
-              ...dashboardPayload.data.summary,
-              collectionValue: {
-                ...dashboardPayload.data.summary.collectionValue,
-                median: null,
-              },
+    globalThis.fetch = jest.fn(async () =>
+      jsonResponse({
+        ...dashboardPayload,
+        data: {
+          ...dashboardPayload.data,
+          summary: {
+            ...dashboardPayload.data.summary,
+            collectionValue: {
+              ...dashboardPayload.data.summary.collectionValue,
+              median: null,
             },
           },
-        }),
+        },
+      }),
     );
 
     renderWithProviders(<DashboardScreen />);

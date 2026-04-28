@@ -22,6 +22,13 @@ npm run check:api-types
 
 Detailed agent workflow for contract-sync tasks lives in `.agents/skills/api-contract-sync/SKILL.md`.
 
+If the user says the API now has a new endpoint, parameter, field, or behavior and the local API is available, treat that as a contract-sync task immediately:
+
+- refresh the OpenAPI source of truth from the running API
+- regenerate the committed types before updating consumers
+- run `npm run check:api-types` to catch drift
+- stop and surface the blocker if the contract cannot be refreshed or verified
+
 ## Start The App
 
 Use Expo Go first:
@@ -85,6 +92,7 @@ Use the scripts documented in [Versioning](versioning.md). Detailed agent workfl
 The app keeps TanStack Query data in local storage for up to 24 hours so repeated launches do not immediately reread stable API endpoints.
 
 - Dashboard, breakdowns, record details, and filter catalogs reuse cached data until their query-specific stale windows expire.
+- The random record screen always refetches a fresh random release on mount or pull-to-refresh instead of reusing persisted detail cache data.
 - The records screen loads filter values only when the filter sheet is opened.
 - Pull-to-refresh and retry actions still force a fresh request when the user asks for one.
 
@@ -95,6 +103,7 @@ Before verification, review the task diff for unused implementation:
 - Remove helpers, fallback branches, optional inputs, and defensive checks that no current user path reaches.
 - Keep parameter types as narrow as the current call sites allow.
 - Make sure every behavior added by the task has user-behavior test coverage. If that cannot be done, stop and decide the exception separately.
+- If the task depends on new API behavior and the API is available locally, refresh and verify the contract before treating the frontend work as complete.
 - Prefer `const` arrow functions over function declarations. ESLint enforces this with `func-style`.
 - In Expo UI code, inline styles are fine for one-off layout. Extract only repeated visual recipes into shared theme styles such as screen containers, card frames, wrap rows, or filter chips.
 - Promote a repeated UI pattern to a shared component only when it carries styling plus behavior, interaction state, or accessibility semantics. Keep purely visual reuse in shared style objects.

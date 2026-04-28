@@ -1,9 +1,14 @@
 import * as React from "react";
-import { ScrollView, Text, View } from "react-native";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
+import type { UseQueryResult } from "@tanstack/react-query";
 import { Image } from "expo-image";
 
-import { useRecordDetailQuery } from "@/api/queries";
 import { getErrorMessage } from "@/api/client";
+import {
+  useRandomRecordDetailQuery,
+  useRecordDetailQuery,
+} from "@/api/queries";
+import type { RecordDetailResponse } from "@/api/types";
 import { FieldRow } from "@/components/field-row";
 import { Panel } from "@/components/panel";
 import { Section } from "@/components/section";
@@ -24,13 +29,27 @@ type RecordDetailScreenProps = {
   releaseId: number;
 };
 
-export const RecordDetailScreen = ({ releaseId }: RecordDetailScreenProps) => {
-  const { t } = useTranslation();
-  const query = useRecordDetailQuery(releaseId);
+type RecordDetailContentProps = {
+  isRefreshing?: boolean;
+  invalidReleaseId?: boolean;
+  onRefresh?: (() => void) | undefined;
+  query: UseQueryResult<RecordDetailResponse, Error>;
+};
 
-  if (!Number.isFinite(releaseId)) {
+const RecordDetailContent = ({
+  isRefreshing = false,
+  invalidReleaseId = false,
+  onRefresh,
+  query,
+}: RecordDetailContentProps) => {
+  const { t } = useTranslation();
+  const refreshControl = onRefresh ? (
+    <RefreshControl onRefresh={onRefresh} refreshing={isRefreshing} />
+  ) : undefined;
+
+  if (invalidReleaseId) {
     return (
-      <ScrollView contentContainerStyle={screenStyles.paddedContent}>
+      <ScrollView contentContainerStyle={screenStyles.paddedContent} refreshControl={refreshControl}>
         <StatusMessage
           message={t("recordDetail.invalidMessage")}
           title={t("recordDetail.invalidTitle")}
@@ -42,7 +61,7 @@ export const RecordDetailScreen = ({ releaseId }: RecordDetailScreenProps) => {
 
   if (query.isLoading) {
     return (
-      <ScrollView contentContainerStyle={screenStyles.paddedContent}>
+      <ScrollView contentContainerStyle={screenStyles.paddedContent} refreshControl={refreshControl}>
         <StatusMessage
           message={t("recordDetail.loadingMessage")}
           title={t("recordDetail.loadingTitle")}
@@ -54,7 +73,7 @@ export const RecordDetailScreen = ({ releaseId }: RecordDetailScreenProps) => {
 
   if (query.isError) {
     return (
-      <ScrollView contentContainerStyle={screenStyles.paddedContent}>
+      <ScrollView contentContainerStyle={screenStyles.paddedContent} refreshControl={refreshControl}>
         <StatusMessage
           actionLabel={t("common.tryAgain")}
           message={getErrorMessage(query.error)}
@@ -68,7 +87,7 @@ export const RecordDetailScreen = ({ releaseId }: RecordDetailScreenProps) => {
 
   if (!query.data) {
     return (
-      <ScrollView contentContainerStyle={screenStyles.paddedContent}>
+      <ScrollView contentContainerStyle={screenStyles.paddedContent} refreshControl={refreshControl}>
         <StatusMessage
           message={t("recordDetail.loadingMessage")}
           title={t("recordDetail.loadingTitle")}
@@ -83,6 +102,7 @@ export const RecordDetailScreen = ({ releaseId }: RecordDetailScreenProps) => {
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
+      refreshControl={refreshControl}
       style={screenStyles.scrollView}
       contentContainerStyle={screenStyles.content}
     >
@@ -201,5 +221,31 @@ export const RecordDetailScreen = ({ releaseId }: RecordDetailScreenProps) => {
         </Section>
       )}
     </ScrollView>
+  );
+};
+
+export const RecordDetailScreen = ({ releaseId }: RecordDetailScreenProps) => {
+  const query = useRecordDetailQuery(releaseId);
+
+  return (
+    <RecordDetailContent
+      invalidReleaseId={!Number.isFinite(releaseId)}
+      query={query}
+    />
+  );
+};
+
+export const RandomRecordDetailScreen = () => {
+  const query = useRandomRecordDetailQuery();
+  const refresh = React.useCallback(() => {
+    void query.refetch();
+  }, [query]);
+
+  return (
+    <RecordDetailContent
+      isRefreshing={query.isFetching && !query.isLoading}
+      onRefresh={refresh}
+      query={query}
+    />
   );
 };

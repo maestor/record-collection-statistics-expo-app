@@ -5,6 +5,7 @@
 Expo Router owns navigation:
 
 - `/` dashboard
+- `/random-record` random record detail
 - `/statistics` collection statistics
 - `/records` catalog
 - `/records/[releaseId]` detail

@@ -3,6 +3,7 @@ import {
   getFilters,
   getHealth,
   getLocalApiBaseUrl,
+  getRandomRecord,
   IOS_SIMULATOR_API_BASE_URL,
   listRecords,
 } from "@/api/client";
@@ -121,6 +122,17 @@ describe("api client", () => {
     const url = String((globalThis.fetch as jest.Mock).mock.calls[0][0]);
     expect(url).toContain("limit=10");
     expect(url).toContain("dimensions=artist%2Cformat%2Cgenre%2Cadded_year");
+  });
+
+  it("requests a random record detail from the dedicated endpoint", async () => {
+    await getRandomRecord({ apiKey: "", baseUrl: "http://example.test" });
+
+    expect(globalThis.fetch).toHaveBeenCalledWith(
+      "http://example.test/records/random",
+      expect.objectContaining({
+        headers: expect.any(Headers),
+      }),
+    );
   });
 
   it("normalizes API errors", async () => {

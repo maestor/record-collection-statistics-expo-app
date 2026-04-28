@@ -7,6 +7,7 @@ import RootLayout from "../app/_layout";
 import TabsLayout from "../app/(tabs)/_layout";
 import DashboardStackLayout from "../app/(tabs)/(dashboard)/_layout";
 import DashboardRoute from "../app/(tabs)/(dashboard)/index";
+import RandomRecordRoute from "../app/(tabs)/(dashboard)/random-record";
 import InfoRoute from "../app/(tabs)/info";
 import RecordsStackLayout from "../app/(tabs)/records/_layout";
 import RecordsRoute from "../app/(tabs)/records/index";
@@ -237,6 +238,13 @@ describe("Expo Router routes", () => {
       }),
       undefined,
     );
+    expect(Stack.Screen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "random-record",
+        options: { title: t("navigation.randomRecord") },
+      }),
+      undefined,
+    );
   });
 
   it("registers the statistics stack screens inside the statistics tab", () => {
@@ -311,6 +319,15 @@ describe("Expo Router routes", () => {
 
     expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
     expect((globalThis.fetch as jest.Mock).mock.calls.some((call) => String(call[0]).includes("/records/37098591"))).toBe(
+      true,
+    );
+  });
+
+  it("renders the random record route through the shared detail screen", async () => {
+    renderWithProviders(<RandomRecordRoute />);
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
+    expect((globalThis.fetch as jest.Mock).mock.calls.some((call) => String(call[0]).includes("/records/random"))).toBe(
       true,
     );
   });

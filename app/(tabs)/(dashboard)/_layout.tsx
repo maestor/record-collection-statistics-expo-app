@@ -17,6 +17,10 @@ const DashboardStackLayout = () => {
         name="index"
         options={{ title: translate("navigation.dashboard") }}
       />
+      <Stack.Screen
+        name="random-record"
+        options={{ title: translate("navigation.randomRecord") }}
+      />
     </Stack>
   );
 };

@@ -17,7 +17,7 @@ type ButtonProps = Omit<PressableProps, "style"> & {
   isLoading?: boolean;
   label: string;
   style?: StyleProp<ViewStyle>;
-  variant?: ButtonVariant;
+  variant: ButtonVariant;
 };
 
 const variantStyles = {
@@ -43,7 +43,7 @@ export const Button = ({
   isLoading = false,
   label,
   style,
-  variant = "primary",
+  variant,
   ...props
 }: ButtonProps) => {
   const styles = variantStyles[variant];

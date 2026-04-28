@@ -5,7 +5,7 @@
 - Prefer strict TypeScript, user-behavior tests, and a small dependency footprint.
 - Never store or request Discogs tokens in the app. The app may store only the API base URL and optional read API key.
 - Update README or docs when behavior, setup, public interfaces, testing, or deployment flows change.
-- Treat generated OpenAPI types as the app/backend contract. Regenerate them after API schema changes.
+- Treat generated OpenAPI types as the app/backend contract. When the user says the API has a new or changed endpoint, response shape, parameter, or behavior, always treat that as an `api-contract-sync` task first, not a consumer-only change. Refresh the contract from the available API source of truth, regenerate the types, update consumers, and stop if the contract cannot be refreshed or verified.
 
 ## Implementation Expectations
 - Use Expo Router routes under `app/`; keep components, providers, API code, and utilities under `src/`.
@@ -26,8 +26,8 @@
 
 ## Quality
 - Run `npm run verify` after meaningful app changes.
-- Run `npm run generate:api-types` after backend OpenAPI changes.
-- Run `npm run check:api-types` when the local API is available and API compatibility matters.
+- Run `npm run generate:api-types` after backend OpenAPI changes and whenever the user reports new API behavior that should already exist in the running API contract.
+- Run `npm run check:api-types` whenever the local API is available for contract-sensitive work. Do not skip contract verification just because the consumer change looks small or obvious.
 - Test user-visible behavior with Testing Library. Prefer interactions and assertions over snapshots.
 - Prefer semantic React Native Testing Library matchers for rendered UI assertions, for example `toBeOnTheScreen`, `not.toBeOnTheScreen`, and `toHaveTextContent`, instead of generic `toBeTruthy` or `toBeNull` when asserting presence, absence, or content.
 - Cover loading, success, empty, error, and accessibility states for user-facing screens.

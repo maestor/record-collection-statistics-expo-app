@@ -279,6 +279,14 @@ export const getRecordDetail = (
     signal,
   });
 
+export const getRandomRecord = (
+  config: ApiConfig,
+  signal?: AbortSignal,
+): Promise<RecordDetailResponse> =>
+  requestJson<RecordDetailResponse>(config, "/records/random", undefined, {
+    signal,
+  });
+
 export const getBreakdown = (
   config: ApiConfig,
   dimension: BreakdownDimension,

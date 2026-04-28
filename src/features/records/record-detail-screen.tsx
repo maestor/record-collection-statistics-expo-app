@@ -1,9 +1,14 @@
 import * as React from "react";
 import { ScrollView, Text, View } from "react-native";
+import type { UseQueryResult } from "@tanstack/react-query";
 import { Image } from "expo-image";
 
-import { useRecordDetailQuery } from "@/api/queries";
 import { getErrorMessage } from "@/api/client";
+import {
+  useRandomRecordDetailQuery,
+  useRecordDetailQuery,
+} from "@/api/queries";
+import type { RecordDetailResponse } from "@/api/types";
 import { FieldRow } from "@/components/field-row";
 import { Panel } from "@/components/panel";
 import { Section } from "@/components/section";
@@ -24,11 +29,18 @@ type RecordDetailScreenProps = {
   releaseId: number;
 };
 
-export const RecordDetailScreen = ({ releaseId }: RecordDetailScreenProps) => {
-  const { t } = useTranslation();
-  const query = useRecordDetailQuery(releaseId);
+type RecordDetailContentProps = {
+  invalidReleaseId?: boolean;
+  query: UseQueryResult<RecordDetailResponse, Error>;
+};
 
-  if (!Number.isFinite(releaseId)) {
+const RecordDetailContent = ({
+  invalidReleaseId = false,
+  query,
+}: RecordDetailContentProps) => {
+  const { t } = useTranslation();
+
+  if (invalidReleaseId) {
     return (
       <ScrollView contentContainerStyle={screenStyles.paddedContent}>
         <StatusMessage
@@ -202,4 +214,21 @@ export const RecordDetailScreen = ({ releaseId }: RecordDetailScreenProps) => {
       )}
     </ScrollView>
   );
+};
+
+export const RecordDetailScreen = ({ releaseId }: RecordDetailScreenProps) => {
+  const query = useRecordDetailQuery(releaseId);
+
+  return (
+    <RecordDetailContent
+      invalidReleaseId={!Number.isFinite(releaseId)}
+      query={query}
+    />
+  );
+};
+
+export const RandomRecordDetailScreen = () => {
+  const query = useRandomRecordDetailQuery();
+
+  return <RecordDetailContent query={query} />;
 };

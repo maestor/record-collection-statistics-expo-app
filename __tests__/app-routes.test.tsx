@@ -11,6 +11,7 @@ import InfoRoute from "../app/(tabs)/info";
 import RecordsStackLayout from "../app/(tabs)/records/_layout";
 import RecordsRoute from "../app/(tabs)/records/index";
 import RecordDetailRoute from "../app/(tabs)/records/[releaseId]";
+import RandomRecordRoute from "../app/(tabs)/records/random";
 import StatisticsStackLayout from "../app/(tabs)/statistics/_layout";
 import StatisticsRoute from "../app/(tabs)/statistics/index";
 import BreakdownRoute from "../app/(tabs)/statistics/breakdowns/[dimension]";
@@ -275,6 +276,13 @@ describe("Expo Router routes", () => {
       }),
       undefined,
     );
+    expect(Stack.Screen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "random",
+        options: { title: t("navigation.randomRecord") },
+      }),
+      undefined,
+    );
   });
 
   it("renders the tab routes through their actual route components", async () => {
@@ -311,6 +319,15 @@ describe("Expo Router routes", () => {
 
     expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
     expect((globalThis.fetch as jest.Mock).mock.calls.some((call) => String(call[0]).includes("/records/37098591"))).toBe(
+      true,
+    );
+  });
+
+  it("renders the random record route through the shared detail screen", async () => {
+    renderWithProviders(<RandomRecordRoute />);
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
+    expect((globalThis.fetch as jest.Mock).mock.calls.some((call) => String(call[0]).includes("/records/random"))).toBe(
       true,
     );
   });

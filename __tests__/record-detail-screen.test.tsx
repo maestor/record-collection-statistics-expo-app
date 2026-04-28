@@ -2,7 +2,10 @@ import * as React from "react";
 import { fireEvent, screen } from "@testing-library/react-native";
 
 import * as apiQueries from "@/api/queries";
-import { RecordDetailScreen } from "@/features/records/record-detail-screen";
+import {
+  RandomRecordDetailScreen,
+  RecordDetailScreen,
+} from "@/features/records/record-detail-screen";
 import { jsonResponse, renderWithProviders, t } from "../test/test-utils";
 
 const recordDetail = {
@@ -198,5 +201,29 @@ describe("RecordDetailScreen", () => {
     expect(await screen.findByText("Release not found")).toBeOnTheScreen();
     fireEvent.press(screen.getByRole("button", { name: t("common.tryAgain") }));
     expect(globalThis.fetch).toHaveBeenCalled();
+  });
+});
+
+describe("RandomRecordDetailScreen", () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+    globalThis.fetch = jest.fn(async () => jsonResponse({ data: recordDetail }));
+  });
+
+  it("loads a random record through the shared detail screen", async () => {
+    renderWithProviders(<RandomRecordDetailScreen />);
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
+    expect((globalThis.fetch as jest.Mock).mock.calls[0]?.[0]).toContain("/records/random");
+  });
+
+  it("renders random record API errors with retry", async () => {
+    globalThis.fetch = jest.fn(async () => jsonResponse({ error: "Random failed" }, 503));
+
+    renderWithProviders(<RandomRecordDetailScreen />);
+
+    expect(await screen.findByText("Random failed")).toBeOnTheScreen();
+    fireEvent.press(screen.getByRole("button", { name: t("common.tryAgain") }));
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2);
   });
 });

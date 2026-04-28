@@ -86,17 +86,13 @@ export const DashboardScreen = () => {
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
-      refreshControl={
-        <RefreshControl onRefresh={refresh} refreshing={isRefreshing} />
-      }
+      refreshControl={<RefreshControl onRefresh={refresh} refreshing={isRefreshing} />}
       style={screenStyles.scrollView}
       contentContainerStyle={[screenStyles.content, { flexGrow: 1 }]}
     >
       <Section style={{ flex: 1 }} title={t("dashboard.overviewTitle")}>
-        <View style={{ flex: 1, gap: spacing.md }}>
-          <View
-            style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.md }}
-          >
+        <View style={{ flex: 1, gap: spacing.sm }}>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing.md }}>
             <MetricCard
               label={t("dashboard.metricCollectionItems")}
               value={formatCount(summary.totals.releases)}
@@ -122,27 +118,32 @@ export const DashboardScreen = () => {
               })}
             </Text>
           </View>
-          <Link href="/statistics" asChild>
-            <Button
-              accessibilityLabel={t("dashboard.statisticsButton")}
-              label={t("dashboard.statisticsButton")}
-              variant="secondary"
-            />
-          </Link>
-          <Link href="/records" asChild>
-            <Button
-              accessibilityLabel={t("dashboard.browseRecords")}
-              label={t("dashboard.browseRecords")}
-            />
-          </Link>
+          <View style={{ gap: spacing.xs }}>
+            <Link href="/statistics" asChild>
+              <Button
+                accessibilityLabel={t("dashboard.statisticsButton")}
+                label={t("dashboard.statisticsButton")}
+                variant="secondary"
+              />
+            </Link>
+            <Link href="/records" asChild>
+              <Button
+                accessibilityLabel={t("dashboard.browseRecords")}
+                label={t("dashboard.browseRecords")}
+                variant="primary"
+              />
+            </Link>
+            <Link href="/records/random" asChild>
+              <Button
+                accessibilityLabel={t("dashboard.randomRecordButton")}
+                label={t("dashboard.randomRecordButton")}
+                variant="secondary"
+              />
+            </Link>
+          </View>
           <View style={{ gap: spacing.sm, marginTop: "auto" }}>
             {topBreakdownRows.map((row) => (
-              <BreakdownRow
-                count={row.count}
-                key={row.label}
-                label={row.label}
-                max={row.count}
-              />
+              <BreakdownRow count={row.count} key={row.label} label={row.label} max={row.count} />
             ))}
           </View>
         </View>

@@ -13,6 +13,7 @@ Tests use `jest-expo` and `@testing-library/react-native`.
 - Keep generated OpenAPI types out of coverage.
 - Every behavior added by a task must be tested in that task. A task is incomplete until its new loading, success, empty, error, interaction, and accessibility paths are covered where they apply.
 - Do not create helper-only or implementation-only tests to justify unused code. If a helper, branch, optional parameter, or fallback is not reached by current user behavior, remove it.
+- Do not respond to reported new API behavior by updating consumer mocks and tests alone when the API is available locally. Refresh the OpenAPI contract, regenerate types, and then update tests to match the verified contract.
 - When full behavior testing is blocked or would require changing the product decision, pause and document the issue before continuing.
 - Include Expo Router files under `app/` in coverage. Test route-level behavior there: route params, invalid route fallbacks, layout/provider wiring, tab/stack screen registration, and navigation targets. Keep deep screen behavior tests next to the feature screens in `src/`.
 - Use `assertNever` for exhaustive `switch` defaults over union values. Ignore the `assertNever` utility from coverage and add `/* istanbul ignore next -- exhaustive type guard for impossible union values */` immediately before each impossible `default` case so the consumer-side unreachable branch is ignored too.

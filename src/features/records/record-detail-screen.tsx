@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ScrollView, Text, View } from "react-native";
+import { RefreshControl, ScrollView, Text, View } from "react-native";
 import type { UseQueryResult } from "@tanstack/react-query";
 import { Image } from "expo-image";
 
@@ -30,19 +30,26 @@ type RecordDetailScreenProps = {
 };
 
 type RecordDetailContentProps = {
+  isRefreshing?: boolean;
   invalidReleaseId?: boolean;
+  onRefresh?: (() => void) | undefined;
   query: UseQueryResult<RecordDetailResponse, Error>;
 };
 
 const RecordDetailContent = ({
+  isRefreshing = false,
   invalidReleaseId = false,
+  onRefresh,
   query,
 }: RecordDetailContentProps) => {
   const { t } = useTranslation();
+  const refreshControl = onRefresh ? (
+    <RefreshControl onRefresh={onRefresh} refreshing={isRefreshing} />
+  ) : undefined;
 
   if (invalidReleaseId) {
     return (
-      <ScrollView contentContainerStyle={screenStyles.paddedContent}>
+      <ScrollView contentContainerStyle={screenStyles.paddedContent} refreshControl={refreshControl}>
         <StatusMessage
           message={t("recordDetail.invalidMessage")}
           title={t("recordDetail.invalidTitle")}
@@ -54,7 +61,7 @@ const RecordDetailContent = ({
 
   if (query.isLoading) {
     return (
-      <ScrollView contentContainerStyle={screenStyles.paddedContent}>
+      <ScrollView contentContainerStyle={screenStyles.paddedContent} refreshControl={refreshControl}>
         <StatusMessage
           message={t("recordDetail.loadingMessage")}
           title={t("recordDetail.loadingTitle")}
@@ -66,7 +73,7 @@ const RecordDetailContent = ({
 
   if (query.isError) {
     return (
-      <ScrollView contentContainerStyle={screenStyles.paddedContent}>
+      <ScrollView contentContainerStyle={screenStyles.paddedContent} refreshControl={refreshControl}>
         <StatusMessage
           actionLabel={t("common.tryAgain")}
           message={getErrorMessage(query.error)}
@@ -80,7 +87,7 @@ const RecordDetailContent = ({
 
   if (!query.data) {
     return (
-      <ScrollView contentContainerStyle={screenStyles.paddedContent}>
+      <ScrollView contentContainerStyle={screenStyles.paddedContent} refreshControl={refreshControl}>
         <StatusMessage
           message={t("recordDetail.loadingMessage")}
           title={t("recordDetail.loadingTitle")}
@@ -95,6 +102,7 @@ const RecordDetailContent = ({
   return (
     <ScrollView
       contentInsetAdjustmentBehavior="automatic"
+      refreshControl={refreshControl}
       style={screenStyles.scrollView}
       contentContainerStyle={screenStyles.content}
     >
@@ -229,6 +237,15 @@ export const RecordDetailScreen = ({ releaseId }: RecordDetailScreenProps) => {
 
 export const RandomRecordDetailScreen = () => {
   const query = useRandomRecordDetailQuery();
+  const refresh = React.useCallback(() => {
+    void query.refetch();
+  }, [query]);
 
-  return <RecordDetailContent query={query} />;
+  return (
+    <RecordDetailContent
+      isRefreshing={query.isFetching && !query.isLoading}
+      onRefresh={refresh}
+      query={query}
+    />
+  );
 };

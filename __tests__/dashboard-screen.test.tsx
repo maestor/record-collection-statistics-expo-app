@@ -117,7 +117,7 @@ describe("DashboardScreen", () => {
     const randomRecordButton = screen.getByRole("button", {
       name: t("dashboard.randomRecordButton"),
     });
-    expect(randomRecordButton.props.href).toBe("/records/random");
+    expect(randomRecordButton.props.href).toBe("/random-record");
     expect(randomRecordButton).toHaveStyle({
       backgroundColor: colors.surfaceMuted,
       borderColor: colors.border,

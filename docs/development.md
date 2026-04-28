@@ -92,6 +92,7 @@ Use the scripts documented in [Versioning](versioning.md). Detailed agent workfl
 The app keeps TanStack Query data in local storage for up to 24 hours so repeated launches do not immediately reread stable API endpoints.
 
 - Dashboard, breakdowns, record details, and filter catalogs reuse cached data until their query-specific stale windows expire.
+- The random record screen always refetches a fresh random release on mount or pull-to-refresh instead of reusing persisted detail cache data.
 - The records screen loads filter values only when the filter sheet is opened.
 - Pull-to-refresh and retry actions still force a fresh request when the user asks for one.
 

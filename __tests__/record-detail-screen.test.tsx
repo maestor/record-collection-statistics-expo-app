@@ -1,5 +1,6 @@
 import * as React from "react";
-import { fireEvent, screen } from "@testing-library/react-native";
+import { act, fireEvent, screen } from "@testing-library/react-native";
+import { ScrollView, Text } from "react-native";
 
 import * as apiQueries from "@/api/queries";
 import {
@@ -224,6 +225,71 @@ describe("RandomRecordDetailScreen", () => {
 
     expect(await screen.findByText("Random failed")).toBeOnTheScreen();
     fireEvent.press(screen.getByRole("button", { name: t("common.tryAgain") }));
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("fetches a fresh random record when the screen is mounted again", async () => {
+    globalThis.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ data: recordDetail }))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          data: {
+            ...recordDetail,
+            releaseId: 999,
+            title: "New Born",
+          },
+        }),
+      );
+
+    const RandomRecordHarness = () => {
+      const [visible, setVisible] = React.useState(true);
+
+      return visible ? (
+        <>
+          <RandomRecordDetailScreen />
+          <Text onPress={() => setVisible(false)}>Hide random record</Text>
+        </>
+      ) : (
+        <Text onPress={() => setVisible(true)}>Show random record</Text>
+      );
+    };
+
+    renderWithProviders(<RandomRecordHarness />);
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
+    fireEvent.press(screen.getByText("Hide random record"));
+    fireEvent.press(screen.getByText("Show random record"));
+
+    expect(await screen.findByText("New Born")).toBeOnTheScreen();
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("pull to refresh fetches another random record", async () => {
+    globalThis.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(jsonResponse({ data: recordDetail }))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          data: {
+            ...recordDetail,
+            releaseId: 777,
+            title: "Plug In Baby",
+          },
+        }),
+      );
+
+    const view = renderWithProviders(<RandomRecordDetailScreen />);
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
+
+    const scrollView = view.UNSAFE_getByType(ScrollView);
+
+    await act(async () => {
+      await scrollView.props.refreshControl.props.onRefresh();
+    });
+
+    expect(await screen.findByText("Plug In Baby")).toBeOnTheScreen();
     expect(globalThis.fetch).toHaveBeenCalledTimes(2);
   });
 });

@@ -7,11 +7,11 @@ import RootLayout from "../app/_layout";
 import TabsLayout from "../app/(tabs)/_layout";
 import DashboardStackLayout from "../app/(tabs)/(dashboard)/_layout";
 import DashboardRoute from "../app/(tabs)/(dashboard)/index";
+import RandomRecordRoute from "../app/(tabs)/(dashboard)/random-record";
 import InfoRoute from "../app/(tabs)/info";
 import RecordsStackLayout from "../app/(tabs)/records/_layout";
 import RecordsRoute from "../app/(tabs)/records/index";
 import RecordDetailRoute from "../app/(tabs)/records/[releaseId]";
-import RandomRecordRoute from "../app/(tabs)/records/random";
 import StatisticsStackLayout from "../app/(tabs)/statistics/_layout";
 import StatisticsRoute from "../app/(tabs)/statistics/index";
 import BreakdownRoute from "../app/(tabs)/statistics/breakdowns/[dimension]";
@@ -238,6 +238,13 @@ describe("Expo Router routes", () => {
       }),
       undefined,
     );
+    expect(Stack.Screen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "random-record",
+        options: { title: t("navigation.randomRecord") },
+      }),
+      undefined,
+    );
   });
 
   it("registers the statistics stack screens inside the statistics tab", () => {
@@ -273,13 +280,6 @@ describe("Expo Router routes", () => {
       expect.objectContaining({
         name: "[releaseId]",
         options: { title: t("navigation.record") },
-      }),
-      undefined,
-    );
-    expect(Stack.Screen).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: "random",
-        options: { title: t("navigation.randomRecord") },
       }),
       undefined,
     );

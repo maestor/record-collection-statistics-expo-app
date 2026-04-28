@@ -117,10 +117,12 @@ export const useRandomRecordDetailQuery = () => {
   const { config, enabled, queryScope } = useApiQueryBase();
 
   return useQuery({
+    gcTime: 0,
     enabled,
     queryFn: ({ signal }) => getRandomRecord(config, signal),
-    queryKey: ["record-detail", "random", ...queryScope],
-    staleTime: DETAIL_STALE_TIME,
+    queryKey: ["random-record-detail", ...queryScope],
+    refetchOnMount: "always",
+    staleTime: 0,
   });
 };
 

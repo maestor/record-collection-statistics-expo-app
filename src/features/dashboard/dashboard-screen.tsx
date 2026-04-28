@@ -133,7 +133,7 @@ export const DashboardScreen = () => {
                 variant="primary"
               />
             </Link>
-            <Link href="/records/random" asChild>
+            <Link href="/random-record" asChild>
               <Button
                 accessibilityLabel={t("dashboard.randomRecordButton")}
                 label={t("dashboard.randomRecordButton")}

@@ -201,7 +201,7 @@ describe("RecordsScreen", () => {
     });
 
     expect(
-      screen.getByRole("button", { name: t("records.randomRecordButton") }).props.href,
+      screen.getByRole("button", { name: t("dashboard.randomRecordButton") }).props.href,
     ).toEqual({
       params: {
         added_from: "2026-01-01T00:00:00.000Z",
@@ -209,7 +209,7 @@ describe("RecordsScreen", () => {
         format: "Vinyl",
         q: "Muse",
       },
-      pathname: "/random-record",
+      pathname: "/records/random-record",
     });
 
     fireEvent.press(
@@ -271,7 +271,7 @@ describe("RecordsScreen", () => {
     });
 
     expect(
-      screen.getByRole("button", { name: t("records.randomRecordButton") }).props.href,
+      screen.getByRole("button", { name: t("dashboard.randomRecordButton") }).props.href,
     ).toEqual({
       params: {
         added_from: "2026-01-01T00:00:00.000Z",
@@ -280,7 +280,7 @@ describe("RecordsScreen", () => {
         genre: "Rock",
         q: "Muse",
       },
-      pathname: "/random-record",
+      pathname: "/records/random-record",
     });
 
     fireEvent.press(

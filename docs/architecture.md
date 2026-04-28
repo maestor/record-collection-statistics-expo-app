@@ -8,6 +8,7 @@ Expo Router owns navigation:
 - `/random-record` random record detail
 - `/statistics` collection statistics
 - `/records` catalog
+- `/records/random-record` random record detail opened from the records stack
 - `/records/[releaseId]` detail
 - `/statistics/breakdowns/[dimension]` full stats breakdowns
 

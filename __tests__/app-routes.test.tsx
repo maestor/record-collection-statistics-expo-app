@@ -11,6 +11,7 @@ import RandomRecordRoute from "../app/(tabs)/(dashboard)/random-record";
 import InfoRoute from "../app/(tabs)/info";
 import RecordsStackLayout from "../app/(tabs)/records/_layout";
 import RecordsRoute from "../app/(tabs)/records/index";
+import RecordsRandomRecordRoute from "../app/(tabs)/records/random-record";
 import RecordDetailRoute from "../app/(tabs)/records/[releaseId]";
 import StatisticsStackLayout from "../app/(tabs)/statistics/_layout";
 import StatisticsRoute from "../app/(tabs)/statistics/index";
@@ -283,6 +284,13 @@ describe("Expo Router routes", () => {
       }),
       undefined,
     );
+    expect(Stack.Screen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "random-record",
+        options: { title: t("navigation.randomRecord") },
+      }),
+      undefined,
+    );
   });
 
   it("renders the tab routes through their actual route components", async () => {
@@ -342,6 +350,23 @@ describe("Expo Router routes", () => {
     expect(randomUrl).toContain("format=Vinyl");
     expect(randomUrl).toContain("added_from=2026-01-01T00%3A00%3A00.000Z");
     expect(randomUrl).toContain("added_to=2026-12-31T23%3A59%3A59.999Z");
+  });
+
+  it("renders the records-stack random record route with query filters", async () => {
+    (useLocalSearchParams as jest.Mock).mockReturnValue({
+      artist: "Muse",
+      genre: "Rock",
+    });
+
+    renderWithProviders(<RecordsRandomRecordRoute />);
+
+    expect(await screen.findByText("Muscle Museum EP")).toBeOnTheScreen();
+    const randomUrl = (globalThis.fetch as jest.Mock).mock.calls
+      .map((call) => String(call[0]))
+      .find((url) => url.includes("/records/random"));
+
+    expect(randomUrl).toContain("artist=Muse");
+    expect(randomUrl).toContain("genre=Rock");
   });
 
   it("renders the record detail invalid id state from route params", async () => {

@@ -239,7 +239,7 @@ export const RecordsScreen = () => {
             style={{ width: "100%" }}
           />
           <Link
-            href={{ pathname: "/random-record", params: randomRecordParams }}
+            href={{ pathname: "/records/random-record", params: randomRecordParams }}
             asChild
           >
             <Button

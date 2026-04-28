@@ -21,6 +21,10 @@ const RecordsStackLayout = () => {
         name="[releaseId]"
         options={{ title: translate("navigation.record") }}
       />
+      <Stack.Screen
+        name="random-record"
+        options={{ title: translate("navigation.randomRecord") }}
+      />
     </Stack>
   );
 };

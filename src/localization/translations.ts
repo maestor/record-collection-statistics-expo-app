@@ -137,7 +137,7 @@ export const translations = {
       order: "Järjestys",
       orderAscending: "Nouseva",
       orderDescending: "Laskeva",
-      randomRecordButton: "Satunnainen äänite suodattimilla",
+      randomRecordButton: "Satunnainen äänite",
       resultsTitle: "{count} äänitettä",
       searchLabel: "Hae levyjä",
       searchPlaceholder: "Artisti, nimi, levymerkki, genre...",

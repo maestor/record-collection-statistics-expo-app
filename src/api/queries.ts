@@ -14,6 +14,7 @@ import type {
   BreakdownDimension,
   FilterDimension,
   RecordListParams,
+  RandomRecordParams,
   RecordsResponse,
 } from "./types";
 
@@ -113,14 +114,14 @@ export const useRecordDetailQuery = (releaseId: number) => {
   });
 };
 
-export const useRandomRecordDetailQuery = () => {
+export const useRandomRecordDetailQuery = (params: RandomRecordParams = {}) => {
   const { config, enabled, queryScope } = useApiQueryBase();
 
   return useQuery({
     gcTime: 0,
     enabled,
-    queryFn: ({ signal }) => getRandomRecord(config, signal),
-    queryKey: ["random-record-detail", ...queryScope],
+    queryFn: ({ signal }) => getRandomRecord(config, params, signal),
+    queryKey: ["random-record-detail", ...queryScope, params],
     refetchOnMount: "always",
     staleTime: 0,
   });

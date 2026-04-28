@@ -2,6 +2,6 @@ import * as React from "react";
 
 import { RandomRecordRouteScreen } from "@/features/records/random-record-route";
 
-const RandomRecordRoute = () => <RandomRecordRouteScreen />;
+const RecordsRandomRecordRoute = () => <RandomRecordRouteScreen />;
 
-export default RandomRecordRoute;
+export default RecordsRandomRecordRoute;

@@ -1,4 +1,9 @@
-import type { RecordDetail, RecordListItem, RecordListParams } from "@/api/types";
+import type {
+  RandomRecordParams,
+  RecordDetail,
+  RecordListItem,
+  RecordListParams,
+} from "@/api/types";
 import { translate } from "@/localization/i18n";
 import { assertNever } from "@/utils/assert-never";
 
@@ -61,6 +66,38 @@ export const buildRecordListParams = (
         params[key] = value;
       }
     }
+  }
+
+  return params;
+};
+
+export const buildRandomRecordParams = (
+  listParams: Omit<RecordListParams, "page">,
+): RandomRecordParams => {
+  const params: RandomRecordParams = {};
+
+  if (listParams.q) {
+    params.q = listParams.q;
+  }
+
+  if (listParams.added_from) {
+    params.added_from = listParams.added_from;
+  }
+
+  if (listParams.added_to) {
+    params.added_to = listParams.added_to;
+  }
+
+  if (listParams.artist) {
+    params.artist = listParams.artist;
+  }
+
+  if (listParams.format) {
+    params.format = listParams.format;
+  }
+
+  if (listParams.genre) {
+    params.genre = listParams.genre;
   }
 
   return params;

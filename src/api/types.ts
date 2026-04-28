@@ -20,6 +20,7 @@ export type RecordListParams = NonNullable<paths["/records"]["get"]["parameters"
 export type RecordListItem = components["schemas"]["RecordListItem"];
 export type RecordDetailResponse = JsonResponse<paths["/records/{releaseId}"]["get"]["responses"]["200"]>;
 export type RecordDetail = RecordDetailResponse["data"];
+export type RandomRecordParams = NonNullable<paths["/records/random"]["get"]["parameters"]["query"]>;
 export type BreakdownResponse = JsonResponse<
   paths["/stats/breakdowns/{dimension}"]["get"]["responses"]["200"]
 >;

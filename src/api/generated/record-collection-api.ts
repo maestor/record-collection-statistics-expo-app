@@ -89,6 +89,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/records/random": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get one random cached release from the collection.
+         * @description Returns a random cached release detail, optionally constrained by the same filters used for records browsing. This endpoint is intentionally not cacheable so repeated requests can return a new random pick.
+         */
+        get: operations["getRandomRecord"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/stats/summary": {
         parameters: {
             query?: never;
@@ -96,7 +116,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get collection-wide summary statistics. */
+        /** Get collection-wide summary statistics, excluding placeholder artists from unique-artist totals. */
         get: operations["getStatsSummary"];
         put?: never;
         post?: never;
@@ -113,7 +133,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get a compact dashboard stats payload for dashboards and clients. */
+        /** Get a compact dashboard stats payload for dashboards and clients, excluding placeholder artist and unknown release-year breakdown values. */
         get: operations["getStatsDashboard"];
         put?: never;
         post?: never;
@@ -130,7 +150,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get filter and facet values for records browsing. */
+        /** Get filter and facet values for records browsing, excluding placeholder artist and unknown release-year breakdown values. */
         get: operations["getFilters"];
         put?: never;
         post?: never;
@@ -147,7 +167,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get a breakdown for a supported collection dimension. */
+        /** Get a breakdown for a supported collection dimension, excluding placeholder artist and unknown release-year values where applicable. */
         get: operations["getStatsBreakdown"];
         put?: never;
         post?: never;
@@ -335,6 +355,7 @@ export interface operations {
                             openapi: string;
                             filters: string;
                             records: string;
+                            randomRecord: string;
                             recordDetail: string;
                             statsSummary: string;
                             statsDashboard: string;
@@ -613,6 +634,77 @@ export interface operations {
                 };
             };
             /** @description Release not found in local cache. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Remote API access disabled because API_READ_KEY is not configured. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    getRandomRecord: {
+        parameters: {
+            query?: {
+                /** @description Case-insensitive free-text match against title, artist, label, format descriptions, and format free text. */
+                q?: string;
+                artist?: string;
+                label?: string;
+                genre?: string;
+                style?: string;
+                format?: string;
+                country?: string;
+                year_from?: number;
+                year_to?: number;
+                added_from?: string;
+                added_to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Detailed metadata for a random cached release. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["RecordDetail"];
+                    };
+                };
+            };
+            /** @description Invalid request. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Missing or invalid API key for non-local request. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description No cached releases are available in the local cache, or no cached release matches the requested filters. */
             404: {
                 headers: {
                     [name: string]: unknown;

@@ -2,6 +2,8 @@
 
 React Native and Expo app for browsing a personal Discogs-backed record collection through the read-only Record Collection Statistics API.
 
+API repository: https://github.com/maestor/record-collection-statistics-api
+
 ## Features
 - Finnish-first interface with a typed localization layer for future locales.
 - Dashboard with collection totals, median collection value, year ranges, a random-record shortcut, and a dedicated statistics tab with both list and graph views.

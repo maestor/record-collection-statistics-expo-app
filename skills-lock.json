@@ -61,6 +61,12 @@
       "sourceType": "github",
       "computedHash": "d39e806942fe880347f161056729b588a3cb0f1796270eebf52633fe11cfdce1"
     },
+    "git-pr-workflow": {
+      "source": "maestor/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/git-pr-workflow/SKILL.md",
+      "computedHash": "40e64ee3cd04130db176d353aae532da37da659b33736ccd2a7a1b9aec235ca4"
+    },
     "intelligence-testing": {
       "source": "maestor/agent-skills",
       "sourceType": "github",
@@ -75,6 +81,12 @@
       "source": "expo/skills",
       "sourceType": "github",
       "computedHash": "3cd0ba91f359f9f84cd40f36f356287994a0e952520fac6e03ef7952d0397879"
+    },
+    "project-documentation": {
+      "source": "maestor/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/project-documentation/SKILL.md",
+      "computedHash": "6045f59b9b299ff3e7223f5dea726d78817e9937573a48324fd0d50ab86b6d03"
     },
     "upgrading-expo": {
       "source": "expo/skills",
